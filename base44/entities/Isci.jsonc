@@ -1,0 +1,76 @@
+{
+  "name": "Isci",
+  "type": "object",
+  "properties": {
+    "ad_soyad": {
+      "type": "string",
+      "title": "Ad Soyad"
+    },
+    "vezife": {
+      "type": "string",
+      "title": "V\u0259zif\u0259",
+      "enum": [
+        "Sah\u0259 i\u015f\u00e7isi",
+        "Supervisor",
+        "Dispatcher",
+        "S\u00fcr\u00fcc\u00fc",
+        "Anbardar",
+        "Menecer"
+      ]
+    },
+    "telefon": {
+      "type": "string",
+      "title": "Telefon"
+    },
+    "email": {
+      "type": "string",
+      "title": "Email"
+    },
+    "ise_baslama": {
+      "type": "string",
+      "title": "\u0130\u015f\u0259 ba\u015flama tarixi",
+      "format": "date"
+    },
+    "maas": {
+      "type": "number",
+      "title": "Maa\u015f (AZN)"
+    },
+    "komanda": {
+      "type": "string",
+      "title": "Komanda"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "Aktiv",
+        "M\u0259zuniyy\u0259td\u0259",
+        "X\u0259st\u0259",
+        "\u0130\u015fd\u0259n \u00e7\u0131x\u0131b"
+      ],
+      "default": "Aktiv"
+    },
+    "sexsiyyet_no": {
+      "type": "string",
+      "title": "\u015e\u0259xsiyy\u0259t v\u0259siq\u0259si"
+    },
+    "dogum_tarixi": {
+      "type": "string",
+      "title": "Do\u011fum tarixi",
+      "format": "date"
+    },
+    "unvan": {
+      "type": "string",
+      "title": "\u00dcnvan"
+    },
+    "qeydler": {
+      "type": "string",
+      "title": "Qeydl\u0259r"
+    }
+  },
+  "required": [
+    "ad_soyad",
+    "vezife",
+    "telefon"
+  ]
+}

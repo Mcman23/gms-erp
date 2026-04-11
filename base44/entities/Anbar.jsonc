@@ -1,0 +1,70 @@
+{
+  "name": "Anbar",
+  "type": "object",
+  "properties": {
+    "ad": {
+      "type": "string",
+      "title": "M\u0259hsul ad\u0131"
+    },
+    "kateqoriya": {
+      "type": "string",
+      "title": "Kateqoriya",
+      "enum": [
+        "Kimy\u0259vi madd\u0259",
+        "T\u0259mizlik al\u0259ti",
+        "Avadanl\u0131q",
+        "Ehtiyat hiss\u0259",
+        "Dig\u0259r"
+      ]
+    },
+    "vahid": {
+      "type": "string",
+      "title": "\u00d6l\u00e7\u00fc vahidi",
+      "enum": [
+        "\u0259d\u0259d",
+        "litr",
+        "kq",
+        "qutu",
+        "paket"
+      ]
+    },
+    "miqdar": {
+      "type": "number",
+      "title": "M\u00f6vcud miqdar",
+      "default": 0
+    },
+    "min_miqdar": {
+      "type": "number",
+      "title": "Minimum miqdar",
+      "default": 5
+    },
+    "qiymet": {
+      "type": "number",
+      "title": "Vahid qiym\u0259t (AZN)"
+    },
+    "tedarukcu": {
+      "type": "string",
+      "title": "T\u0259dar\u00fck\u00e7\u00fc"
+    },
+    "son_alis_tarixi": {
+      "type": "string",
+      "title": "Son al\u0131\u015f tarixi",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "M\u00f6vcud",
+        "Az qal\u0131b",
+        "Bitib"
+      ],
+      "default": "M\u00f6vcud"
+    }
+  },
+  "required": [
+    "ad",
+    "kateqoriya",
+    "vahid"
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "name": "Sikayet",
+  "type": "object",
+  "properties": {
+    "ticket_no": {
+      "type": "string",
+      "title": "Bilet n\u00f6mr\u0259si"
+    },
+    "musteri_id": {
+      "type": "string",
+      "title": "M\u00fc\u015ft\u0259ri ID"
+    },
+    "musteri_adi": {
+      "type": "string",
+      "title": "M\u00fc\u015ft\u0259ri ad\u0131"
+    },
+    "sifaris_id": {
+      "type": "string",
+      "title": "Sifari\u015f ID"
+    },
+    "kateqoriya": {
+      "type": "string",
+      "title": "Kateqoriya",
+      "enum": [
+        "Xidm\u0259t keyfiyy\u0259ti",
+        "Gecikmo",
+        "Qiym\u0259t",
+        "\u0130\u015f\u00e7i davran\u0131\u015f\u0131",
+        "Z\u0259r\u0259r",
+        "Dig\u0259r"
+      ]
+    },
+    "prioritet": {
+      "type": "string",
+      "title": "Prioritet",
+      "enum": [
+        "A\u015fa\u011f\u0131",
+        "Orta",
+        "Y\u00fcks\u0259k",
+        "Kritik"
+      ],
+      "default": "Orta"
+    },
+    "aciklama": {
+      "type": "string",
+      "title": "A\u00e7\u0131qlama"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "A\u00e7\u0131q",
+        "\u0130crada",
+        "H\u0259ll edildi",
+        "Ba\u011fl\u0131"
+      ],
+      "default": "A\u00e7\u0131q"
+    },
+    "cavab": {
+      "type": "string",
+      "title": "Cavab"
+    },
+    "sla_muddeti": {
+      "type": "number",
+      "title": "SLA m\u00fcdd\u0259ti (saat)",
+      "default": 24
+    }
+  },
+  "required": [
+    "musteri_id",
+    "kateqoriya",
+    "aciklama"
+  ]
+}

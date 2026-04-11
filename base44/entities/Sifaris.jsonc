@@ -1,0 +1,122 @@
+{
+  "name": "Sifaris",
+  "type": "object",
+  "properties": {
+    "sifaris_no": {
+      "type": "string",
+      "title": "Sifari\u015f n\u00f6mr\u0259si"
+    },
+    "musteri_id": {
+      "type": "string",
+      "title": "M\u00fc\u015ft\u0259ri ID"
+    },
+    "musteri_adi": {
+      "type": "string",
+      "title": "M\u00fc\u015ft\u0259ri ad\u0131"
+    },
+    "xidmet_tipi": {
+      "type": "string",
+      "title": "Xidm\u0259t tipi",
+      "enum": [
+        "Ev t\u0259mizliyi",
+        "Ofis t\u0259mizliyi",
+        "P\u0259nc\u0259r\u0259 t\u0259mizliyi",
+        "Xal\u00e7a yuma",
+        "Divan yuma",
+        "Tikintid\u0259n sonra",
+        "D\u0259rin t\u0259mizlik",
+        "M\u0259tb\u0259x t\u0259mizliyi",
+        "Dig\u0259r"
+      ]
+    },
+    "unvan": {
+      "type": "string",
+      "title": "\u00dcnvan"
+    },
+    "tarix": {
+      "type": "string",
+      "title": "Xidm\u0259t tarixi",
+      "format": "date-time"
+    },
+    "saat": {
+      "type": "string",
+      "title": "Saat"
+    },
+    "muddeti": {
+      "type": "number",
+      "title": "M\u00fcdd\u0259ti (saat)"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "Yeni",
+        "T\u0259sdiql\u0259ndi",
+        "Planland\u0131",
+        "\u0130crada",
+        "Tamamland\u0131",
+        "L\u0259\u011fv edildi"
+      ],
+      "default": "Yeni"
+    },
+    "komanda_id": {
+      "type": "string",
+      "title": "Komanda ID"
+    },
+    "komanda_adi": {
+      "type": "string",
+      "title": "Komanda ad\u0131"
+    },
+    "qiymet": {
+      "type": "number",
+      "title": "Qiym\u0259t"
+    },
+    "edv_meblegi": {
+      "type": "number",
+      "title": "\u018fDV m\u0259bl\u0259\u011fi",
+      "default": 0
+    },
+    "umumi_mebleg": {
+      "type": "number",
+      "title": "\u00dcmumi m\u0259bl\u0259\u011f"
+    },
+    "odenis_statusu": {
+      "type": "string",
+      "title": "\u00d6d\u0259ni\u015f statusu",
+      "enum": [
+        "\u00d6d\u0259nilm\u0259yib",
+        "Qism\u0259n \u00f6d\u0259nilib",
+        "\u00d6d\u0259nilib"
+      ],
+      "default": "\u00d6d\u0259nilm\u0259yib"
+    },
+    "tekrarlanan": {
+      "type": "boolean",
+      "title": "T\u0259krarlanan sifari\u015f",
+      "default": false
+    },
+    "tekrar_periodu": {
+      "type": "string",
+      "title": "T\u0259krar periodu",
+      "enum": [
+        "H\u0259ft\u0259lik",
+        "2 h\u0259ft\u0259lik",
+        "Ayl\u0131q"
+      ]
+    },
+    "qeydler": {
+      "type": "string",
+      "title": "Qeydl\u0259r"
+    },
+    "qiymetlendirme": {
+      "type": "number",
+      "title": "Qiym\u0259tl\u0259ndirm\u0259 (1-5)"
+    }
+  },
+  "required": [
+    "musteri_id",
+    "xidmet_tipi",
+    "tarix",
+    "qiymet"
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "name": "Faktura",
+  "type": "object",
+  "properties": {
+    "faktura_no": {
+      "type": "string",
+      "title": "Faktura n\u00f6mr\u0259si"
+    },
+    "musteri_id": {
+      "type": "string",
+      "title": "M\u00fc\u015ft\u0259ri ID"
+    },
+    "musteri_adi": {
+      "type": "string",
+      "title": "M\u00fc\u015ft\u0259ri ad\u0131"
+    },
+    "sifaris_id": {
+      "type": "string",
+      "title": "Sifari\u015f ID"
+    },
+    "tarix": {
+      "type": "string",
+      "title": "Tarix",
+      "format": "date"
+    },
+    "son_odenis_tarixi": {
+      "type": "string",
+      "title": "Son \u00f6d\u0259ni\u015f tarixi",
+      "format": "date"
+    },
+    "ara_cem": {
+      "type": "number",
+      "title": "Ara c\u0259m"
+    },
+    "edv_faizi": {
+      "type": "number",
+      "title": "\u018fDV faizi",
+      "default": 0
+    },
+    "edv_meblegi": {
+      "type": "number",
+      "title": "\u018fDV m\u0259bl\u0259\u011fi",
+      "default": 0
+    },
+    "umumi_mebleg": {
+      "type": "number",
+      "title": "\u00dcmumi m\u0259bl\u0259\u011f"
+    },
+    "odenis_statusu": {
+      "type": "string",
+      "title": "\u00d6d\u0259ni\u015f statusu",
+      "enum": [
+        "\u00d6d\u0259nilm\u0259yib",
+        "Qism\u0259n",
+        "\u00d6d\u0259nilib"
+      ],
+      "default": "\u00d6d\u0259nilm\u0259yib"
+    },
+    "odenilmis_mebleg": {
+      "type": "number",
+      "title": "\u00d6d\u0259nilmi\u015f m\u0259bl\u0259\u011f",
+      "default": 0
+    },
+    "qeydler": {
+      "type": "string",
+      "title": "Qeydl\u0259r"
+    }
+  },
+  "required": [
+    "musteri_id",
+    "tarix",
+    "umumi_mebleg"
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "name": "Musteri",
+  "type": "object",
+  "properties": {
+    "ad_soyad": {
+      "type": "string",
+      "title": "Ad Soyad"
+    },
+    "telefon": {
+      "type": "string",
+      "title": "Telefon"
+    },
+    "telefon2": {
+      "type": "string",
+      "title": "\u018flav\u0259 telefon"
+    },
+    "email": {
+      "type": "string",
+      "title": "Email"
+    },
+    "unvan": {
+      "type": "string",
+      "title": "\u00dcnvan"
+    },
+    "seher": {
+      "type": "string",
+      "title": "\u015e\u0259h\u0259r",
+      "default": "Bak\u0131"
+    },
+    "edv_odeyicisi": {
+      "type": "boolean",
+      "title": "\u018fDV \u00f6d\u0259yicisi",
+      "default": false
+    },
+    "voen": {
+      "type": "string",
+      "title": "V\u00d6EN"
+    },
+    "musteri_tipi": {
+      "type": "string",
+      "title": "M\u00fc\u015ft\u0259ri tipi",
+      "enum": [
+        "F\u0259rdi",
+        "Korporativ"
+      ],
+      "default": "F\u0259rdi"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "Aktiv",
+        "Passiv",
+        "Qara siyah\u0131"
+      ],
+      "default": "Aktiv"
+    },
+    "menbe": {
+      "type": "string",
+      "title": "M\u0259nb\u0259",
+      "enum": [
+        "Telefon",
+        "Vebsayt",
+        "Sosial media",
+        "T\u00f6vsiy\u0259",
+        "Dig\u0259r"
+      ]
+    },
+    "qeydler": {
+      "type": "string",
+      "title": "Qeydl\u0259r"
+    },
+    "umumi_xercle": {
+      "type": "number",
+      "title": "\u00dcmumi x\u0259rcl\u0259m\u0259",
+      "default": 0
+    },
+    "sifaris_sayi": {
+      "type": "number",
+      "title": "Sifari\u015f say\u0131",
+      "default": 0
+    }
+  },
+  "required": [
+    "ad_soyad",
+    "telefon"
+  ]
+}

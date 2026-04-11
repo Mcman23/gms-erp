@@ -1,0 +1,70 @@
+{
+  "name": "Kassa",
+  "type": "object",
+  "properties": {
+    "ad": {
+      "type": "string",
+      "title": "Kassa ad\u0131"
+    },
+    "kod": {
+      "type": "string",
+      "title": "Kassa kodu"
+    },
+    "tip": {
+      "type": "string",
+      "title": "Kassa tipi",
+      "enum": [
+        "Na\u011fd",
+        "Bank",
+        "POS terminal"
+      ]
+    },
+    "balans": {
+      "type": "number",
+      "title": "Cari balans",
+      "default": 0
+    },
+    "valyuta": {
+      "type": "string",
+      "title": "Valyuta",
+      "default": "AZN"
+    },
+    "mesul_sexs": {
+      "type": "string",
+      "title": "M\u0259sul \u015f\u0259xs"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "Aktiv",
+        "Deaktiv",
+        "Ba\u011fl\u0131"
+      ],
+      "default": "Aktiv"
+    },
+    "gun_acilis_balansi": {
+      "type": "number",
+      "title": "G\u00fcnd\u0259lik a\u00e7\u0131l\u0131\u015f balans\u0131",
+      "default": 0
+    },
+    "gun_baglanis_balansi": {
+      "type": "number",
+      "title": "G\u00fcnd\u0259lik ba\u011flan\u0131\u015f balans\u0131"
+    },
+    "son_baglanis_tarixi": {
+      "type": "string",
+      "title": "Son ba\u011flan\u0131\u015f tarixi",
+      "format": "date-time"
+    },
+    "qeydler": {
+      "type": "string",
+      "title": "Qeydl\u0259r"
+    }
+  },
+  "required": [
+    "ad",
+    "kod",
+    "tip"
+  ]
+}

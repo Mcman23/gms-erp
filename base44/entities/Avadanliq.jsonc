@@ -1,0 +1,67 @@
+{
+  "name": "Avadanliq",
+  "type": "object",
+  "properties": {
+    "ad": {
+      "type": "string",
+      "title": "Avadanl\u0131q ad\u0131"
+    },
+    "kateqoriya": {
+      "type": "string",
+      "title": "Kateqoriya",
+      "enum": [
+        "Tozsoran",
+        "Buxar aparat\u0131",
+        "Cilalay\u0131c\u0131",
+        "T\u0259zyiqli yuma",
+        "Dig\u0259r"
+      ]
+    },
+    "seriya_no": {
+      "type": "string",
+      "title": "Seriya n\u00f6mr\u0259si"
+    },
+    "alis_tarixi": {
+      "type": "string",
+      "title": "Al\u0131\u015f tarixi",
+      "format": "date"
+    },
+    "qiymeti": {
+      "type": "number",
+      "title": "Qiym\u0259ti (AZN)"
+    },
+    "teyin_olunan": {
+      "type": "string",
+      "title": "T\u0259yin olunan komanda/i\u015f\u00e7i"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "\u0130stifad\u0259d\u0259",
+        "Anbarda",
+        "T\u0259mird\u0259",
+        "Silindi"
+      ],
+      "default": "\u0130stifad\u0259d\u0259"
+    },
+    "son_baxim_tarixi": {
+      "type": "string",
+      "title": "Son bax\u0131m tarixi",
+      "format": "date"
+    },
+    "novbeti_baxim": {
+      "type": "string",
+      "title": "N\u00f6vb\u0259ti bax\u0131m tarixi",
+      "format": "date"
+    },
+    "qeydler": {
+      "type": "string",
+      "title": "Qeydl\u0259r"
+    }
+  },
+  "required": [
+    "ad",
+    "kateqoriya"
+  ]
+}

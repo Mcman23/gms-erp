@@ -1,0 +1,89 @@
+{
+  "name": "KassaEmeliyyati",
+  "type": "object",
+  "properties": {
+    "kassa_id": {
+      "type": "string",
+      "title": "Kassa"
+    },
+    "tip": {
+      "type": "string",
+      "title": "\u018fm\u0259liyyat tipi",
+      "enum": [
+        "M\u0259daxil",
+        "M\u0259xaric"
+      ]
+    },
+    "kateqoriya": {
+      "type": "string",
+      "title": "Kateqoriya",
+      "enum": [
+        "Xidm\u0259t \u00f6d\u0259ni\u015fi",
+        "Maa\u015f",
+        "Material al\u0131\u015f\u0131",
+        "Avadanl\u0131q",
+        "\u0130car\u0259",
+        "Kommunal",
+        "N\u0259qliyyat",
+        "Dig\u0259r m\u0259daxil",
+        "Dig\u0259r m\u0259xaric"
+      ]
+    },
+    "mebleg": {
+      "type": "number",
+      "title": "M\u0259bl\u0259\u011f"
+    },
+    "valyuta": {
+      "type": "string",
+      "title": "Valyuta",
+      "default": "AZN"
+    },
+    "odenis_metodu": {
+      "type": "string",
+      "title": "\u00d6d\u0259ni\u015f metodu",
+      "enum": [
+        "Na\u011fd",
+        "Bank k\u00f6\u00e7\u00fcrm\u0259si",
+        "Kart",
+        "POS"
+      ]
+    },
+    "tarix": {
+      "type": "string",
+      "title": "Tarix",
+      "format": "date-time"
+    },
+    "sifaris_id": {
+      "type": "string",
+      "title": "Sifari\u015f ID"
+    },
+    "musteri_id": {
+      "type": "string",
+      "title": "M\u00fc\u015ft\u0259ri ID"
+    },
+    "aciklama": {
+      "type": "string",
+      "title": "A\u00e7\u0131qlama"
+    },
+    "qebz_nomresi": {
+      "type": "string",
+      "title": "Q\u0259bz n\u00f6mr\u0259si"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "G\u00f6zl\u0259yir",
+        "T\u0259sdiql\u0259ndi",
+        "L\u0259\u011fv edildi"
+      ],
+      "default": "G\u00f6zl\u0259yir"
+    }
+  },
+  "required": [
+    "kassa_id",
+    "tip",
+    "mebleg",
+    "tarix"
+  ]
+}

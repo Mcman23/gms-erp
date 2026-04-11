@@ -5,7 +5,22 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-// Add page imports here
+import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard';
+import Kassa from './pages/Kassa';
+import Musteriler from './pages/Musteriler';
+import Sifarisler from './pages/Sifarisler';
+import Planlama from './pages/Planlama';
+import Iscilar from './pages/Iscilar';
+import Mezuniyyet from './pages/Mezuniyyet';
+import Maas from './pages/Maas';
+import Anbar from './pages/Anbar';
+import Fakturalar from './pages/Fakturalar';
+import Maliyye from './pages/Maliyye';
+import Avadanliq from './pages/Avadanliq';
+import Sikayetler from './pages/Sikayetler';
+import Hesabatlar from './pages/Hesabatlar';
+import Ayarlar from './pages/Ayarlar';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -33,8 +48,24 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      {/* Add your page Route elements here */}
-      <Route path="*" element={<PageNotFound />} />
+      <Route element={<Layout />}>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/kassa" element={<Kassa />} />
+        <Route path="/musteriler" element={<Musteriler />} />
+        <Route path="/sifarisler" element={<Sifarisler />} />
+        <Route path="/planlama" element={<Planlama />} />
+        <Route path="/iscilar" element={<Iscilar />} />
+        <Route path="/mezuniyyet" element={<Mezuniyyet />} />
+        <Route path="/maas" element={<Maas />} />
+        <Route path="/anbar" element={<Anbar />} />
+        <Route path="/fakturalar" element={<Fakturalar />} />
+        <Route path="/maliyye" element={<Maliyye />} />
+        <Route path="/avadanliq" element={<Avadanliq />} />
+        <Route path="/sikayetler" element={<Sikayetler />} />
+        <Route path="/hesabatlar" element={<Hesabatlar />} />
+        <Route path="/ayarlar" element={<Ayarlar />} />
+        <Route path="*" element={<PageNotFound />} />
+      </Route>
     </Routes>
   );
 };

@@ -1,0 +1,59 @@
+{
+  "name": "Mezuniyyet",
+  "type": "object",
+  "properties": {
+    "isci_id": {
+      "type": "string",
+      "title": "\u0130\u015f\u00e7i ID"
+    },
+    "isci_adi": {
+      "type": "string",
+      "title": "\u0130\u015f\u00e7i ad\u0131"
+    },
+    "tip": {
+      "type": "string",
+      "title": "M\u0259zuniyy\u0259t tipi",
+      "enum": [
+        "\u0130llik",
+        "X\u0259st\u0259lik",
+        "\u00d6d\u0259ni\u015fsiz",
+        "Do\u011fum",
+        "T\u0259hsil"
+      ]
+    },
+    "baslama_tarixi": {
+      "type": "string",
+      "title": "Ba\u015flama tarixi",
+      "format": "date"
+    },
+    "bitis_tarixi": {
+      "type": "string",
+      "title": "Bitm\u0259 tarixi",
+      "format": "date"
+    },
+    "gun_sayi": {
+      "type": "number",
+      "title": "G\u00fcn say\u0131"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "G\u00f6zl\u0259yir",
+        "T\u0259sdiql\u0259ndi",
+        "R\u0259dd edildi"
+      ],
+      "default": "G\u00f6zl\u0259yir"
+    },
+    "sebebi": {
+      "type": "string",
+      "title": "S\u0259b\u0259bi"
+    }
+  },
+  "required": [
+    "isci_id",
+    "tip",
+    "baslama_tarixi",
+    "bitis_tarixi"
+  ]
+}
