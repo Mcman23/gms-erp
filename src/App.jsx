@@ -5,6 +5,9 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import { useState, useEffect } from 'react';
+import { getSession } from '@/hooks/useAppSession';
+import AppLogin from './pages/AppLogin';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Kassa from './pages/Kassa';
@@ -24,8 +27,16 @@ import Ayarlar from './pages/Ayarlar';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const [loggedIn, setLoggedIn] = useState(() => !!getSession());
 
-  // Show loading spinner while checking app public settings or auth
+  useEffect(() => {
+    if (!loggedIn) return;
+    const interval = setInterval(() => {
+      if (!getSession()) setLoggedIn(false);
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [loggedIn]);
+
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
@@ -34,21 +45,23 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors
   if (authError) {
     if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
+      // Still allow our custom login even if base44 auth says not registered
+      if (!loggedIn) return <AppLogin onSuccess={() => setLoggedIn(true)} />;
     } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
       navigateToLogin();
       return null;
     }
   }
 
-  // Render the main app
+  if (!loggedIn) {
+    return <AppLogin onSuccess={() => setLoggedIn(true)} />;
+  }
+
   return (
     <Routes>
-      <Route element={<Layout />}>
+      <Route element={<Layout onLogout={() => setLoggedIn(false)} />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/kassa" element={<Kassa />} />
         <Route path="/musteriler" element={<Musteriler />} />
