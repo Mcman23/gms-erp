@@ -21,6 +21,9 @@ import Avadanliq from './pages/Avadanliq';
 import Sikayetler from './pages/Sikayetler';
 import Hesabatlar from './pages/Hesabatlar';
 import Ayarlar from './pages/Ayarlar';
+import QiymetKalkulyatoru from './pages/QiymetKalkulyatoru';
+import QiymetTeklifleri from './pages/QiymetTeklifleri';
+import SendIdareetmesi from './pages/SendIdareetmesi';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -64,6 +67,9 @@ const AuthenticatedApp = () => {
         <Route path="/sikayetler" element={<Sikayetler />} />
         <Route path="/hesabatlar" element={<Hesabatlar />} />
         <Route path="/ayarlar" element={<Ayarlar />} />
+        <Route path="/qiymet-kalkulyatoru" element={<QiymetKalkulyatoru />} />
+        <Route path="/qiymet-teklifleri" element={<QiymetTeklifleri />} />
+        <Route path="/senedler" element={<SendIdareetmesi />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>

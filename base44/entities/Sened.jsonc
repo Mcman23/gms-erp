@@ -1,0 +1,78 @@
+{
+  "name": "Sened",
+  "type": "object",
+  "properties": {
+    "ad": {
+      "type": "string",
+      "title": "S\u0259n\u0259d ad\u0131"
+    },
+    "kateqoriya": {
+      "type": "string",
+      "title": "Kateqoriya",
+      "enum": [
+        "M\u00fcqavil\u0259",
+        "Faktura",
+        "Akt",
+        "Etibarnam\u0259",
+        "\u0130caz\u0259",
+        "\u018fmr",
+        "Qeyd",
+        "Dig\u0259r"
+      ]
+    },
+    "fayl_url": {
+      "type": "string",
+      "title": "Fayl URL"
+    },
+    "fayl_adi": {
+      "type": "string",
+      "title": "Fayl ad\u0131"
+    },
+    "fayl_olcusu": {
+      "type": "string",
+      "title": "Fayl \u00f6l\u00e7\u00fcs\u00fc"
+    },
+    "yukleyen": {
+      "type": "string",
+      "title": "Y\u00fckl\u0259y\u0259n"
+    },
+    "istinad_tipi": {
+      "type": "string",
+      "title": "\u0130stinad tipi",
+      "enum": [
+        "M\u00fc\u015ft\u0259ri",
+        "Sifari\u015f",
+        "Faktura",
+        "\u0130\u015f\u00e7i",
+        "\u00dcmumi"
+      ]
+    },
+    "istinad_id": {
+      "type": "string",
+      "title": "\u0130stinad ID"
+    },
+    "tarix": {
+      "type": "string",
+      "title": "Tarix",
+      "format": "date"
+    },
+    "qeydler": {
+      "type": "string",
+      "title": "Qeydl\u0259r"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "Aktiv",
+        "Arxivd\u0259",
+        "Silindi"
+      ],
+      "default": "Aktiv"
+    }
+  },
+  "required": [
+    "ad",
+    "kateqoriya"
+  ]
+}

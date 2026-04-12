@@ -1,0 +1,98 @@
+{
+  "name": "QiymetTeklifi",
+  "type": "object",
+  "properties": {
+    "teklif_no": {
+      "type": "string",
+      "title": "Teklif n\u00f6mr\u0259si"
+    },
+    "musteri_adi": {
+      "type": "string",
+      "title": "M\u00fc\u015ft\u0259ri ad\u0131"
+    },
+    "musteri_telefon": {
+      "type": "string",
+      "title": "Telefon"
+    },
+    "voen": {
+      "type": "string",
+      "title": "V\u00d6EN"
+    },
+    "unvan": {
+      "type": "string",
+      "title": "\u00dcnvan"
+    },
+    "xidmet_tipi": {
+      "type": "string",
+      "title": "Xidm\u0259t tipi"
+    },
+    "xidmet_aciklamasi": {
+      "type": "string",
+      "title": "Xidm\u0259t a\u00e7\u0131qlamas\u0131"
+    },
+    "sahesi": {
+      "type": "number",
+      "title": "Sah\u0259si (m\u00b2)"
+    },
+    "ara_cem": {
+      "type": "number",
+      "title": "Ara c\u0259m (AZN)"
+    },
+    "edv_faizi": {
+      "type": "number",
+      "title": "\u018fDV faizi (%)",
+      "default": 18
+    },
+    "edv_meblegi": {
+      "type": "number",
+      "title": "\u018fDV m\u0259bl\u0259\u011fi",
+      "default": 0
+    },
+    "umumi_mebleg": {
+      "type": "number",
+      "title": "\u00dcmumi m\u0259bl\u0259\u011f"
+    },
+    "edv_odeyicisi": {
+      "type": "boolean",
+      "title": "\u018fDV \u00f6d\u0259yicisi",
+      "default": false
+    },
+    "tarix": {
+      "type": "string",
+      "title": "Tarix",
+      "format": "date"
+    },
+    "etibarliliq_muddeti": {
+      "type": "string",
+      "title": "Etibarl\u0131l\u0131q m\u00fcdd\u0259ti",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "G\u00f6nd\u0259rilm\u0259yib",
+        "G\u00f6nd\u0259rilib",
+        "Q\u0259bul edildi",
+        "R\u0259dd edildi",
+        "M\u00fcqavil\u0259y\u0259 \u00e7evrildi"
+      ],
+      "default": "G\u00f6nd\u0259rilm\u0259yib"
+    },
+    "imza_telebedilir": {
+      "type": "boolean",
+      "title": "\u0130mza t\u0259l\u0259b edilir",
+      "default": false
+    },
+    "qeydler": {
+      "type": "string",
+      "title": "Qeydl\u0259r"
+    }
+  },
+  "required": [
+    "musteri_adi",
+    "xidmet_tipi",
+    "umumi_mebleg",
+    "tarix"
+  ]
+}

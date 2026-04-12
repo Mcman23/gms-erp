@@ -2,7 +2,8 @@ import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Wallet, Users, ClipboardList, Calendar,
   UserCog, Palmtree, Banknote, Package, Receipt, FileText,
-  Wrench, MessageSquareWarning, BarChart3, Settings, X, Sparkles
+  Wrench, MessageSquareWarning, BarChart3, Settings, X, Sparkles,
+  Calculator, FileCheck, FolderOpen
 } from "lucide-react";
 
 const menuItems = [
@@ -19,6 +20,9 @@ const menuItems = [
   { label: "Maliyyə", path: "/maliyye", icon: FileText },
   { label: "Avadanlıq", path: "/avadanliq", icon: Wrench },
   { label: "Şikayətlər", path: "/sikayetler", icon: MessageSquareWarning },
+  { label: "Qiymət Kalkulyatoru", path: "/qiymet-kalkulyatoru", icon: Calculator },
+  { label: "Qiymət Teklifləri", path: "/qiymet-teklifleri", icon: FileCheck },
+  { label: "Sənəd İdarəetməsi", path: "/senedler", icon: FolderOpen },
   { label: "Hesabatlar", path: "/hesabatlar", icon: BarChart3 },
   { label: "Ayarlar", path: "/ayarlar", icon: Settings },
 ];

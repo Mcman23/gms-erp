@@ -1,0 +1,40 @@
+{
+  "name": "SilmeJurnali",
+  "type": "object",
+  "properties": {
+    "entity_adi": {
+      "type": "string",
+      "title": "Entity ad\u0131"
+    },
+    "entity_id": {
+      "type": "string",
+      "title": "Silinen ID"
+    },
+    "silinen_data": {
+      "type": "string",
+      "title": "Silinen m\u0259lumat (JSON)"
+    },
+    "silen_istifadeci": {
+      "type": "string",
+      "title": "Sil\u0259n istifad\u0259\u00e7i"
+    },
+    "silen_rol": {
+      "type": "string",
+      "title": "Rol"
+    },
+    "sebeb": {
+      "type": "string",
+      "title": "Silm\u0259 s\u0259b\u0259bi"
+    },
+    "tarix": {
+      "type": "string",
+      "title": "Tarix",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "entity_adi",
+    "entity_id",
+    "silen_istifadeci"
+  ]
+}
