@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Filter } from "lucide-react";
+import { Plus, DollarSign } from "lucide-react";
+import SifarisXerciModal from "../components/SifarisXerciModal";
 import moment from "moment";
 
 const statuses = ["Yeni", "Təsdiqləndi", "Planlandı", "İcrada", "Tamamlandı", "Ləğv edildi"];
@@ -27,6 +28,7 @@ export default function Sifarisler() {
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");
+  const [xercSifaris, setXercSifaris] = useState(null);
   const [form, setForm] = useState({
     musteri_id: "", xidmet_tipi: "Ev təmizliyi", unvan: "", tarix: "", saat: "",
     muddeti: "", qiymet: "", tekrarlanan: false, tekrar_periodu: "", qeydler: ""
@@ -131,9 +133,14 @@ export default function Sifarisler() {
                       {s.odenis_statusu}
                     </span>
                   </td>
+                  <td className="px-4 py-3">
+                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs gap-1" onClick={() => setXercSifaris(s)}>
+                      <DollarSign className="w-3.5 h-3.5" /> Xərclər
+                    </Button>
+                  </td>
                 </tr>
               ))}
-              {filtered.length === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Sifariş tapılmadı</td></tr>}
+              {filtered.length === 0 && <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">Sifariş tapılmadı</td></tr>}
             </tbody>
           </table>
         </div>
@@ -192,6 +199,12 @@ export default function Sifarisler() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <SifarisXerciModal
+        sifaris={xercSifaris}
+        open={!!xercSifaris}
+        onClose={() => setXercSifaris(null)}
+      />
     </div>
   );
 }

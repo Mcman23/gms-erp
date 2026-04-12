@@ -5,35 +5,96 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { Shield, Users, Settings, LogOut } from "lucide-react";
+import { Shield, LogOut, Plus, Lock, UserX, UserCheck } from "lucide-react";
+import moment from "moment";
 
-const roller = ["Super Admin","Admin","Direktor","Əməliyyat meneceri","Dispatcher","Supervisor","Sahə işçisi","Satış meneceri","HR meneceri","Maliyyə meneceri","Kassir"];
+const ROLLER = ["Super Admin","Admin","Direktor","Əməliyyat meneceri","Dispatcher","Supervisor","Sahə işçisi","Satış meneceri","HR meneceri","Maliyyə meneceri","Kassir","Anbar müdürü","Audit/Baxış"];
+
+const ROL_MODULLER = {
+  "Kassir": ["Kassa","Fakturalar","Sifarişlər"],
+  "HR meneceri": ["İşçilər","Məzuniyyət","Maaş"],
+  "Dispatcher": ["Sifarişlər","Planlama"],
+  "Maliyyə meneceri": ["Maliyyə","Fakturalar","Hesabatlar","Kassa"],
+  "Sahə işçisi": ["Öz tapşırıqları"],
+  "Supervisor": ["Sifarişlər","İşçilər"],
+  "Anbar müdürü": ["Anbar"],
+  "Admin": ["Hamısı"],
+  "Super Admin": ["Hamısı"],
+  "Direktor": ["Hamısı"],
+};
+
+const BUTUN_MODULLER = ["Dashboard","Kassa","Müştərilər","Sifarişlər","Planlama","İşçilər","Məzuniyyət","Maaş","Anbar","Fakturalar","Maliyyə","Avadanlıq","Şikayətlər","Hesabatlar","Ayarlar"];
 
 export default function Ayarlar() {
   const [users, setUsers] = useState([]);
+  const [davetler, setDavetler] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState("user");
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [inviteForm, setInviteForm] = useState({ email: "", ad_soyad: "", telefon: "", rol: "Kassir", departament: "", modul_erisimi: [] });
   const { toast } = useToast();
 
-  useEffect(() => {
-    base44.entities.User.list().then(setUsers).finally(() => setLoading(false));
-  }, []);
-
-  const handleInvite = async () => {
-    if (!inviteEmail) return;
-    await base44.users.inviteUser(inviteEmail, inviteRole);
-    toast({ title: "Dəvət göndərildi", description: `${inviteEmail} adresinə dəvət göndərildi.` });
-    setInviteEmail("");
-    base44.entities.User.list().then(setUsers);
+  const fetchData = () => {
+    Promise.all([
+      base44.entities.User.list().catch(() => []),
+      base44.entities.DavetEdilmisIstifadeci.list("-created_date", 100).catch(() => []),
+    ]).then(([u, d]) => { setUsers(u); setDavetler(d); setLoading(false); });
   };
 
-  const handleLogout = () => {
-    base44.auth.logout();
+  useEffect(() => { fetchData(); }, []);
+
+  const handleRolChange = (rol) => {
+    const moduller = ROL_MODULLER[rol] || [];
+    setInviteForm(f => ({ ...f, rol, modul_erisimi: moduller[0] === "Hamısı" ? BUTUN_MODULLER : moduller }));
+  };
+
+  const toggleModul = (modul) => {
+    setInviteForm(f => ({
+      ...f,
+      modul_erisimi: f.modul_erisimi.includes(modul)
+        ? f.modul_erisimi.filter(m => m !== modul)
+        : [...f.modul_erisimi, modul]
+    }));
+  };
+
+  const handleInvite = async () => {
+    if (!inviteForm.email) return;
+    // Invite to platform
+    await base44.users.inviteUser(inviteForm.email, ["Super Admin","Admin","Direktor"].includes(inviteForm.rol) ? "admin" : "user");
+    // Save to DavetEdilmisIstifadeci
+    await base44.entities.DavetEdilmisIstifadeci.create({
+      email: inviteForm.email,
+      ad_soyad: inviteForm.ad_soyad,
+      telefon: inviteForm.telefon,
+      rol: inviteForm.rol,
+      departament: inviteForm.departament,
+      modul_erisimi: inviteForm.modul_erisimi,
+      status: "Dəvət göndərilib",
+      davet_tarixi: new Date().toISOString(),
+      giris_sayi: 0,
+      token_aktiv: true,
+    });
+    toast({ title: "Dəvət göndərildi", description: `${inviteForm.email} adresinə dəvət göndərildi.` });
+    setShowInviteDialog(false);
+    setInviteForm({ email: "", ad_soyad: "", telefon: "", rol: "Kassir", departament: "", modul_erisimi: [] });
+    fetchData();
+  };
+
+  const handleBlok = async (davet, blok) => {
+    await base44.entities.DavetEdilmisIstifadeci.update(davet.id, { status: blok ? "Bloklandı" : "Aktiv" });
+    fetchData();
+  };
+
+  const handleTokenReset = async (davet) => {
+    await base44.entities.DavetEdilmisIstifadeci.update(davet.id, { token_aktiv: true });
+    toast({ title: "Token sıfırlandı" });
+    fetchData();
   };
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
+
+  const statusColors = { "Dəvət göndərilib": "bg-yellow-100 text-yellow-700", "Aktiv": "bg-green-100 text-green-700", "Bloklandı": "bg-red-100 text-red-700", "Deaktiv": "bg-gray-100 text-gray-600" };
 
   return (
     <div className="space-y-6">
@@ -42,29 +103,81 @@ export default function Ayarlar() {
         <p className="text-muted-foreground text-sm mt-1">İstifadəçilər, rollar və sistem konfiqurasiyası</p>
       </div>
 
-      <Tabs defaultValue="istifadeciler">
-        <TabsList>
-          <TabsTrigger value="istifadeciler">İstifadəçilər</TabsTrigger>
+      <Tabs defaultValue="idareetme">
+        <TabsList className="flex-wrap h-auto gap-1">
+          <TabsTrigger value="idareetme">İstifadəçi İdarəetməsi</TabsTrigger>
+          <TabsTrigger value="platform">Platform İstifadəçilər</TabsTrigger>
           <TabsTrigger value="roller">Rollar</TabsTrigger>
           <TabsTrigger value="sistem">Sistem</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="istifadeciler" className="mt-4 space-y-6">
-          <div className="bg-card rounded-xl border border-border p-5">
-            <h3 className="font-semibold text-sm mb-4">Yeni İstifadəçi Dəvət Et</h3>
-            <div className="flex gap-3 flex-wrap">
-              <Input placeholder="Email ünvanı" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} className="flex-1 min-w-[200px]" />
-              <Select value={inviteRole} onValueChange={setInviteRole}>
-                <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="user">İstifadəçi</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button onClick={handleInvite}>Dəvət et</Button>
+        {/* İSTİFADƏÇİ İDARƏETMƏSİ */}
+        <TabsContent value="idareetme" className="mt-4 space-y-4">
+          <div className="flex justify-end">
+            <Button onClick={() => { handleRolChange("Kassir"); setShowInviteDialog(true); }} className="gap-2">
+              <Plus className="w-4 h-4" /> Yeni İstifadəçi Dəvət Et
+            </Button>
+          </div>
+          <div className="bg-card rounded-xl border border-border overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="text-left px-4 py-3 font-medium">Ad Soyad</th>
+                    <th className="text-left px-4 py-3 font-medium">Email</th>
+                    <th className="text-left px-4 py-3 font-medium">Rol</th>
+                    <th className="text-left px-4 py-3 font-medium">Departament</th>
+                    <th className="text-left px-4 py-3 font-medium">Status</th>
+                    <th className="text-left px-4 py-3 font-medium">Modul Erişimi</th>
+                    <th className="text-left px-4 py-3 font-medium">Son Giriş</th>
+                    <th className="text-right px-4 py-3 font-medium">Əməliyyat</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {davetler.map(d => (
+                    <tr key={d.id} className="border-t border-border/50 hover:bg-muted/20">
+                      <td className="px-4 py-3 font-medium">{d.ad_soyad || "—"}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{d.email}</td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">{d.rol}</span>
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{d.departament || "—"}</td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColors[d.status] || ""}`}>{d.status}</span>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground max-w-[180px] truncate">
+                        {(d.modul_erisimi || []).join(", ") || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground text-xs">
+                        {d.son_giris ? moment(d.son_giris).format("DD.MM.YYYY") : "—"}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex gap-1 justify-end">
+                          {d.status === "Bloklandı" ? (
+                            <Button size="sm" variant="ghost" className="h-7 px-2 text-green-600" onClick={() => handleBlok(d, false)} title="Aç">
+                              <UserCheck className="w-3.5 h-3.5" />
+                            </Button>
+                          ) : (
+                            <Button size="sm" variant="ghost" className="h-7 px-2 text-red-600" onClick={() => handleBlok(d, true)} title="Blokla">
+                              <UserX className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-muted-foreground" onClick={() => handleTokenReset(d)} title="Token sıfırla">
+                            <Lock className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {davetler.length === 0 && <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">İstifadəçi tapılmadı</td></tr>}
+                </tbody>
+              </table>
             </div>
           </div>
+        </TabsContent>
 
+        {/* PLATFORM İSTİFADƏÇİLƏRİ */}
+        <TabsContent value="platform" className="mt-4 space-y-4">
           <div className="bg-card rounded-xl border border-border overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-muted/50">
@@ -76,13 +189,11 @@ export default function Ayarlar() {
               </thead>
               <tbody>
                 {users.map(u => (
-                  <tr key={u.id} className="border-t border-border/50 hover:bg-muted/30">
+                  <tr key={u.id} className="border-t border-border/50 hover:bg-muted/20">
                     <td className="px-4 py-3 font-medium">{u.full_name || "—"}</td>
                     <td className="px-4 py-3 text-muted-foreground">{u.email}</td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${u.role === "admin" ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700"}`}>
-                        {u.role}
-                      </span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${u.role === "admin" ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700"}`}>{u.role}</span>
                     </td>
                   </tr>
                 ))}
@@ -93,12 +204,19 @@ export default function Ayarlar() {
 
         <TabsContent value="roller" className="mt-4">
           <div className="bg-card rounded-xl border border-border p-5">
-            <h3 className="font-semibold text-sm mb-4">Mövcud Rollar</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {roller.map(r => (
-                <div key={r} className="bg-muted/50 rounded-lg p-3 flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-medium">{r}</span>
+            <h3 className="font-semibold text-sm mb-4">Mövcud Rollar və Modul Erişimi</h3>
+            <div className="space-y-3">
+              {ROLLER.map(r => (
+                <div key={r} className="flex items-start gap-3 py-2 border-b border-border/50">
+                  <div className="flex items-center gap-2 min-w-[180px]">
+                    <Shield className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-medium">{r}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {(ROL_MODULLER[r] || ["—"]).map(m => (
+                      <span key={m} className="text-xs bg-muted px-2 py-0.5 rounded-full">{m}</span>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
@@ -109,24 +227,61 @@ export default function Ayarlar() {
           <div className="bg-card rounded-xl border border-border p-5 space-y-4">
             <h3 className="font-semibold text-sm">Vergi Ayarları</h3>
             <div className="grid grid-cols-2 gap-4 max-w-md">
-              <div>
-                <Label>ƏDV faizi</Label>
-                <Input value="18" disabled />
-              </div>
-              <div>
-                <Label>Valyuta</Label>
-                <Input value="AZN" disabled />
-              </div>
+              <div><Label>ƏDV faizi</Label><Input value="18%" disabled /></div>
+              <div><Label>Valyuta</Label><Input value="AZN" disabled /></div>
+              <div><Label>DSMF İşçi</Label><Input value="3%" disabled /></div>
+              <div><Label>DSMF İşvərən</Label><Input value="22%" disabled /></div>
             </div>
           </div>
           <div className="bg-card rounded-xl border border-border p-5">
             <h3 className="font-semibold text-sm mb-3">Hesab</h3>
-            <Button variant="destructive" onClick={handleLogout} className="gap-2">
+            <Button variant="destructive" onClick={() => base44.auth.logout()} className="gap-2">
               <LogOut className="w-4 h-4" /> Çıxış
             </Button>
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Invite Dialog */}
+      <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>Yeni İstifadəçi Dəvət Et</DialogTitle></DialogHeader>
+          <div className="space-y-4 max-h-[65vh] overflow-y-auto pr-1">
+            <div className="grid grid-cols-2 gap-4">
+              <div><Label>Ad Soyad</Label><Input value={inviteForm.ad_soyad} onChange={e => setInviteForm(f => ({...f, ad_soyad: e.target.value}))} /></div>
+              <div><Label>Email *</Label><Input value={inviteForm.email} onChange={e => setInviteForm(f => ({...f, email: e.target.value}))} type="email" /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><Label>Telefon</Label><Input value={inviteForm.telefon} onChange={e => setInviteForm(f => ({...f, telefon: e.target.value}))} /></div>
+              <div><Label>Departament</Label><Input value={inviteForm.departament} onChange={e => setInviteForm(f => ({...f, departament: e.target.value}))} /></div>
+            </div>
+            <div>
+              <Label>Rol *</Label>
+              <Select value={inviteForm.rol} onValueChange={handleRolChange}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{ROLLER.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="mb-2 block">Modul Erişimi</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {BUTUN_MODULLER.map(m => (
+                  <label key={m} className="flex items-center gap-2 cursor-pointer text-sm">
+                    <input
+                      type="checkbox"
+                      checked={inviteForm.modul_erisimi.includes(m)}
+                      onChange={() => toggleModul(m)}
+                      className="rounded"
+                    />
+                    {m}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <Button className="w-full" onClick={handleInvite}>Dəvət göndər</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

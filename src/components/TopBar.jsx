@@ -1,6 +1,5 @@
-import { Menu, Bell, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Menu, Search } from "lucide-react";
+import Bildirisler from "./Bildirisler";
 import { base44 } from "@/api/base44Client";
 import { useEffect, useState } from "react";
 
@@ -33,10 +32,7 @@ export default function TopBar({ onMenuClick }) {
       </div>
 
       <div className="flex items-center gap-3 ml-auto">
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
-        </Button>
+        <Bildirisler />
 
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary">
