@@ -11,22 +11,22 @@ import { useToast } from "@/components/ui/use-toast";
 import { Shield, LogOut, Plus, Lock, UserX, UserCheck } from "lucide-react";
 import moment from "moment";
 
-const ROLLER = ["Super Admin","Admin","Direktor","Əməliyyat meneceri","Dispatcher","Supervisor","Sahə işçisi","Satış meneceri","HR meneceri","Maliyyə meneceri","Kassir","Anbar müdürü","Audit/Baxış"];
+const ROLLER = ["Super Admin","Admin","Direktor","Amaliyyat meneceri","Dispatcher","Supervisor","Sahe iscisi","Satis meneceri","HR meneceri","Maliyye meneceri","Kassir","Anbar muduru","Audit/Baxis"];
 
 const ROL_MODULLER = {
-  "Kassir": ["Kassa","Fakturalar","Sifarişlər"],
-  "HR meneceri": ["İşçilər","Məzuniyyət","Maaş"],
-  "Dispatcher": ["Sifarişlər","Planlama"],
-  "Maliyyə meneceri": ["Maliyyə","Fakturalar","Hesabatlar","Kassa"],
-  "Sahə işçisi": ["Öz tapşırıqları"],
-  "Supervisor": ["Sifarişlər","İşçilər"],
-  "Anbar müdürü": ["Anbar"],
-  "Admin": ["Hamısı"],
-  "Super Admin": ["Hamısı"],
-  "Direktor": ["Hamısı"],
+  "Kassir": ["Kassa","Fakturalar","Sifarisler"],
+  "HR meneceri": ["Iscilar","Mezuniyyet","Maas"],
+  "Dispatcher": ["Sifarisler","Planlama"],
+  "Maliyye meneceri": ["Maliyye","Fakturalar","Hesabatlar","Kassa"],
+  "Sahe iscisi": ["Oz tapsirilari"],
+  "Supervisor": ["Sifarisler","Iscilar"],
+  "Anbar muduru": ["Anbar"],
+  "Admin": ["Hamisi"],
+  "Super Admin": ["Hamisi"],
+  "Direktor": ["Hamisi"],
 };
 
-const BUTUN_MODULLER = ["Dashboard","Kassa","Müştərilər","Sifarişlər","Planlama","İşçilər","Məzuniyyət","Maaş","Anbar","Fakturalar","Maliyyə","Avadanlıq","Şikayətlər","Hesabatlar","Ayarlar"];
+const BUTUN_MODULLER = ["Dashboard","Kassa","Musteriler","Sifarisler","Planlama","Iscilar","Mezuniyyet","Maas","Anbar","Fakturalar","Maliyye","Avadanliq","Sikayetler","Hesabatlar","Ayarlar"];
 
 export default function Ayarlar() {
   const [users, setUsers] = useState([]);

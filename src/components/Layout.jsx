@@ -1,10 +1,16 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
-import { useState } from "react";
+import SystemLogin from "./SystemLogin";
+import { useState, useEffect } from "react";
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sysAuthed, setSysAuthed] = useState(() => sessionStorage.getItem("gms_sys_auth") === "1");
+
+  if (!sysAuthed) {
+    return <SystemLogin onSuccess={() => setSysAuthed(true)} />;
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
