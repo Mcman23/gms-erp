@@ -7,18 +7,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Printer } from "lucide-react";
+import { Plus, Printer, Trash2 } from "lucide-react";
 import moment from "moment";
 
-const STATUSLAR = ["Göndərilməyib", "Göndərilib", "Qəbul edildi", "Rədd edildi", "Müqaviləyə çevrildi"];
+const STATUSLAR = ["Gonderilmeyib", "Gonderilib", "Qebul edildi", "Redd edildi", "Muqavilеye cevrildi"];
 const STATUS_RENK = {
-  "Göndərilməyib": "bg-gray-100 text-gray-700",
-  "Göndərilib": "bg-blue-100 text-blue-700",
-  "Qəbul edildi": "bg-green-100 text-green-700",
-  "Rədd edildi": "bg-red-100 text-red-700",
-  "Müqaviləyə çevrildi": "bg-purple-100 text-purple-700",
+  "Gonderilmeyib": "bg-gray-100 text-gray-700",
+  "Gonderilib": "bg-blue-100 text-blue-700",
+  "Qebul edildi": "bg-green-100 text-green-700",
+  "Redd edildi": "bg-red-100 text-red-700",
+  "Muqavilеye cevrildi": "bg-purple-100 text-purple-700",
 };
-const XIDMETLER = ["Ev təmizliyi","Ofis təmizliyi","Pəncərə təmizliyi","Xalça yuma","Divan yuma","Tikintidən sonra","Dərin təmizlik","Mətbəx təmizliyi","Digər"];
+const XIDMETLER = ["Ev temizliyi","Ofis temizliyi","Pencere temizliyi","Xalca yuma","Divan yuma","Tikintiden sonra","Derin temizlik","Metbex temizliyi","Diger"];
+
+const BOSH_XIDMET = { ad: "", vahid_qiymet: "", miqdar: "1", mebleg: "" };
 
 export default function QiymetTeklifleri() {
   const [teklifler, setTeklifler] = useState([]);
@@ -29,12 +31,14 @@ export default function QiymetTeklifleri() {
 
   const [form, setForm] = useState({
     musteri_adi: "", musteri_telefon: "", voen: "", unvan: "",
-    xidmet_tipi: "Ev təmizliyi", xidmet_aciklamasi: "", sahesi: "",
-    ara_cem: "", edv_odeyicisi: false, qeydler: "", etibarliliq_muddeti: "", imza_telebedilir: false,
+    xidmet_tipi: "Ev temizliyi", xidmet_aciklamasi: "",
+    edv_odeyicisi: false, qeydler: "", etibarliliq_muddeti: "", imza_telebedilir: false,
+    xidmetler: [{ ...BOSH_XIDMET }],
   });
 
-  const edvMeblegi = form.edv_odeyicisi ? (parseFloat(form.ara_cem) || 0) * 0.18 : 0;
-  const umumi = (parseFloat(form.ara_cem) || 0) + edvMeblegi;
+  const xidmetlerCemi = form.xidmetler.reduce((s, x) => s + (parseFloat(x.mebleg) || (parseFloat(x.vahid_qiymet) || 0) * (parseFloat(x.miqdar) || 1)), 0);
+  const edvMeblegi = form.edv_odeyicisi ? xidmetlerCemi * 0.18 : 0;
+  const umumi = xidmetlerCemi + edvMeblegi;
 
   const fetchData = () => {
     base44.entities.QiymetTeklifi.list("-created_date", 100).catch(() => []).then(data => {
@@ -44,21 +48,41 @@ export default function QiymetTeklifleri() {
 
   useEffect(() => { fetchData(); }, []);
 
+  const addXidmet = () => setForm(f => ({ ...f, xidmetler: [...f.xidmetler, { ...BOSH_XIDMET }] }));
+  const removeXidmet = (i) => setForm(f => ({ ...f, xidmetler: f.xidmetler.filter((_, idx) => idx !== i) }));
+  const updateXidmet = (i, key, val) => setForm(f => {
+    const xs = [...f.xidmetler];
+    xs[i] = { ...xs[i], [key]: val };
+    if (key === "vahid_qiymet" || key === "miqdar") {
+      xs[i].mebleg = ((parseFloat(xs[i].vahid_qiymet) || 0) * (parseFloat(xs[i].miqdar) || 1)).toFixed(2);
+    }
+    return { ...f, xidmetler: xs };
+  });
+
   const handleCreate = async () => {
     const no = `TKL-${Date.now().toString().slice(-6)}`;
+    const aciklama = form.xidmetler.map(x => x.ad).filter(Boolean).join(", ") || form.xidmet_tipi;
     await base44.entities.QiymetTeklifi.create({
-      ...form,
       teklif_no: no,
-      sahesi: parseFloat(form.sahesi) || 0,
-      ara_cem: parseFloat(form.ara_cem) || 0,
+      musteri_adi: form.musteri_adi,
+      musteri_telefon: form.musteri_telefon,
+      voen: form.voen,
+      unvan: form.unvan,
+      xidmet_tipi: form.xidmet_tipi,
+      xidmet_aciklamasi: aciklama,
+      ara_cem: xidmetlerCemi,
       edv_faizi: form.edv_odeyicisi ? 18 : 0,
       edv_meblegi: edvMeblegi,
       umumi_mebleg: umumi,
+      edv_odeyicisi: form.edv_odeyicisi,
       tarix: new Date().toISOString().slice(0, 10),
-      status: "Göndərilməyib",
+      etibarliliq_muddeti: form.etibarliliq_muddeti,
+      imza_telebedilir: form.imza_telebedilir,
+      status: "Gonderilmeyib",
+      qeydler: form.qeydler,
     });
     setShowDialog(false);
-    setForm({ musteri_adi: "", musteri_telefon: "", voen: "", unvan: "", xidmet_tipi: "Ev təmizliyi", xidmet_aciklamasi: "", sahesi: "", ara_cem: "", edv_odeyicisi: false, qeydler: "", etibarliliq_muddeti: "", imza_telebedilir: false });
+    setForm({ musteri_adi: "", musteri_telefon: "", voen: "", unvan: "", xidmet_tipi: "Ev temizliyi", xidmet_aciklamasi: "", edv_odeyicisi: false, qeydler: "", etibarliliq_muddeti: "", imza_telebedilir: false, xidmetler: [{ ...BOSH_XIDMET }] });
     fetchData();
   };
 
@@ -75,14 +99,14 @@ export default function QiymetTeklifleri() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Qiymət Teklifləri</h1>
-          <p className="text-muted-foreground text-sm mt-1">VÖEN · ƏDV 18% · İmza · Status</p>
+          <h1 className="text-2xl font-bold tracking-tight">Qiymet Teklifleri</h1>
+          <p className="text-muted-foreground text-sm mt-1">VOEN · EDV 18% · Imza · Status</p>
         </div>
         <Button className="gap-2" onClick={() => setShowDialog(true)}><Plus className="w-4 h-4" /> Yeni Teklif</Button>
       </div>
 
       <div className="flex gap-2 flex-wrap">
-        <Button size="sm" variant={filterStatus === "all" ? "default" : "outline"} onClick={() => setFilterStatus("all")}>Hamısı</Button>
+        <Button size="sm" variant={filterStatus === "all" ? "default" : "outline"} onClick={() => setFilterStatus("all")}>Hamisi</Button>
         {STATUSLAR.map(s => (
           <Button key={s} size="sm" variant={filterStatus === s ? "default" : "outline"} onClick={() => setFilterStatus(s)}>{s}</Button>
         ))}
@@ -94,12 +118,12 @@ export default function QiymetTeklifleri() {
             <thead className="bg-muted/50">
               <tr>
                 <th className="text-left px-4 py-3 font-medium">№</th>
-                <th className="text-left px-4 py-3 font-medium">Müştəri</th>
-                <th className="text-left px-4 py-3 font-medium">Xidmət</th>
+                <th className="text-left px-4 py-3 font-medium">Musteri</th>
+                <th className="text-left px-4 py-3 font-medium">Xidmet</th>
                 <th className="text-left px-4 py-3 font-medium">Tarix</th>
-                <th className="text-right px-4 py-3 font-medium">Məbləğ</th>
-                <th className="text-right px-4 py-3 font-medium">ƏDV</th>
-                <th className="text-right px-4 py-3 font-medium">Ümumi</th>
+                <th className="text-right px-4 py-3 font-medium">Ara cem</th>
+                <th className="text-right px-4 py-3 font-medium">EDV</th>
+                <th className="text-right px-4 py-3 font-medium">Umumi</th>
                 <th className="text-left px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3"></th>
               </tr>
@@ -110,9 +134,9 @@ export default function QiymetTeklifleri() {
                   <td className="px-4 py-3 font-mono font-medium">{t.teklif_no}</td>
                   <td className="px-4 py-3">
                     <p className="font-medium">{t.musteri_adi}</p>
-                    {t.voen && <p className="text-xs text-muted-foreground">VÖEN: {t.voen}</p>}
+                    {t.voen && <p className="text-xs text-muted-foreground">VOEN: {t.voen}</p>}
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{t.xidmet_tipi}</td>
+                  <td className="px-4 py-3 text-muted-foreground text-xs max-w-[160px] truncate">{t.xidmet_aciklamasi || t.xidmet_tipi}</td>
                   <td className="px-4 py-3">{t.tarix ? moment(t.tarix).format("DD.MM.YYYY") : "—"}</td>
                   <td className="px-4 py-3 text-right">{(t.ara_cem || 0).toFixed(2)} ₼</td>
                   <td className="px-4 py-3 text-right text-purple-700">{(t.edv_meblegi || 0).toFixed(2)} ₼</td>
@@ -120,7 +144,7 @@ export default function QiymetTeklifleri() {
                   <td className="px-4 py-3">
                     <Select value={t.status} onValueChange={v => handleStatusChange(t.id, v)}>
                       <SelectTrigger className="h-7 text-xs w-36">
-                        <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${STATUS_RENK[t.status] || ""}`}>{t.status}</span>
+                        <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${STATUS_RENK[t.status] || "bg-gray-100 text-gray-700"}`}>{t.status}</span>
                       </SelectTrigger>
                       <SelectContent>{STATUSLAR.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                     </Select>
@@ -132,44 +156,61 @@ export default function QiymetTeklifleri() {
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">Teklif tapılmadı</td></tr>}
+              {filtered.length === 0 && <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">Teklif tapilmadi</td></tr>}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Print Dialog */}
+      {/* Print Dialog — Temiz, linksiz */}
       {printTeklif && (
         <Dialog open={!!printTeklif} onOpenChange={() => setPrintTeklif(null)}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <div className="flex items-center justify-between">
-                <DialogTitle>Qiymət Teklifi — {printTeklif.teklif_no}</DialogTitle>
-                <Button size="sm" variant="outline" onClick={() => window.print()} className="gap-2"><Printer className="w-4 h-4" /> Çap et</Button>
+                <DialogTitle>Qiymet Teklifi — {printTeklif.teklif_no}</DialogTitle>
+                <Button size="sm" variant="outline" onClick={() => window.print()} className="gap-2"><Printer className="w-4 h-4" /> Cap et</Button>
               </div>
             </DialogHeader>
-            <div className="bg-white border border-border rounded-xl p-8 text-sm space-y-4">
+            <div className="bg-white border border-border rounded-xl p-8 text-sm space-y-4" id="print-area">
               <div className="flex justify-between">
-                <div><h2 className="text-lg font-bold">CleanPro MMC</h2><p className="text-muted-foreground">Qiymət Teklifi</p></div>
-                <div className="text-right"><p className="font-bold">{printTeklif.teklif_no}</p><p className="text-muted-foreground">{printTeklif.tarix ? moment(printTeklif.tarix).format("DD.MM.YYYY") : ""}</p></div>
+                <div>
+                  <h2 className="text-xl font-bold">GMS ERP</h2>
+                  <p className="text-muted-foreground">Qiymet Teklifi</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-lg">{printTeklif.teklif_no}</p>
+                  <p className="text-muted-foreground">{printTeklif.tarix ? moment(printTeklif.tarix).format("DD.MM.YYYY") : ""}</p>
+                  {printTeklif.etibarliliq_muddeti && <p className="text-xs text-muted-foreground">Etibarliliq: {moment(printTeklif.etibarliliq_muddeti).format("DD.MM.YYYY")}</p>}
+                </div>
               </div>
               <div className="border-t border-border pt-4">
-                <p className="font-semibold">{printTeklif.musteri_adi}</p>
-                {printTeklif.voen && <p className="text-muted-foreground">VÖEN: {printTeklif.voen}</p>}
+                <p className="font-semibold text-base">{printTeklif.musteri_adi}</p>
+                {printTeklif.voen && <p className="text-muted-foreground">VOEN: {printTeklif.voen}</p>}
+                {printTeklif.musteri_telefon && <p className="text-muted-foreground">{printTeklif.musteri_telefon}</p>}
                 {printTeklif.unvan && <p className="text-muted-foreground">{printTeklif.unvan}</p>}
               </div>
               <table className="w-full border-collapse border border-border text-sm">
-                <thead className="bg-muted/30"><tr><th className="border border-border px-3 py-2 text-left">Xidmət</th><th className="border border-border px-3 py-2 text-right">Məbləğ</th></tr></thead>
+                <thead className="bg-muted/30">
+                  <tr>
+                    <th className="border border-border px-3 py-2 text-left">Xidmet</th>
+                    <th className="border border-border px-3 py-2 text-right">Meblег</th>
+                  </tr>
+                </thead>
                 <tbody>
-                  <tr><td className="border border-border px-3 py-2">{printTeklif.xidmet_tipi}{printTeklif.xidmet_aciklamasi ? ` — ${printTeklif.xidmet_aciklamasi}` : ""}</td><td className="border border-border px-3 py-2 text-right">{(printTeklif.ara_cem || 0).toFixed(2)} ₼</td></tr>
-                  {printTeklif.edv_meblegi > 0 && <tr><td className="border border-border px-3 py-2 text-muted-foreground">ƏDV ({printTeklif.edv_faizi}%)</td><td className="border border-border px-3 py-2 text-right text-purple-700">+{(printTeklif.edv_meblegi || 0).toFixed(2)} ₼</td></tr>}
-                  <tr className="bg-primary/10 font-bold"><td className="border border-border px-3 py-2">CƏMİ</td><td className="border border-border px-3 py-2 text-right">{(printTeklif.umumi_mebleg || 0).toFixed(2)} ₼</td></tr>
+                  {(printTeklif.xidmet_aciklamasi || printTeklif.xidmet_tipi).split(",").map((x, i) => (
+                    <tr key={i}><td className="border border-border px-3 py-2">{x.trim()}</td><td className="border border-border px-3 py-2 text-right">—</td></tr>
+                  ))}
+                  <tr><td className="border border-border px-3 py-2 text-muted-foreground">Ara cem</td><td className="border border-border px-3 py-2 text-right">{(printTeklif.ara_cem || 0).toFixed(2)} ₼</td></tr>
+                  {printTeklif.edv_meblegi > 0 && <tr><td className="border border-border px-3 py-2 text-muted-foreground">EDV ({printTeklif.edv_faizi}%)</td><td className="border border-border px-3 py-2 text-right text-purple-700">+{(printTeklif.edv_meblegi || 0).toFixed(2)} ₼</td></tr>}
+                  <tr className="bg-primary/10 font-bold"><td className="border border-border px-3 py-2">CEMİ</td><td className="border border-border px-3 py-2 text-right">{(printTeklif.umumi_mebleg || 0).toFixed(2)} ₼</td></tr>
                 </tbody>
               </table>
+              {printTeklif.qeydler && <p className="text-xs text-muted-foreground border-t border-border pt-3">Qeyd: {printTeklif.qeydler}</p>}
               {printTeklif.imza_telebedilir && (
-                <div className="grid grid-cols-2 gap-10 mt-8 pt-4 border-t border-border text-xs text-muted-foreground">
-                  <div>Sifarişçi: _______________________<br />Tarix: _______________</div>
-                  <div>İcraçı: _______________________<br />Möhür: _______________</div>
+                <div className="grid grid-cols-2 gap-10 mt-6 pt-4 border-t border-border text-xs text-muted-foreground">
+                  <div>Sifarisc: _______________________<br />Tarix: _______________</div>
+                  <div>Icraçi: _______________________<br />Mohur: _______________</div>
                 </div>
               )}
             </div>
@@ -179,41 +220,66 @@ export default function QiymetTeklifleri() {
 
       {/* Create Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Yeni Qiymət Teklifi</DialogTitle></DialogHeader>
-          <div className="space-y-4 max-h-[65vh] overflow-y-auto pr-1">
+        <DialogContent className="max-w-2xl">
+          <DialogHeader><DialogTitle>Yeni Qiymet Teklifi</DialogTitle></DialogHeader>
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>Müştəri adı *</Label><Input value={form.musteri_adi} onChange={e => setForm(f => ({...f, musteri_adi: e.target.value}))} /></div>
+              <div><Label>Musteri adi *</Label><Input value={form.musteri_adi} onChange={e => setForm(f => ({...f, musteri_adi: e.target.value}))} /></div>
               <div><Label>Telefon</Label><Input value={form.musteri_telefon} onChange={e => setForm(f => ({...f, musteri_telefon: e.target.value}))} /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>VÖEN</Label><Input value={form.voen} onChange={e => setForm(f => ({...f, voen: e.target.value}))} /></div>
-              <div><Label>Ünvan</Label><Input value={form.unvan} onChange={e => setForm(f => ({...f, unvan: e.target.value}))} /></div>
+              <div><Label>VOEN</Label><Input value={form.voen} onChange={e => setForm(f => ({...f, voen: e.target.value}))} /></div>
+              <div><Label>Unvan</Label><Input value={form.unvan} onChange={e => setForm(f => ({...f, unvan: e.target.value}))} /></div>
             </div>
             <div>
-              <Label>Xidmət tipi</Label>
+              <Label>Esas xidmet kateqoriyasi</Label>
               <Select value={form.xidmet_tipi} onValueChange={v => setForm(f => ({...f, xidmet_tipi: v}))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{XIDMETLER.map(x => <SelectItem key={x} value={x}>{x}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div><Label>Xidmət açıqlaması</Label><Textarea value={form.xidmet_aciklamasi} onChange={e => setForm(f => ({...f, xidmet_aciklamasi: e.target.value}))} /></div>
-            <div className="grid grid-cols-2 gap-3">
-              <div><Label>Sahəsi (m²)</Label><Input type="number" value={form.sahesi} onChange={e => setForm(f => ({...f, sahesi: e.target.value}))} /></div>
-              <div><Label>Ara cəm (₼) *</Label><Input type="number" value={form.ara_cem} onChange={e => setForm(f => ({...f, ara_cem: e.target.value}))} /></div>
+
+            {/* Çoxlu xidmet bolmeleri */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="font-semibold">Xidmetler ve Qiymetler</Label>
+                <Button size="sm" variant="outline" onClick={addXidmet} className="gap-1 h-7 text-xs"><Plus className="w-3.5 h-3.5" /> Xidmet elave et</Button>
+              </div>
+              {form.xidmetler.map((x, i) => (
+                <div key={i} className="border border-border rounded-lg p-3 space-y-2 bg-muted/20">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-muted-foreground">Xidmet {i + 1}</span>
+                    {form.xidmetler.length > 1 && (
+                      <button onClick={() => removeXidmet(i)} className="text-muted-foreground hover:text-red-600"><Trash2 className="w-3.5 h-3.5" /></button>
+                    )}
+                  </div>
+                  <div><Label className="text-xs">Xidmet adi / Acıqlama</Label><Input className="h-8" value={x.ad} onChange={e => updateXidmet(i, "ad", e.target.value)} placeholder="Meselen: Ev temizliyi 80 m²" /></div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div><Label className="text-xs">Vahid qiymet (₼)</Label><Input className="h-8" type="number" value={x.vahid_qiymet} onChange={e => updateXidmet(i, "vahid_qiymet", e.target.value)} placeholder="0" /></div>
+                    <div><Label className="text-xs">Miqdar</Label><Input className="h-8" type="number" value={x.miqdar} onChange={e => updateXidmet(i, "miqdar", e.target.value)} placeholder="1" /></div>
+                    <div><Label className="text-xs">Meblег (₼)</Label><Input className="h-8" type="number" value={x.mebleg} onChange={e => updateXidmet(i, "mebleg", e.target.value)} placeholder="0" /></div>
+                  </div>
+                </div>
+              ))}
+              <div className="bg-muted/30 rounded-lg px-4 py-2 flex justify-between text-sm font-semibold">
+                <span>Xidmetler cemi</span>
+                <span>{xidmetlerCemi.toFixed(2)} ₼</span>
+              </div>
             </div>
-            <div className="flex items-center gap-3"><Switch checked={form.edv_odeyicisi} onCheckedChange={v => setForm(f => ({...f, edv_odeyicisi: v}))} /><Label>ƏDV ödəyicisi (18%)</Label></div>
+
+            <div className="flex items-center gap-3"><Switch checked={form.edv_odeyicisi} onCheckedChange={v => setForm(f => ({...f, edv_odeyicisi: v}))} /><Label>EDV odeyicisi (18%)</Label></div>
             {form.edv_odeyicisi && (
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-sm">
-                <div className="flex justify-between"><span>ƏDV məbləği:</span><span className="font-semibold text-purple-700">{edvMeblegi.toFixed(2)} ₼</span></div>
-                <div className="flex justify-between font-bold mt-1"><span>Ümumi:</span><span>{umumi.toFixed(2)} ₼</span></div>
+                <div className="flex justify-between"><span>EDV meblegi:</span><span className="font-semibold text-purple-700">{edvMeblegi.toFixed(2)} ₼</span></div>
+                <div className="flex justify-between font-bold mt-1"><span>Umumi:</span><span>{umumi.toFixed(2)} ₼</span></div>
               </div>
             )}
+            {!form.edv_odeyicisi && <div className="bg-muted/30 rounded-lg px-4 py-2 flex justify-between text-sm font-bold"><span>Umumi:</span><span>{umumi.toFixed(2)} ₼</span></div>}
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Etibarlılıq tarixi</Label><Input type="date" value={form.etibarliliq_muddeti} onChange={e => setForm(f => ({...f, etibarliliq_muddeti: e.target.value}))} /></div>
             </div>
-            <div className="flex items-center gap-3"><Switch checked={form.imza_telebedilir} onCheckedChange={v => setForm(f => ({...f, imza_telebedilir: v}))} /><Label>İmza tələb edilir</Label></div>
-            <div><Label>Qeydlər</Label><Textarea value={form.qeydler} onChange={e => setForm(f => ({...f, qeydler: e.target.value}))} /></div>
+            <div className="flex items-center gap-3"><Switch checked={form.imza_telebedilir} onCheckedChange={v => setForm(f => ({...f, imza_telebedilir: v}))} /><Label>Imza telebedilir</Label></div>
+            <div><Label>Qeydler</Label><Textarea value={form.qeydler} onChange={e => setForm(f => ({...f, qeydler: e.target.value}))} /></div>
             <Button className="w-full" onClick={handleCreate}>Teklif yarat</Button>
           </div>
         </DialogContent>

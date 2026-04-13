@@ -55,8 +55,8 @@ export default function Sidebar({ open, onClose }) {
             <Sparkles className="w-5 h-5 text-sidebar-primary-foreground" />
           </div>
           <div>
-            <h1 className="font-bold text-base text-sidebar-primary-foreground leading-tight">CleanPro</h1>
-            <p className="text-[11px] text-sidebar-foreground/60">ERP Sistemi</p>
+            <h1 className="font-bold text-base text-sidebar-primary-foreground leading-tight">GMS ERP</h1>
+            <p className="text-[11px] text-sidebar-foreground/60">İdarəetmə Sistemi</p>
           </div>
           <button onClick={onClose} className="ml-auto lg:hidden text-sidebar-foreground/60 hover:text-sidebar-foreground">
             <X className="w-5 h-5" />
@@ -88,7 +88,7 @@ export default function Sidebar({ open, onClose }) {
 
         {/* Footer */}
         <div className="px-4 py-4 border-t border-sidebar-border">
-          <p className="text-[11px] text-sidebar-foreground/40 text-center">© 2026 CleanPro ERP</p>
+          <p className="text-[11px] text-sidebar-foreground/40 text-center">© 2026 GMS ERP</p>
         </div>
       </aside>
     </>

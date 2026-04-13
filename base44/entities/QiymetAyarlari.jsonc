@@ -1,0 +1,39 @@
+{
+  "name": "QiymetAyarlari",
+  "type": "object",
+  "properties": {
+    "xidmet_adi": {
+      "type": "string",
+      "title": "Xidm\u0259t ad\u0131"
+    },
+    "b2c_qiymet": {
+      "type": "number",
+      "title": "B2C Qiym\u0259t (\u20bc/m\u00b2)",
+      "default": 0
+    },
+    "b2b_qiymet": {
+      "type": "number",
+      "title": "B2B Qiym\u0259t (\u20bc/m\u00b2)",
+      "default": 0
+    },
+    "vahid": {
+      "type": "string",
+      "title": "Vahid",
+      "default": "m\u00b2"
+    },
+    "aktiv": {
+      "type": "boolean",
+      "title": "Aktiv",
+      "default": true
+    },
+    "qeyd": {
+      "type": "string",
+      "title": "Qeyd"
+    }
+  },
+  "required": [
+    "xidmet_adi",
+    "b2c_qiymet",
+    "b2b_qiymet"
+  ]
+}

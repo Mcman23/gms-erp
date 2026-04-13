@@ -124,7 +124,7 @@ export default function Bildirisler() {
                       </div>
                     </div>
                     <button
-                      onClick={() => handleBagla(b.id)}
+                      onClick={(e) => { e.stopPropagation(); handleBagla(b.id); }}
                       className="shrink-0 w-6 h-6 rounded-full hover:bg-black/10 flex items-center justify-center transition-colors"
                       title="Bağla"
                     >
