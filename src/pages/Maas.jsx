@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Printer, Plus, Check } from "lucide-react";
+import DeleteButton from "@/components/DeleteButton";
 
 const AYLAR = ["Yanvar","Fevral","Mart","Aprel","May","İyun","İyul","Avqust","Sentyabr","Oktyabr","Noyabr","Dekabr"];
 
@@ -160,6 +161,11 @@ export default function Maas() {
     fetchHesablamalar();
   };
 
+  const handleDelete = async (id) => {
+    await base44.entities.MaasHesablamasi.delete(id);
+    fetchHesablamalar();
+  };
+
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
 
   const ayHesablamalar = hesablamalar.filter(h => h.ay === AYLAR[parseInt(ay)] && h.il === il);
@@ -235,7 +241,7 @@ export default function Maas() {
                       <tr key={h.id} className="border-t border-border/50 hover:bg-muted/20">
                         <td className="px-4 py-3">
                           <p className="font-medium">{h.isci_adi}</p>
-                          <p className="text-xs text-muted-foreground">{isci?.vezife || ""}</p>
+                          <p className="text-xs text-muted-foreground">{isci?.vezife || h.isci_adi || "—"}</p>
                         </td>
                         <td className="px-4 py-3 text-right">{(h.nagilmaas || 0).toFixed(2)} ₼</td>
                         <td className="px-4 py-3 text-right text-red-600">-{tutulma.toFixed(2)} ₼</td>
@@ -247,15 +253,16 @@ export default function Maas() {
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <div className="flex gap-1">
-                            <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setPayslipIsci({ h, isci })}>
-                              <Printer className="w-3.5 h-3.5" />
-                            </Button>
-                            {h.odenis_statusu !== "Ödənilib" && (
-                              <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-green-600" onClick={() => handleOdendi(h.id)}>
-                                <Check className="w-3.5 h-3.5" />
-                              </Button>
-                            )}
+                          <div className="flex gap-1 items-center">
+                           <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setPayslipIsci({ h, isci })}>
+                             <Printer className="w-3.5 h-3.5" />
+                           </Button>
+                           {h.odenis_statusu !== "Ödənilib" && (
+                             <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-green-600" onClick={() => handleOdendi(h.id)}>
+                               <Check className="w-3.5 h-3.5" />
+                             </Button>
+                           )}
+                           <DeleteButton onDelete={() => handleDelete(h.id)} />
                           </div>
                         </td>
                       </tr>

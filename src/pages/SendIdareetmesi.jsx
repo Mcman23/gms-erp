@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, FileText, Download, Trash2, FolderOpen, Plus } from "lucide-react";
+import { Upload, FileText, Download, FolderOpen, Plus } from "lucide-react";
+import DeleteButton from "@/components/DeleteButton";
 import moment from "moment";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -104,9 +105,7 @@ export default function SendIdareetmesi() {
                   <span className="text-xs bg-muted px-1.5 py-0.5 rounded-full">{s.kateqoriya}</span>
                 </div>
               </div>
-              <button onClick={() => handleDelete(s)} className="text-muted-foreground hover:text-red-600 transition-colors">
-                <Trash2 className="w-4 h-4" />
-              </button>
+              <DeleteButton onDelete={() => handleDelete(s)} />
             </div>
             <div className="text-xs text-muted-foreground space-y-1">
               <p>Yükləyən: {s.yukleyen || "—"}</p>
