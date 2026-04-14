@@ -75,6 +75,11 @@ export default function Sifarisler() {
     fetchData();
   };
 
+  const handleOdenisChange = async (id, newOdenis) => {
+    await base44.entities.Sifaris.update(id, { odenis_statusu: newOdenis });
+    fetchData();
+  };
+
   const filtered = filterStatus === "all" ? sifarisler : sifarisler.filter(s => s.status === filterStatus);
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
@@ -134,9 +139,20 @@ export default function Sifarisler() {
                     </Select>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${s.odenis_statusu === "Ödənilib" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
-                      {s.odenis_statusu}
-                    </span>
+                    <Select value={s.odenis_statusu || "Ödənilməyib"} onValueChange={v => handleOdenisChange(s.id, v)}>
+                      <SelectTrigger className="h-7 text-xs w-36 border-0 shadow-none p-0 focus:ring-0">
+                        <span className={`px-2 py-0.5 rounded-full text-xs ${
+                          s.odenis_statusu === "Ödənilib" ? "bg-green-100 text-green-700" :
+                          s.odenis_statusu === "Qismən ödənilib" ? "bg-orange-100 text-orange-700" :
+                          "bg-yellow-100 text-yellow-700"
+                        }`}>{s.odenis_statusu || "Ödənilməyib"}</span>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Ödənilməyib">Ödənilməyib</SelectItem>
+                        <SelectItem value="Qismən ödənilib">Qismən ödənilib</SelectItem>
+                        <SelectItem value="Ödənilib">Ödənilib</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </td>
                   <td className="px-4 py-3">
                     <Button size="sm" variant="ghost" className="h-7 px-2 text-xs gap-1" onClick={() => setXercSifaris(s)}>
