@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Wallet, Users, ClipboardList, Calendar,
   UserCog, Palmtree, Banknote, Package, Receipt, FileText,
   Wrench, MessageSquareWarning, BarChart3, Settings, X, Sparkles,
-  Calculator, FileCheck, FolderOpen
+  Calculator, FileCheck, FolderOpen, Handshake
 } from "lucide-react";
 
 const menuItems = [
@@ -23,6 +23,7 @@ const menuItems = [
   { label: "Qiymət Kalkulyatoru", path: "/qiymet-kalkulyatoru", icon: Calculator },
   { label: "Qiymət Teklifləri", path: "/qiymet-teklifleri", icon: FileCheck },
   { label: "Sənəd İdarəetməsi", path: "/senedler", icon: FolderOpen },
+  { label: "Podratçılar", path: "/podratcilar", icon: Handshake },
   { label: "Hesabatlar", path: "/hesabatlar", icon: BarChart3 },
   { label: "Ayarlar", path: "/ayarlar", icon: Settings },
 ];

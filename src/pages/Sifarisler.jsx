@@ -25,20 +25,23 @@ const xidmetler = ["Ev təmizliyi","Ofis təmizliyi","Pəncərə təmizliyi","Xa
 export default function Sifarisler() {
   const [sifarisler, setSifarisler] = useState([]);
   const [musteriler, setMusteriler] = useState([]);
+  const [podratcilar, setPodratcilar] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");
   const [xercSifaris, setXercSifaris] = useState(null);
   const [form, setForm] = useState({
     musteri_id: "", xidmet_tipi: "Ev təmizliyi", unvan: "", tarix: "", saat: "",
-    muddeti: "", qiymet: "", tekrarlanan: false, tekrar_periodu: "", qeydler: ""
+    muddeti: "", qiymet: "", tekrarlanan: false, tekrar_periodu: "", qeydler: "",
+    podratci_id: "", podratci_adi: ""
   });
 
   const fetchData = () => {
     Promise.all([
       base44.entities.Sifaris.list("-created_date", 100),
       base44.entities.Musteri.list("-created_date", 200),
-    ]).then(([s, m]) => { setSifarisler(s); setMusteriler(m); setLoading(false); });
+      base44.entities.Podratci.list(),
+    ]).then(([s, m, p]) => { setSifarisler(s); setMusteriler(m); setPodratcilar(p); setLoading(false); });
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -49,10 +52,12 @@ export default function Sifarisler() {
     const edvMeblegi = musteri?.edv_odeyicisi ? qiymet * 0.18 : 0;
     const sifarisNo = `SIF-${Date.now().toString().slice(-6)}`;
 
+    const podratci = podratcilar.find(p => p.id === form.podratci_id);
     await base44.entities.Sifaris.create({
       ...form,
       sifaris_no: sifarisNo,
       musteri_adi: musteri?.ad_soyad || "",
+      podratci_adi: podratci?.ad || "",
       qiymet,
       edv_meblegi: edvMeblegi,
       umumi_mebleg: qiymet + edvMeblegi,
@@ -61,7 +66,7 @@ export default function Sifarisler() {
       muddeti: parseFloat(form.muddeti) || 0,
     });
     setShowDialog(false);
-    setForm({ musteri_id: "", xidmet_tipi: "Ev təmizliyi", unvan: "", tarix: "", saat: "", muddeti: "", qiymet: "", tekrarlanan: false, tekrar_periodu: "", qeydler: "" });
+    setForm({ musteri_id: "", xidmet_tipi: "Ev təmizliyi", unvan: "", tarix: "", saat: "", muddeti: "", qiymet: "", tekrarlanan: false, tekrar_periodu: "", qeydler: "", podratci_id: "", podratci_adi: "" });
     fetchData();
   };
 
@@ -194,6 +199,16 @@ export default function Sifarisler() {
                 </Select>
               </div>
             )}
+            <div>
+              <Label>Podratçı (B2C)</Label>
+              <Select value={form.podratci_id} onValueChange={v => setForm(f => ({...f, podratci_id: v}))}>
+                <SelectTrigger><SelectValue placeholder="Podratçı seçin (isteğe bağlı)" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={null}>— Podratçısız —</SelectItem>
+                  {podratcilar.map(p => <SelectItem key={p.id} value={p.id}>{p.ad} ({p.komissiya_faizi || 20}%)</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
             <div><Label>Qeydlər</Label><Textarea value={form.qeydler} onChange={e => setForm(f => ({...f, qeydler: e.target.value}))} /></div>
             <Button className="w-full" onClick={handleCreate}>Sifariş yarat</Button>
           </div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PodratciHesabati from "@/components/hesabatlar/PodratciHesabati";
 
 const COLORS = ["hsl(210,80%,45%)", "hsl(165,60%,42%)", "hsl(32,95%,52%)", "hsl(280,60%,55%)", "hsl(340,70%,55%)", "hsl(200,60%,50%)"];
 
@@ -64,6 +65,7 @@ export default function Hesabatlar() {
           <TabsTrigger value="maliyye">Maliyyə</TabsTrigger>
           <TabsTrigger value="hr">HR</TabsTrigger>
           <TabsTrigger value="kassa">Kassa</TabsTrigger>
+          <TabsTrigger value="podratci">Podratçı hesabatı</TabsTrigger>
         </TabsList>
 
         <TabsContent value="emeliyyat" className="mt-4 space-y-6">
@@ -136,6 +138,9 @@ export default function Hesabatlar() {
               </BarChart>
             </ResponsiveContainer>
           </div>
+        </TabsContent>
+        <TabsContent value="podratci" className="mt-4">
+          <PodratciHesabati />
         </TabsContent>
       </Tabs>
     </div>
