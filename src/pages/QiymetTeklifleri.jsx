@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Printer, Trash2 } from "lucide-react";
 import moment from "moment";
+import DeleteButton from "../components/DeleteButton";
+import { useAdmin } from "../hooks/useAdmin";
 
 const STATUSLAR = ["Gonderilmeyib", "Gonderilib", "Qebul edildi", "Redd edildi", "Muqavilеye cevrildi"];
 const STATUS_RENK = {
@@ -23,6 +25,7 @@ const XIDMETLER = ["Ev temizliyi","Ofis temizliyi","Pencere temizliyi","Xalca yu
 const BOSH_XIDMET = { ad: "", vahid_qiymet: "", miqdar: "1", mebleg: "" };
 
 export default function QiymetTeklifleri() {
+  const isAdmin = useAdmin();
   const [teklifler, setTeklifler] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
@@ -150,9 +153,12 @@ export default function QiymetTeklifleri() {
                     </Select>
                   </td>
                   <td className="px-4 py-3">
-                    <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setPrintTeklif(t)}>
-                      <Printer className="w-3.5 h-3.5" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setPrintTeklif(t)}>
+                        <Printer className="w-3.5 h-3.5" />
+                      </Button>
+                      {isAdmin && <DeleteButton onDelete={async () => { await base44.entities.QiymetTeklifi.delete(t.id); fetchData(); }} />}
+                    </div>
                   </td>
                 </tr>
               ))}
