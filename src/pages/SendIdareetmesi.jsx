@@ -62,8 +62,8 @@ export default function SendIdareetmesi() {
     fetchData();
   };
 
-  const handleDelete = async (id) => {
-    await base44.entities.Sened.update(id, { status: "Silindi" });
+  const handleDelete = async (sened) => {
+    await base44.entities.Sened.update(sened.id, { ...sened, status: "Silindi" });
     fetchData();
     toast({ title: "Sənəd silindi" });
   };
@@ -104,7 +104,7 @@ export default function SendIdareetmesi() {
                   <span className="text-xs bg-muted px-1.5 py-0.5 rounded-full">{s.kateqoriya}</span>
                 </div>
               </div>
-              <button onClick={() => handleDelete(s.id)} className="text-muted-foreground hover:text-red-600 transition-colors">
+              <button onClick={() => handleDelete(s)} className="text-muted-foreground hover:text-red-600 transition-colors">
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
