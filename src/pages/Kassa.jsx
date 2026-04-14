@@ -9,9 +9,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, ArrowUpRight, ArrowDownRight, Wallet, Lock, RotateCcw } from "lucide-react";
+import DeleteButton from "../components/DeleteButton";
+import { useAdmin } from "../hooks/useAdmin";
 import moment from "moment";
 
 export default function Kassa() {
+  const isAdmin = useAdmin();
   const [kassalar, setKassalar] = useState([]);
   const [emeliyyatlar, setEmeliyyatlar] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -156,6 +159,7 @@ export default function Kassa() {
                   <Button size="sm" variant="outline" className="text-xs gap-1" onClick={() => handleKassaBaglama(kassa)}>
                     <Lock className="w-3 h-3" /> Bağla
                   </Button>
+                  {isAdmin && <DeleteButton onDelete={async () => { await base44.entities.Kassa.delete(kassa.id); fetchData(); }} />}
                 </div>
               </div>
             ))}
@@ -194,6 +198,7 @@ export default function Kassa() {
                           {em.tip === "Mədaxil" ? "+" : "−"}{(em.mebleg || 0).toFixed(2)} ₼
                         </td>
                         <td className="px-4 py-3 text-muted-foreground max-w-[200px] truncate">{em.aciklama || "—"}</td>
+                        {isAdmin && <td className="px-2 py-3"><DeleteButton onDelete={async () => { await base44.entities.KassaEmeliyyati.delete(em.id); fetchData(); }} /></td>}
                       </tr>
                     );
                   })}

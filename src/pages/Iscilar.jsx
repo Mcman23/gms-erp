@@ -7,11 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Phone, Mail } from "lucide-react";
+import DeleteButton from "../components/DeleteButton";
+import { useAdmin } from "../hooks/useAdmin";
 
 const vezifeler = ["Sahə işçisi","Supervisor","Dispatcher","Sürücü","Anbardar","Menecer"];
 const statuslar = ["Aktiv","Məzuniyyətdə","Xəstə","İşdən çıxıb"];
 
 export default function Iscilar() {
+  const isAdmin = useAdmin();
   const [iscilar, setIscilar] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
@@ -63,6 +66,7 @@ export default function Iscilar() {
             <div className="flex justify-between items-center mt-3 pt-3 border-t border-border/50 text-xs text-muted-foreground">
               <span>Komanda: {i.komanda || "—"}</span>
               <span className="font-semibold text-foreground">{(i.maas || 0).toFixed(2)} ₼</span>
+              {isAdmin && <DeleteButton onDelete={async () => { await base44.entities.Isci.delete(i.id); fetchData(); }} />}
             </div>
           </div>
         ))}

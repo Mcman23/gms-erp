@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Plus, DollarSign } from "lucide-react";
 import SifarisXerciModal from "../components/SifarisXerciModal";
+import DeleteButton from "../components/DeleteButton";
+import { useAdmin } from "../hooks/useAdmin";
 import moment from "moment";
 
 const statuses = ["Yeni", "Təsdiqləndi", "Planlandı", "İcrada", "Tamamlandı", "Ləğv edildi"];
@@ -23,6 +25,7 @@ const statusColors = {
 const xidmetler = ["Ev təmizliyi","Ofis təmizliyi","Pəncərə təmizliyi","Xalça yuma","Divan yuma","Tikintidən sonra","Dərin təmizlik","Mətbəx təmizliyi","Digər"];
 
 export default function Sifarisler() {
+  const isAdmin = useAdmin();
   const [sifarisler, setSifarisler] = useState([]);
   const [musteriler, setMusteriler] = useState([]);
   const [podratcilar, setPodratcilar] = useState([]);
@@ -154,10 +157,11 @@ export default function Sifarisler() {
                       </SelectContent>
                     </Select>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 flex items-center gap-1">
                     <Button size="sm" variant="ghost" className="h-7 px-2 text-xs gap-1" onClick={() => setXercSifaris(s)}>
                       <DollarSign className="w-3.5 h-3.5" /> Xərclər
                     </Button>
+                    {isAdmin && <DeleteButton onDelete={async () => { await base44.entities.Sifaris.delete(s.id); fetchData(); }} />}
                   </td>
                 </tr>
               ))}
