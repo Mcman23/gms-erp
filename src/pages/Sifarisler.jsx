@@ -12,6 +12,7 @@ import SifarisXerciModal from "../components/SifarisXerciModal";
 import DeleteButton from "../components/DeleteButton";
 import { useAdmin } from "../hooks/useAdmin";
 import moment from "moment";
+import { SIRKET_XIDMETLER, SIRKETLER } from "@/lib/xidmetler";
 
 const statuses = ["Yeni", "Təsdiqləndi", "Planlandı", "İcrada", "Tamamlandı", "Ləğv edildi"];
 const statusColors = {
@@ -22,7 +23,6 @@ const statusColors = {
   "Tamamlandı": "bg-green-100 text-green-700",
   "Ləğv edildi": "bg-red-100 text-red-700",
 };
-const xidmetler = ["Ev təmizliyi","Ofis təmizliyi","Pəncərə təmizliyi","Xalça yuma","Divan yuma","Tikintidən sonra","Dərin təmizlik","Mətbəx təmizliyi","Digər"];
 
 export default function Sifarisler() {
   const isAdmin = useAdmin();
@@ -34,7 +34,7 @@ export default function Sifarisler() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [xercSifaris, setXercSifaris] = useState(null);
   const [form, setForm] = useState({
-    musteri_id: "", xidmet_tipi: "Ev təmizliyi", unvan: "", tarix: "", saat: "",
+    musteri_id: "", sirket: "GMS (Ümumi)", xidmet_tipi: "Ev təmizliyi", unvan: "", tarix: "", saat: "",
     muddeti: "", qiymet: "", tekrarlanan: false, tekrar_periodu: "", qeydler: "",
     podratci_id: "", podratci_adi: ""
   });
@@ -69,7 +69,7 @@ export default function Sifarisler() {
       muddeti: parseFloat(form.muddeti) || 0,
     });
     setShowDialog(false);
-    setForm({ musteri_id: "", xidmet_tipi: "Ev təmizliyi", unvan: "", tarix: "", saat: "", muddeti: "", qiymet: "", tekrarlanan: false, tekrar_periodu: "", qeydler: "", podratci_id: "", podratci_adi: "" });
+    setForm({ musteri_id: "", sirket: "GMS (Ümumi)", xidmet_tipi: "Ev təmizliyi", unvan: "", tarix: "", saat: "", muddeti: "", qiymet: "", tekrarlanan: false, tekrar_periodu: "", qeydler: "", podratci_id: "", podratci_adi: "" });
     fetchData();
   };
 
@@ -113,6 +113,7 @@ export default function Sifarisler() {
               <tr>
                 <th className="text-left px-4 py-3 font-medium">Sifariş №</th>
                 <th className="text-left px-4 py-3 font-medium">Müştəri</th>
+                <th className="text-left px-4 py-3 font-medium">Şirkət</th>
                 <th className="text-left px-4 py-3 font-medium">Xidmət</th>
                 <th className="text-left px-4 py-3 font-medium">Tarix</th>
                 <th className="text-right px-4 py-3 font-medium">Məbləğ</th>
@@ -125,7 +126,15 @@ export default function Sifarisler() {
                 <tr key={s.id} className="border-t border-border/50 hover:bg-muted/30">
                   <td className="px-4 py-3 font-medium">{s.sifaris_no || "—"}</td>
                   <td className="px-4 py-3">{s.musteri_adi || "—"}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{s.xidmet_tipi}</td>
+                  <td className="px-4 py-3">
+                    {s.sirket && s.sirket !== "GMS (Ümumi)" && (
+                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">{s.sirket}</span>
+                    )}
+                    {(!s.sirket || s.sirket === "GMS (Ümumi)") && (
+                      <span className="text-xs text-muted-foreground">GMS</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground text-xs max-w-[180px] truncate" title={s.xidmet_tipi}>{s.xidmet_tipi}</td>
                   <td className="px-4 py-3">{s.tarix ? moment(s.tarix).format("DD.MM.YYYY HH:mm") : "—"}</td>
                   <td className="px-4 py-3 text-right font-semibold">
                     {(s.umumi_mebleg || s.qiymet || 0).toFixed(2)} ₼
@@ -187,12 +196,23 @@ export default function Sifarisler() {
                 </SelectContent>
               </Select>
             </div>
+            <div>
+              <Label>Şirkət</Label>
+              <Select value={form.sirket} onValueChange={v => setForm(f => ({
+                ...f,
+                sirket: v,
+                xidmet_tipi: SIRKET_XIDMETLER[v]?.[0] || ""
+              }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{SIRKETLER.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Xidmət tipi *</Label>
                 <Select value={form.xidmet_tipi} onValueChange={v => setForm(f => ({...f, xidmet_tipi: v}))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{xidmetler.map(x => <SelectItem key={x} value={x}>{x}</SelectItem>)}</SelectContent>
+                  <SelectContent>{(SIRKET_XIDMETLER[form.sirket] || []).map(x => <SelectItem key={x} value={x}>{x}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div><Label>Qiymət (₼) *</Label><Input type="number" value={form.qiymet} onChange={e => setForm(f => ({...f, qiymet: e.target.value}))} /></div>
