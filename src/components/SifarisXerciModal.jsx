@@ -16,6 +16,8 @@ const emptyForm = {
   gun_sayi: "1",
   gun_qiymet: "",
   baxsis: "",
+  isci_id: "",
+  isci_adi: "",
 };
 
 function calcMebleg(f) {
@@ -28,6 +30,7 @@ function calcMebleg(f) {
 export default function SifarisXerciModal({ sifaris, open, onClose }) {
   const [xercler, setXercler] = useState([]);
   const [form, setForm] = useState(emptyForm);
+  const [iscilar, setIscilar] = useState([]);
 
   const fetchXercler = () => {
     if (!sifaris?.id) return;
@@ -35,7 +38,10 @@ export default function SifarisXerciModal({ sifaris, open, onClose }) {
   };
 
   useEffect(() => {
-    if (open && sifaris) fetchXercler();
+    if (open && sifaris) {
+      fetchXercler();
+      base44.entities.Isci.filter({ status: "Aktiv" }).catch(() => []).then(setIscilar);
+    }
   }, [open, sifaris]);
 
   const handleChange = (field, value) => {
@@ -56,7 +62,7 @@ export default function SifarisXerciModal({ sifaris, open, onClose }) {
       sifaris_id: sifaris.id,
       sifaris_no: sifaris.sifaris_no || "",
       kateqoriya: form.kateqoriya,
-      aciklama: form.aciklama,
+      aciklama: form.aciklama || form.isci_adi,
       edet_sayi: edet,
       gun_sayi: gun,
       gun_qiymet: gunQ,
@@ -64,6 +70,8 @@ export default function SifarisXerciModal({ sifaris, open, onClose }) {
       miqdar: edet,
       vahid_qiymet: gunQ,
       mebleg,
+      isci_id: form.isci_id || "",
+      isci_adi: form.isci_adi || "",
       tarix: new Date().toISOString().slice(0, 10),
     });
     setForm(emptyForm);
@@ -113,7 +121,7 @@ export default function SifarisXerciModal({ sifaris, open, onClose }) {
         {/* Xərc əlavə et */}
         <div className="bg-muted/30 rounded-xl p-4 space-y-3">
           <p className="text-sm font-semibold">Xərc əlavə et</p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div>
               <Label>Kateqoriya</Label>
               <Select value={form.kateqoriya} onValueChange={v => handleChange("kateqoriya", v)}>
@@ -122,8 +130,23 @@ export default function SifarisXerciModal({ sifaris, open, onClose }) {
               </Select>
             </div>
             <div>
+              <Label>İşçi (isteğe bağlı)</Label>
+              <Select value={form.isci_id} onValueChange={v => {
+                const isci = iscilar.find(i => i.id === v);
+                handleChange("isci_id", v);
+                handleChange("isci_adi", isci?.ad_soyad || "");
+                if (isci && !form.aciklama) handleChange("aciklama", isci.ad_soyad + " işçi");
+              }}>
+                <SelectTrigger><SelectValue placeholder="İşçi seçin" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={null}>— Seçilməyib —</SelectItem>
+                  {iscilar.map(i => <SelectItem key={i.id} value={i.id}>{i.ad_soyad}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
               <Label>Açıqlama / Təsvir</Label>
-              <Input value={form.aciklama} onChange={e => handleChange("aciklama", e.target.value)} placeholder="Aparat arendası, Namiq işçi..." />
+              <Input value={form.aciklama} onChange={e => handleChange("aciklama", e.target.value)} placeholder="Aparat arendası, material..." />
             </div>
           </div>
           <div className="grid grid-cols-4 gap-3">
@@ -171,8 +194,8 @@ export default function SifarisXerciModal({ sifaris, open, onClose }) {
               {xercler.map(x => (
                 <tr key={x.id} className="border-t border-border/50">
                   <td className="px-3 py-2">
-                    <p className="font-medium">{x.aciklama || "—"}</p>
-                    <p className="text-xs text-muted-foreground">{x.kateqoriya}</p>
+                    <p className="font-medium">{x.aciklama || x.isci_adi || "—"}</p>
+                    <p className="text-xs text-muted-foreground">{x.kateqoriya}{x.isci_adi ? ` · ${x.isci_adi}` : ""}</p>
                   </td>
                   <td className="px-3 py-2 text-right">{x.edet_sayi ?? x.miqdar ?? 1}</td>
                   <td className="px-3 py-2 text-right">{x.gun_sayi ?? 1}</td>
