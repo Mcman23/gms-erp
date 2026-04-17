@@ -31,6 +31,11 @@
       "title": "\u0130\u015f\u0259 ba\u015flama tarixi",
       "format": "date"
     },
+    "dogum_tarixi": {
+      "type": "string",
+      "title": "Do\u011fum tarixi",
+      "format": "date"
+    },
     "maas": {
       "type": "number",
       "title": "Maa\u015f (AZN)"
@@ -53,11 +58,6 @@
     "sexsiyyet_no": {
       "type": "string",
       "title": "\u015e\u0259xsiyy\u0259t v\u0259siq\u0259si"
-    },
-    "dogum_tarixi": {
-      "type": "string",
-      "title": "Do\u011fum tarixi",
-      "format": "date"
     },
     "unvan": {
       "type": "string",

@@ -1,0 +1,62 @@
+{
+  "name": "PodratciSifarisi",
+  "type": "object",
+  "properties": {
+    "sifaris_id": {
+      "type": "string",
+      "title": "Sifari\u015f ID"
+    },
+    "sifaris_no": {
+      "type": "string",
+      "title": "Sifari\u015f n\u00f6mr\u0259si"
+    },
+    "podratci_id": {
+      "type": "string",
+      "title": "Podrat\u00e7\u0131 ID"
+    },
+    "podratci_adi": {
+      "type": "string",
+      "title": "Podrat\u00e7\u0131 ad\u0131"
+    },
+    "xidmet_tarixi": {
+      "type": "string",
+      "title": "Xidm\u0259t tarixi",
+      "format": "date"
+    },
+    "xidmet_novu": {
+      "type": "string",
+      "title": "Xidm\u0259t n\u00f6v\u00fc"
+    },
+    "isin_deyeri": {
+      "type": "number",
+      "title": "\u0130\u015fin d\u0259y\u0259ri (m\u00fc\u015ft\u0259rid\u0259n al\u0131nan)"
+    },
+    "podratci_payi": {
+      "type": "number",
+      "title": "Podrat\u00e7\u0131 pay\u0131 (\u20bc)"
+    },
+    "sirk\u0259t_qazanci": {
+      "type": "number",
+      "title": "\u015eirk\u0259tin qazanc\u0131 (\u20bc)"
+    },
+    "odenis_statusu": {
+      "type": "string",
+      "title": "\u00d6d\u0259ni\u015f statusu",
+      "enum": [
+        "G\u00f6zl\u0259nilir",
+        "Podrat\u00e7\u0131ya \u00d6d\u0259nilib",
+        "L\u0259\u011fv Edilib"
+      ],
+      "default": "G\u00f6zl\u0259nilir"
+    },
+    "qeyd": {
+      "type": "string",
+      "title": "Qeyd"
+    }
+  },
+  "required": [
+    "podratci_id",
+    "xidmet_tarixi",
+    "isin_deyeri"
+  ]
+}

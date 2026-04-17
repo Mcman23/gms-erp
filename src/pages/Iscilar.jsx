@@ -18,7 +18,7 @@ export default function Iscilar() {
   const [iscilar, setIscilar] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
-  const [form, setForm] = useState({ ad_soyad: "", vezife: "Sahə işçisi", telefon: "", email: "", maas: "", komanda: "", ise_baslama: "", unvan: "" });
+  const [form, setForm] = useState({ ad_soyad: "", vezife: "Sahə işçisi", telefon: "", email: "", maas: "", komanda: "", ise_baslama: "", dogum_tarixi: "", unvan: "" });
 
   const fetchData = () => { base44.entities.Isci.list("-created_date", 100).then(setIscilar).finally(() => setLoading(false)); };
   useEffect(() => { fetchData(); }, []);
@@ -26,7 +26,7 @@ export default function Iscilar() {
   const handleCreate = async () => {
     await base44.entities.Isci.create({ ...form, maas: parseFloat(form.maas) || 0, status: "Aktiv" });
     setShowDialog(false);
-    setForm({ ad_soyad: "", vezife: "Sahə işçisi", telefon: "", email: "", maas: "", komanda: "", ise_baslama: "", unvan: "" });
+    setForm({ ad_soyad: "", vezife: "Sahə işçisi", telefon: "", email: "", maas: "", komanda: "", ise_baslama: "", dogum_tarixi: "", unvan: "" });
     fetchData();
   };
 
@@ -94,7 +94,10 @@ export default function Iscilar() {
               <div><Label>Email</Label><Input value={form.email} onChange={e => setForm(f => ({...f, email: e.target.value}))} /></div>
               <div><Label>Komanda</Label><Input value={form.komanda} onChange={e => setForm(f => ({...f, komanda: e.target.value}))} /></div>
             </div>
-            <div><Label>İşə başlama tarixi</Label><Input type="date" value={form.ise_baslama} onChange={e => setForm(f => ({...f, ise_baslama: e.target.value}))} /></div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><Label>İşə başlama tarixi</Label><Input type="date" value={form.ise_baslama} onChange={e => setForm(f => ({...f, ise_baslama: e.target.value}))} /></div>
+              <div><Label>Doğum tarixi</Label><Input type="date" value={form.dogum_tarixi} onChange={e => setForm(f => ({...f, dogum_tarixi: e.target.value}))} /></div>
+            </div>
             <Button className="w-full" onClick={handleCreate}>Yarat</Button>
           </div>
         </DialogContent>
