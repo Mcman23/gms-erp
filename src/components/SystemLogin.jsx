@@ -40,7 +40,13 @@ export default function SystemLogin({ onSuccess }) {
 
     if (matchedUser) {
       sessionStorage.setItem("gms_sys_auth", "1");
-      sessionStorage.setItem("gms_sys_user", JSON.stringify({ email: matchedUser.email, ad_soyad: matchedUser.ad_soyad, rol: matchedUser.rol, id: matchedUser.id }));
+      sessionStorage.setItem("gms_sys_user", JSON.stringify({
+        email: matchedUser.email,
+        ad_soyad: matchedUser.ad_soyad,
+        rol: matchedUser.rol,
+        id: matchedUser.id,
+        modul_erisimi: matchedUser.modul_erisimi || [],
+      }));
       setLoading(false);
       onSuccess();
       return;

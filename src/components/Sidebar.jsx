@@ -7,6 +7,7 @@ import {
   Calculator, FileCheck, FolderOpen, Handshake, ChevronDown,
   ChevronRight, TrendingUp, Truck, ShieldCheck, Cake, Building2, Crown
 } from "lucide-react";
+import { MODUL_ROUTE_MAP } from "@/lib/systemUser";
 
 const sections = [
   {
@@ -97,9 +98,24 @@ const sections = [
   },
 ];
 
-export default function Sidebar({ open, onClose, user }) {
+export default function Sidebar({ open, onClose, user, systemUser }) {
   const location = useLocation();
   const isAdmin = user?.role === "admin";
+
+  // systemUser null → master şifrə ilə giriş → tam giriş
+  // systemUser var → modul_erisimi ilə filtrləmə
+  const allowedModuls = systemUser?.modul_erisimi || null;
+  const isMasterOrAdmin = !systemUser || ["Super Admin", "Admin", "Direktor"].includes(systemUser?.rol);
+
+  const canSeeItem = (itemPath) => {
+    if (isMasterOrAdmin) return true;
+    if (!allowedModuls) return true;
+    if (itemPath === "/") return true;
+    return Object.entries(MODUL_ROUTE_MAP).some(([modul, route]) => {
+      if (route === "/") return false;
+      return allowedModuls.includes(modul) && itemPath === route;
+    });
+  };
 
   // Auto-open section based on current path
   const getDefaultOpen = () => {
@@ -158,9 +174,10 @@ export default function Sidebar({ open, onClose, user }) {
         <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
           {sections.map((section) => {
             if (section.adminOnly && !isAdmin) return null;
-          if (section.ceoOnly && !isAdmin) return null;
+            if (section.ceoOnly && !isAdmin) return null;
 
             if (section.direct) {
+              if (!canSeeItem(section.path)) return null;
               const Icon = section.icon;
               const active = isActive(section.path);
               return (
@@ -180,9 +197,12 @@ export default function Sidebar({ open, onClose, user }) {
               );
             }
 
+            const visibleItems = section.items?.filter(item => canSeeItem(item.path)) || [];
+            if (visibleItems.length === 0) return null;
+
             const SectionIcon = section.icon;
             const isOpen = openSections.has(section.id);
-            const hasActive = section.items?.some(item => isActive(item.path));
+            const hasActive = visibleItems.some(item => isActive(item.path));
 
             return (
               <div key={section.id}>
@@ -204,7 +224,7 @@ export default function Sidebar({ open, onClose, user }) {
 
                 {isOpen && (
                   <div className="ml-3 mt-0.5 space-y-0.5 border-l border-sidebar-border pl-3">
-                    {section.items.map((item) => {
+                    {visibleItems.map((item) => {
                       const ItemIcon = item.icon;
                       const active = isActive(item.path);
                       return (
