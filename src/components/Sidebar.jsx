@@ -5,7 +5,7 @@ import {
   UserCog, Palmtree, Banknote, Package, Receipt, FileText,
   Wrench, MessageSquareWarning, BarChart3, Settings, X, Sparkles,
   Calculator, FileCheck, FolderOpen, Handshake, ChevronDown,
-  ChevronRight, TrendingUp, Truck, ShieldCheck, Cake, Building2
+  ChevronRight, TrendingUp, Truck, ShieldCheck, Cake, Building2, Crown
 } from "lucide-react";
 
 const sections = [
@@ -87,6 +87,14 @@ const sections = [
       { label: "İstifadəçi İdarəetməsi", path: "/ayarlar", icon: ShieldCheck },
     ],
   },
+  {
+    id: "ceo",
+    label: "CEO Paneli",
+    icon: Crown,
+    ceoOnly: true,
+    direct: true,
+    path: "/ceo-paneli",
+  },
 ];
 
 export default function Sidebar({ open, onClose, user }) {
@@ -150,6 +158,7 @@ export default function Sidebar({ open, onClose, user }) {
         <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
           {sections.map((section) => {
             if (section.adminOnly && !isAdmin) return null;
+          if (section.ceoOnly && !isAdmin) return null;
 
             if (section.direct) {
               const Icon = section.icon;

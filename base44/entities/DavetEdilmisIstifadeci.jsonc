@@ -1,0 +1,110 @@
+{
+  "name": "DavetEdilmisIstifadeci",
+  "type": "object",
+  "properties": {
+    "ad_soyad": {
+      "title": "Ad Soyad",
+      "type": "string"
+    },
+    "davet_eden": {
+      "title": "D\u0259v\u0259t ed\u0259n admin",
+      "type": "string"
+    },
+    "davet_tarixi": {
+      "format": "date-time",
+      "title": "D\u0259v\u0259t tarixi",
+      "type": "string"
+    },
+    "departament": {
+      "title": "Departament",
+      "type": "string"
+    },
+    "email": {
+      "title": "Email",
+      "type": "string"
+    },
+    "giris_sayi": {
+      "default": 0,
+      "title": "Giri\u015f say\u0131",
+      "type": "number"
+    },
+    "modul_erisimi": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Modul eri\u015fimi",
+      "type": "array"
+    },
+    "rol": {
+      "enum": [
+        "Super Admin",
+        "Admin",
+        "Direktor",
+        "\u018fm\u0259liyyat meneceri",
+        "Dispatcher",
+        "Supervisor",
+        "Sah\u0259 i\u015f\u00e7isi",
+        "Sat\u0131\u015f meneceri",
+        "HR meneceri",
+        "Maliyy\u0259 meneceri",
+        "Kassir",
+        "Anbar m\u00fcd\u00fcr\u00fc",
+        "Audit/Bax\u0131\u015f"
+      ],
+      "title": "Rol",
+      "type": "string"
+    },
+    "son_giris": {
+      "format": "date-time",
+      "title": "Son giri\u015f tarixi",
+      "type": "string"
+    },
+    "status": {
+      "default": "D\u0259v\u0259t g\u00f6nd\u0259rilib",
+      "enum": [
+        "D\u0259v\u0259t g\u00f6nd\u0259rilib",
+        "Aktiv",
+        "Blokland\u0131",
+        "Deaktiv"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "telefon": {
+      "title": "Telefon",
+      "type": "string"
+    },
+    "token_aktiv": {
+      "default": true,
+      "title": "Token giri\u015f aktiv",
+      "type": "boolean"
+    },
+    "girisKodu": {
+      "title": "Giri\u015f Kodu",
+      "type": "string"
+    },
+    "kodStatus": {
+      "title": "Kod Statusu",
+      "type": "string",
+      "enum": [
+        "Aktiv",
+        "\u0130stifad\u0259 Edilib",
+        "Deaktiv"
+      ],
+      "default": "Aktiv"
+    },
+    "muvveqetiParol": {
+      "title": "M\u00fcvv\u0259q\u0259ti Parol",
+      "type": "string"
+    },
+    "ilkGirisTamamlandi": {
+      "title": "\u0130lk giri\u015f tamamland\u0131",
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "email",
+    "rol"
+  ]
+}

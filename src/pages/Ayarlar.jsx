@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Save, Pencil, Trash2 } from "lucide-react";
+import { Save, Pencil, Trash2, Copy, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { Shield, LogOut, Plus, Lock, UserX, UserCheck } from "lucide-react";
+import { Shield, LogOut, Plus, Lock, UserX, UserCheck, CheckCircle } from "lucide-react";
 import moment from "moment";
 
 const ROLLER = ["Super Admin","Admin","Direktor","Amaliyyat meneceri","Dispatcher","Supervisor","Sahe iscisi","Satis meneceri","HR meneceri","Maliyye meneceri","Kassir","Anbar muduru","Audit/Baxis"];
@@ -37,7 +37,18 @@ export default function Ayarlar() {
   const [editingQiymet, setEditingQiymet] = useState(null);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [inviteForm, setInviteForm] = useState({ email: "", ad_soyad: "", telefon: "", rol: "Kassir", departament: "", modul_erisimi: [] });
+  const [createdUser, setCreatedUser] = useState(null); // birdəfəlik modal
+  const [deactivateTarget, setDeactivateTarget] = useState(null);
   const { toast } = useToast();
+
+  const generateGirisKodu = () => {
+    const num = Math.floor(100000 + Math.random() * 900000);
+    return `GMS-${num}`;
+  };
+  const generateParol = () => {
+    const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789#@!";
+    return Array.from({length: 8}, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  };
 
   const fetchData = () => {
     Promise.all([
@@ -65,6 +76,8 @@ export default function Ayarlar() {
 
   const handleInvite = async () => {
     if (!inviteForm.email) return;
+    const girisKodu = generateGirisKodu();
+    const muvveqetiParol = generateParol();
     // Invite to platform
     await base44.users.inviteUser(inviteForm.email, ["Super Admin","Admin","Direktor"].includes(inviteForm.rol) ? "admin" : "user");
     // Save to DavetEdilmisIstifadeci
@@ -79,15 +92,30 @@ export default function Ayarlar() {
       davet_tarixi: new Date().toISOString(),
       giris_sayi: 0,
       token_aktiv: true,
+      girisKodu,
+      muvveqetiParol,
+      kodStatus: "Aktiv",
+      ilkGirisTamamlandi: false,
     });
-    toast({ title: "Dəvət göndərildi", description: `${inviteForm.email} adresinə dəvət göndərildi.` });
     setShowInviteDialog(false);
     setInviteForm({ email: "", ad_soyad: "", telefon: "", rol: "Kassir", departament: "", modul_erisimi: [] });
+    setCreatedUser({ ad_soyad: inviteForm.ad_soyad, email: inviteForm.email, rol: inviteForm.rol, girisKodu, muvveqetiParol });
     fetchData();
   };
 
   const handleBlok = async (davet, blok) => {
     await base44.entities.DavetEdilmisIstifadeci.update(davet.id, { status: blok ? "Bloklandı" : "Aktiv" });
+    fetchData();
+  };
+
+  const handleDeaktiv = async (davet) => {
+    await base44.entities.DavetEdilmisIstifadeci.update(davet.id, { status: "Deaktiv" });
+    setDeactivateTarget(null);
+    fetchData();
+  };
+
+  const handleBerpaEt = async (davet) => {
+    await base44.entities.DavetEdilmisIstifadeci.update(davet.id, { status: "Aktiv" });
     fetchData();
   };
 
@@ -193,14 +221,14 @@ export default function Ayarlar() {
                         {d.son_giris ? moment(d.son_giris).format("DD.MM.YYYY") : "—"}
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <div className="flex gap-1 justify-end">
-                          {d.status === "Bloklandı" ? (
-                            <Button size="sm" variant="ghost" className="h-7 px-2 text-green-600" onClick={() => handleBlok(d, false)} title="Aç">
-                              <UserCheck className="w-3.5 h-3.5" />
+                        <div className="flex gap-1 justify-end flex-wrap">
+                          {d.status === "Deaktiv" ? (
+                            <Button size="sm" variant="ghost" className="h-7 px-2 text-green-600 text-xs" onClick={() => handleBerpaEt(d)}>
+                              <UserCheck className="w-3.5 h-3.5 mr-1" />Bərpa Et
                             </Button>
                           ) : (
-                            <Button size="sm" variant="ghost" className="h-7 px-2 text-red-600" onClick={() => handleBlok(d, true)} title="Blokla">
-                              <UserX className="w-3.5 h-3.5" />
+                            <Button size="sm" variant="ghost" className="h-7 px-2 text-red-600 text-xs" onClick={() => setDeactivateTarget(d)}>
+                              <UserX className="w-3.5 h-3.5 mr-1" />Çıxar
                             </Button>
                           )}
                           <Button size="sm" variant="ghost" className="h-7 px-2 text-muted-foreground" onClick={() => handleTokenReset(d)} title="Token sıfırla">
@@ -329,6 +357,66 @@ export default function Ayarlar() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Deaktiv Confirm Dialog */}
+      <Dialog open={!!deactivateTarget} onOpenChange={() => setDeactivateTarget(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>İstifadəçini Çıxar</DialogTitle>
+            <DialogDescription>
+              <strong>{deactivateTarget?.ad_soyad || deactivateTarget?.email}</strong> adlı istifadəçini sistemdən çıxarmaq istədiyinizə əminsiniz? Bu istifadəçi daxil ola bilməyəcək.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2 justify-end mt-2">
+            <Button variant="outline" onClick={() => setDeactivateTarget(null)}>Ləğv et</Button>
+            <Button variant="destructive" onClick={() => handleDeaktiv(deactivateTarget)}>Çıxar</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Created User Info Modal */}
+      <Dialog open={!!createdUser} onOpenChange={() => setCreatedUser(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-6 h-6 text-green-500" />
+              <DialogTitle>İstifadəçi yaradıldı</DialogTitle>
+            </div>
+          </DialogHeader>
+          {createdUser && (
+            <div className="space-y-4">
+              <div className="bg-muted/40 rounded-xl p-4 space-y-2 text-sm">
+                <div className="flex justify-between"><span className="text-muted-foreground">Ad Soyad:</span><span className="font-medium">{createdUser.ad_soyad || "—"}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Email:</span><span className="font-medium">{createdUser.email}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Rol:</span><span className="font-medium">{createdUser.rol}</span></div>
+              </div>
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-3">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Giriş Kodu</p>
+                  <p className="text-2xl font-bold tracking-widest text-primary">{createdUser.girisKodu}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Müvəqqəti Parol</p>
+                  <p className="text-xl font-mono font-bold">{createdUser.muvveqetiParol}</p>
+                </div>
+              </div>
+              <p className="text-xs text-destructive font-medium text-center">⚠️ Bu məlumatı yalnız indi görə bilərsiniz. Sonra baxmaq mümkün olmayacaq.</p>
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1 gap-2" onClick={() => {
+                  navigator.clipboard.writeText(`Giriş Kodu: ${createdUser.girisKodu}\nParol: ${createdUser.muvveqetiParol}`);
+                  toast({ title: "Kopyalandı!" });
+                }}>
+                  <Copy className="w-4 h-4" /> Kopyala
+                </Button>
+                <Button variant="outline" className="flex-1 gap-2" onClick={() => window.print()}>
+                  <Printer className="w-4 h-4" /> Çap Et
+                </Button>
+              </div>
+              <Button className="w-full" onClick={() => setCreatedUser(null)}>Başa düşdüm</Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Invite Dialog */}
       <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>

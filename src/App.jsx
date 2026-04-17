@@ -27,6 +27,7 @@ import SendIdareetmesi from './pages/SendIdareetmesi';
 import Podratcilar from './pages/Podratcilar';
 import PodratciHesabati from './pages/PodratciHesabati';
 import AdGunleri from './pages/AdGunleri';
+import CeoPaneli from './pages/CeoPaneli';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -76,6 +77,7 @@ const AuthenticatedApp = () => {
         <Route path="/podratcilar" element={<Podratcilar />} />
         <Route path="/podratci-hesabati" element={<PodratciHesabati />} />
         <Route path="/ad-gunleri" element={<AdGunleri />} />
+        <Route path="/ceo-paneli" element={<CeoPaneli />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>
