@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Plus, DollarSign } from "lucide-react";
+import { sifarisOdenisKassa } from "@/functions/sifarisOdenisKassa";
 import SifarisXerciModal from "../components/SifarisXerciModal";
 import DeleteButton from "../components/DeleteButton";
 import { useAdmin } from "../hooks/useAdmin";
@@ -79,7 +80,11 @@ export default function Sifarisler() {
   };
 
   const handleOdenisChange = async (id, newOdenis) => {
+    const sifaris = sifarisler.find(s => s.id === id);
+    const kohne = sifaris?.odenis_statusu || "Ödənilməyib";
     await base44.entities.Sifaris.update(id, { odenis_statusu: newOdenis });
+    // Avtomatik kassa əməliyyatı yarat
+    sifarisOdenisKassa({ sifaris_id: id, odenis_statusu: newOdenis, kohne_odenis_statusu: kohne }).catch(console.error);
     fetchData();
   };
 
