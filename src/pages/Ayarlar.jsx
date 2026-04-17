@@ -12,22 +12,63 @@ import { Shield, LogOut, Plus, Lock, UserX, UserCheck, CheckCircle, KeyRound, Tr
 import moment from "moment";
 import ParolTeyinModal from "@/components/ayarlar/ParolTeyinModal";
 
-const ROLLER = ["Super Admin","Admin","Direktor","Amaliyyat meneceri","Dispatcher","Supervisor","Sahe iscisi","Satis meneceri","HR meneceri","Maliyye meneceri","Kassir","Anbar muduru","Audit/Baxis"];
+const ROLLER = [
+  "Super Admin",
+  "Admin",
+  "Direktor",
+  "Əməliyyat meneceri",
+  "Dispatcher",
+  "Supervisor",
+  "Sahə işçisi",
+  "Satış meneceri",
+  "HR meneceri",
+  "Maliyyə meneceri",
+  "Kassir",
+  "Anbar müdürü",
+  "Audit/Baxış",
+];
+
+const BUTUN_MODULLER = [
+  "Ana Panel",
+  "Kassa Əməliyyatları",
+  "Maliyyə Hesabatları",
+  "Qiymət Kalkulyatoru",
+  "Qiymət Təklifləri",
+  "Fakturalar",
+  "Sifarişlər",
+  "Müştərilər",
+  "Podratçılar",
+  "Podratçı Hesabatı",
+  "Şikayətlər",
+  "Anbar",
+  "Avadanlıq",
+  "Əməkdaşlar",
+  "Planlama",
+  "Məzuniyyət",
+  "Maaş Hesablaması",
+  "Ad Günü Bildirişləri",
+  "Sənədlər",
+  "Hesabatlar",
+  "Sistem Ayarları",
+  "CEO Paneli",
+];
 
 const ROL_MODULLER = {
-  "Kassir": ["Kassa","Fakturalar","Sifarisler"],
-  "HR meneceri": ["Iscilar","Mezuniyyet","Maas"],
-  "Dispatcher": ["Sifarisler","Planlama"],
-  "Maliyye meneceri": ["Maliyye","Fakturalar","Hesabatlar","Kassa"],
-  "Sahe iscisi": ["Oz tapsirilari"],
-  "Supervisor": ["Sifarisler","Iscilar"],
-  "Anbar muduru": ["Anbar"],
-  "Admin": ["Hamisi"],
-  "Super Admin": ["Hamisi"],
-  "Direktor": ["Hamisi"],
+  "Super Admin": BUTUN_MODULLER,
+  "Admin": BUTUN_MODULLER,
+  "Direktor": BUTUN_MODULLER,
+  "CEO Paneli": ["Ana Panel", "CEO Paneli", "Hesabatlar", "Maliyyə Hesabatları"],
+  "Əməliyyat meneceri": ["Ana Panel","Sifarişlər","Müştərilər","Planlama","Podratçılar","Podratçı Hesabatı","Şikayətlər","Hesabatlar"],
+  "Dispatcher": ["Ana Panel","Sifarişlər","Planlama"],
+  "Supervisor": ["Ana Panel","Sifarişlər","Əməkdaşlar","Planlama","Şikayətlər"],
+  "Sahə işçisi": ["Ana Panel","Sifarişlər"],
+  "Satış meneceri": ["Ana Panel","Sifarişlər","Müştərilər","Qiymət Kalkulyatoru","Qiymət Təklifləri","Şikayətlər"],
+  "HR meneceri": ["Ana Panel","Əməkdaşlar","Məzuniyyət","Maaş Hesablaması","Ad Günü Bildirişləri"],
+  "Maliyyə meneceri": ["Ana Panel","Kassa Əməliyyatları","Maliyyə Hesabatları","Fakturalar","Hesabatlar","Qiymət Kalkulyatoru","Qiymət Təklifləri"],
+  "Kassir": ["Ana Panel","Kassa Əməliyyatları","Fakturalar","Sifarişlər"],
+  "Anbar müdürü": ["Ana Panel","Anbar","Avadanlıq"],
+  "Audit/Baxış": ["Ana Panel","Hesabatlar","Maliyyə Hesabatları","Podratçı Hesabatı","Sənədlər"],
 };
-
-const BUTUN_MODULLER = ["Dashboard","Kassa","Musteriler","Sifarisler","Planlama","Iscilar","Mezuniyyet","Maas","Anbar","Fakturalar","Maliyye","Avadanliq","Sikayetler","Hesabatlar","Ayarlar"];
 
 export default function Ayarlar() {
   const [users, setUsers] = useState([]);
@@ -37,7 +78,7 @@ export default function Ayarlar() {
   const [qiymetForm, setQiymetForm] = useState({ xidmet_adi: "", b2c_qiymet: "", b2b_qiymet: "", vahid: "m²" });
   const [editingQiymet, setEditingQiymet] = useState(null);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
-  const [inviteForm, setInviteForm] = useState({ email: "", ad_soyad: "", telefon: "", rol: "Kassir", departament: "", modul_erisimi: [] });
+  const [inviteForm, setInviteForm] = useState({ email: "", ad_soyad: "", telefon: "", rol: "Kassir", departament: "", modul_erisimi: ROL_MODULLER["Kassir"] || [] });
   const [createdUser, setCreatedUser] = useState(null);
   const [deactivateTarget, setDeactivateTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -71,7 +112,7 @@ export default function Ayarlar() {
 
   const handleRolChange = (rol) => {
     const moduller = ROL_MODULLER[rol] || [];
-    setInviteForm(f => ({ ...f, rol, modul_erisimi: moduller[0] === "Hamısı" ? BUTUN_MODULLER : moduller }));
+    setInviteForm(f => ({ ...f, rol, modul_erisimi: moduller }));
   };
 
   const toggleModul = (modul) => {
@@ -345,19 +386,28 @@ export default function Ayarlar() {
           <div className="bg-card rounded-xl border border-border p-5">
             <h3 className="font-semibold text-sm mb-4">Mövcud Rollar və Modul Erişimi</h3>
             <div className="space-y-3">
-              {ROLLER.map(r => (
-                <div key={r} className="flex items-start gap-3 py-2 border-b border-border/50">
-                  <div className="flex items-center gap-2 min-w-[180px]">
-                    <Shield className="w-4 h-4 text-primary" />
-                    <span className="text-sm font-medium">{r}</span>
+              {ROLLER.map(r => {
+                const moduller = ROL_MODULLER[r] || [];
+                const hamisi = moduller.length === BUTUN_MODULLER.length;
+                return (
+                  <div key={r} className="flex items-start gap-3 py-2 border-b border-border/50">
+                    <div className="flex items-center gap-2 min-w-[180px]">
+                      <Shield className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-medium">{r}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {hamisi
+                        ? <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">Bütün modullara giriş</span>
+                        : moduller.length === 0
+                          ? <span className="text-xs text-muted-foreground">—</span>
+                          : moduller.map(m => (
+                            <span key={m} className="text-xs bg-muted px-2 py-0.5 rounded-full">{m}</span>
+                          ))
+                      }
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-1">
-                    {(ROL_MODULLER[r] || ["—"]).map(m => (
-                      <span key={m} className="text-xs bg-muted px-2 py-0.5 rounded-full">{m}</span>
-                    ))}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </TabsContent>
