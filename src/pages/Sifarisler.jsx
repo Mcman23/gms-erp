@@ -56,7 +56,7 @@ export default function Sifarisler() {
     const edvMeblegi = musteri?.edv_odeyicisi ? qiymet * 0.18 : 0;
     const sifarisNo = `SIF-${Date.now().toString().slice(-6)}`;
 
-    const podratci = podratcilar.find(p => p.id === form.podratci_id);
+    const podratci = podratcilar.find(p => p.id === form.podratci_id && form.podratci_id !== "none");
     await base44.entities.Sifaris.create({
       ...form,
       sifaris_no: sifarisNo,
@@ -179,7 +179,7 @@ export default function Sifarisler() {
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">Sifariş tapılmadı</td></tr>}
+              {filtered.length === 0 && <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">Sifariş tapılmadı</td></tr>}
             </tbody>
           </table>
         </div>
@@ -246,10 +246,10 @@ export default function Sifarisler() {
             )}
             <div>
               <Label>Podratçı (B2C)</Label>
-              <Select value={form.podratci_id} onValueChange={v => setForm(f => ({...f, podratci_id: v}))}>
+              <Select value={form.podratci_id || "none"} onValueChange={v => setForm(f => ({...f, podratci_id: v === "none" ? "" : v}))}>
                 <SelectTrigger><SelectValue placeholder="Podratçı seçin (isteğe bağlı)" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={null}>— Podratçısız —</SelectItem>
+                  <SelectItem value="none">— Podratçısız —</SelectItem>
                   {podratcilar.map(p => <SelectItem key={p.id} value={p.id}>{p.ad} ({p.komissiya_faizi || 20}%)</SelectItem>)}
                 </SelectContent>
               </Select>

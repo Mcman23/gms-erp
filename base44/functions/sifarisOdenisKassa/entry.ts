@@ -63,16 +63,20 @@ Deno.serve(async (req) => {
     await base44.asServiceRole.entities.Kassa.update(kassa.id, { balans: yeniBalans });
 
     // Maliyyə jurnalına qeyd əlavə et (Gəlirlər hesabı)
+    const jurnal_no = `J-${Date.now().toString().slice(-6)}`;
     await base44.asServiceRole.entities.JurnalQeydi.create({
+      jurnal_no,
       tarix: new Date().toISOString().slice(0, 10),
       aciklama: `Sifariş ödənişi: ${sifaris.sifaris_no || sifaris_id} — ${sifaris.musteri_adi || ''}`,
-      debet_hesab: '1010',   // Kassa/Bank
-      kredit_hesab: '4010',  // Xidmət gəlirləri
-      mebleg: mebleg,
+      debet_hesab: '1010',
+      kredit_hesab: '4010',
+      debet_mebleg: mebleg,
+      kredit_mebleg: mebleg,
+      edv_mebleg: 0,
       istinad_id: sifaris_id,
       istinad_tipi: 'Sifariş',
       status: 'Təsdiqləndi',
-    }).catch(() => null); // JurnalQeydi yoxdursa xəta verməsin
+    }).catch(() => null);
 
     return Response.json({ success: true, mebleg, kassa_ad: kassa.ad });
   } catch (error) {

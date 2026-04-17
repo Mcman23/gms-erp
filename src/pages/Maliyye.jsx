@@ -467,12 +467,12 @@ export default function Maliyye() {
             </table>
           </div>
         </TabsContent>
-      </Tabs>
+        {/* ŞİRKƏT DÖVRİYYƏSİ */}
+        <TabsContent value="sirket" className="mt-4">
+          <SirketDovriiyyesi musteriler={musteriler} sifarisler={sifarisler} kassaEmeliyyatlar={kassaEmeliyyatlar} />
+        </TabsContent>
 
-      {/* ŞİRKƏT DÖVRİYYƏSİ */}
-      <TabsContent value="sirket" className="mt-4">
-        <SirketDovriiyyesi musteriler={musteriler} sifarisler={sifarisler} kassaEmeliyyatlar={kassaEmeliyyatlar} />
-      </TabsContent>
+      </Tabs>
 
       {/* New Hesab Dialog */}
       <Dialog open={showHesabDialog} onOpenChange={setShowHesabDialog}>
