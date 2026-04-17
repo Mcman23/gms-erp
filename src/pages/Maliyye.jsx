@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Check, BookOpen, Layers, FileText, Wallet, TrendingUp } from "lucide-react";
+import { Plus, Check, BookOpen, Layers, FileText, TrendingUp, Building2 } from "lucide-react";
 import moment from "moment";
+import SirketDovriiyyesi from "@/components/maliyye/SirketDovriiyyesi";
 
 const SINIFLER = ["1 - Aktivlər", "2 - Öhdəliklər", "3 - Kapital", "4 - Gəlirlər", "5 - Xərclər"];
 const ISTINAD_TIPLERI = ["Faktura", "Sifariş", "Kassa", "Maaş", "Satınalma", "Manual"];
@@ -18,6 +19,8 @@ export default function Maliyye() {
   const [jurnallar, setJurnallar] = useState([]);
   const [fakturalar, setFakturalar] = useState([]);
   const [kassaEmeliyyatlar, setKassaEmeliyyatlar] = useState([]);
+  const [musteriler, setMusteriler] = useState([]);
+  const [sifarisler, setSifarisler] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showHesabDialog, setShowHesabDialog] = useState(false);
   const [showJurnalDialog, setShowJurnalDialog] = useState(false);
@@ -34,11 +37,15 @@ export default function Maliyye() {
       base44.entities.JurnalQeydi.list("-created_date", 100).catch(() => []),
       base44.entities.Faktura.list("-created_date", 100).catch(() => []),
       base44.entities.KassaEmeliyyati.list("-created_date", 200).catch(() => []),
-    ]).then(([h, j, f, k]) => {
+      base44.entities.Musteri.list().catch(() => []),
+      base44.entities.Sifaris.list("-tarix", 500).catch(() => []),
+    ]).then(([h, j, f, k, m, s]) => {
       setHesablar(h);
       setJurnallar(j);
       setFakturalar(f);
       setKassaEmeliyyatlar(k);
+      setMusteriler(m);
+      setSifarisler(s);
       setLoading(false);
     });
   };
@@ -140,6 +147,7 @@ export default function Maliyye() {
           <TabsTrigger value="balans">Balans</TabsTrigger>
           <TabsTrigger value="edv">ƏDV Hesabatı</TabsTrigger>
           <TabsTrigger value="kassa">Kassa Hərəkəti</TabsTrigger>
+          <TabsTrigger value="sirket" className="gap-1"><Building2 className="w-3.5 h-3.5" />Şirkət Dövriyyəsi</TabsTrigger>
         </TabsList>
 
         {/* HESAB PLANI */}
@@ -460,6 +468,11 @@ export default function Maliyye() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* ŞİRKƏT DÖVRİYYƏSİ */}
+      <TabsContent value="sirket" className="mt-4">
+        <SirketDovriiyyesi musteriler={musteriler} sifarisler={sifarisler} kassaEmeliyyatlar={kassaEmeliyyatlar} />
+      </TabsContent>
 
       {/* New Hesab Dialog */}
       <Dialog open={showHesabDialog} onOpenChange={setShowHesabDialog}>

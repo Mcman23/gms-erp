@@ -1,0 +1,36 @@
+{
+  "name": "ParolDeyisiklikJurnali",
+  "type": "object",
+  "properties": {
+    "istifadeci": {
+      "type": "string",
+      "title": "\u0130stifad\u0259\u00e7i email"
+    },
+    "istifadeci_adi": {
+      "type": "string",
+      "title": "\u0130stifad\u0259\u00e7i ad\u0131"
+    },
+    "deyisdiren_admin": {
+      "type": "string",
+      "title": "D\u0259yi\u015fdir\u0259n Admin"
+    },
+    "deyisiklik_tarixi": {
+      "type": "string",
+      "title": "D\u0259yi\u015fiklik tarixi",
+      "format": "date-time"
+    },
+    "email_gonderildi": {
+      "type": "boolean",
+      "title": "Email g\u00f6nd\u0259rildi",
+      "default": false
+    },
+    "qeyd": {
+      "type": "string",
+      "title": "Qeyd"
+    }
+  },
+  "required": [
+    "istifadeci",
+    "deyisdiren_admin"
+  ]
+}

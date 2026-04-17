@@ -8,8 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { Shield, LogOut, Plus, Lock, UserX, UserCheck, CheckCircle } from "lucide-react";
+import { Shield, LogOut, Plus, Lock, UserX, UserCheck, CheckCircle, KeyRound } from "lucide-react";
 import moment from "moment";
+import ParolTeyinModal from "@/components/ayarlar/ParolTeyinModal";
 
 const ROLLER = ["Super Admin","Admin","Direktor","Amaliyyat meneceri","Dispatcher","Supervisor","Sahe iscisi","Satis meneceri","HR meneceri","Maliyye meneceri","Kassir","Anbar muduru","Audit/Baxis"];
 
@@ -37,8 +38,10 @@ export default function Ayarlar() {
   const [editingQiymet, setEditingQiymet] = useState(null);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [inviteForm, setInviteForm] = useState({ email: "", ad_soyad: "", telefon: "", rol: "Kassir", departament: "", modul_erisimi: [] });
-  const [createdUser, setCreatedUser] = useState(null); // birdəfəlik modal
+  const [createdUser, setCreatedUser] = useState(null);
   const [deactivateTarget, setDeactivateTarget] = useState(null);
+  const [parolTarget, setParolTarget] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const { toast } = useToast();
 
   const generateGirisKodu = () => {
@@ -58,7 +61,12 @@ export default function Ayarlar() {
     ]).then(([u, d, q]) => { setUsers(u); setDavetler(d); setQiymetler(q); setLoading(false); });
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchData();
+    base44.auth.me().then(me => {
+      setCurrentUser(me);
+    }).catch(() => {});
+  }, []);
 
   const handleRolChange = (rol) => {
     const moduller = ROL_MODULLER[rol] || [];
@@ -231,6 +239,9 @@ export default function Ayarlar() {
                               <UserX className="w-3.5 h-3.5 mr-1" />Çıxar
                             </Button>
                           )}
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-amber-600" onClick={() => setParolTarget(d)} title="Parol təyin et">
+                            <KeyRound className="w-3.5 h-3.5" />
+                          </Button>
                           <Button size="sm" variant="ghost" className="h-7 px-2 text-muted-foreground" onClick={() => handleTokenReset(d)} title="Token sıfırla">
                             <Lock className="w-3.5 h-3.5" />
                           </Button>
@@ -417,6 +428,13 @@ export default function Ayarlar() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Parol Təyin Modal */}
+      <ParolTeyinModal
+        target={parolTarget}
+        currentAdmin={currentUser ? davetler.find(d => d.email === currentUser.email) : null}
+        onClose={() => setParolTarget(null)}
+      />
 
       {/* Invite Dialog */}
       <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>

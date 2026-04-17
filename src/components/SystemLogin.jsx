@@ -69,7 +69,10 @@ export default function SystemLogin({ onSuccess }) {
             </Button>
           </div>
 
-          <p className="text-slate-500 text-xs text-center mt-6">
+          <p className="text-slate-500 text-xs text-center mt-4">
+            Parolunuzu unutmusunuzsa, sistem admininizlə əlaqə saxlayın.
+          </p>
+          <p className="text-slate-600 text-xs text-center mt-1">
             GMS ERP • Məxfi sistem — icazəsiz giriş qadağandır
           </p>
         </div>
