@@ -1,24 +1,54 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Lock, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 
-const SYSTEM_PASSWORD = "gms2026"; // Admin bu şifrəni dəyişə bilər
+const SYSTEM_PASSWORD = "gms2026";
 
 export default function SystemLogin({ onSuccess }) {
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [davetler, setDavetler] = useState([]);
 
-  const handleLogin = () => {
+  useEffect(() => {
+    // Load invited users to check muvveqetiParol
+    base44.entities.DavetEdilmisIstifadeci.list().then(setDavetler).catch(() => {});
+  }, []);
+
+  const handleLogin = async () => {
+    if (!password) return;
+    setLoading(true);
+    setError("");
+
+    // 1. Check system master password
     if (password === SYSTEM_PASSWORD) {
       sessionStorage.setItem("gms_sys_auth", "1");
+      sessionStorage.removeItem("gms_sys_user");
+      setLoading(false);
       onSuccess();
-    } else {
-      setError("Şifrə yanlışdır. Yenidən cəhd edin.");
-      setPassword("");
+      return;
     }
+
+    // 2. Check muvveqetiParol from DavetEdilmisIstifadeci
+    const matchedUser = davetler.find(
+      d => d.muvveqetiParol && d.muvveqetiParol === password && d.status !== "Bloklandı" && d.status !== "Deaktiv"
+    );
+
+    if (matchedUser) {
+      sessionStorage.setItem("gms_sys_auth", "1");
+      sessionStorage.setItem("gms_sys_user", JSON.stringify({ email: matchedUser.email, ad_soyad: matchedUser.ad_soyad, rol: matchedUser.rol, id: matchedUser.id }));
+      setLoading(false);
+      onSuccess();
+      return;
+    }
+
+    setError("Şifrə yanlışdır. Yenidən cəhd edin.");
+    setPassword("");
+    setLoading(false);
   };
 
   return (
@@ -64,8 +94,9 @@ export default function SystemLogin({ onSuccess }) {
             <Button
               className="w-full bg-primary hover:bg-primary/90 text-white font-semibold h-10"
               onClick={handleLogin}
+              disabled={loading}
             >
-              Daxil ol
+              {loading ? "Yoxlanılır..." : "Daxil ol"}
             </Button>
           </div>
 
