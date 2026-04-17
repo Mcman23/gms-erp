@@ -14,9 +14,10 @@
       "title": "X\u0259rc kateqoriyas\u0131",
       "type": "string",
       "enum": [
-        "Material/Kimyevi",
+        "Material/Kimy\u0259vi",
         "Avadanl\u0131q istifad\u0259si",
         "\u0130\u015f\u00e7i m\u0259zuniyy\u0259ti",
+        "Personal x\u0259rci",
         "N\u0259qliyyat",
         "Dig\u0259r birba\u015fa x\u0259rc"
       ]

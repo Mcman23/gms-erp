@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, TrendingUp, TrendingDown } from "lucide-react";
 
-const KATEQORIYALAR = ["Material/Kimyəvi", "Avadanlıq istifadəsi", "İşçi məzuniyyəti", "Nəqliyyat", "Digər birbaşa xərc"];
+const KATEQORIYALAR = ["Material/Kimyəvi", "Avadanlıq istifadəsi", "İşçi məzuniyyəti", "Personal xərci", "Nəqliyyat", "Digər birbaşa xərc"];
 
 const emptyForm = {
   kateqoriya: "Material/Kimyəvi",
