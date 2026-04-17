@@ -3,7 +3,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { sifaris_id, odenis_statusu, kohne_odenis_statusu } = await req.json();
+    const { sifaris_id, odenis_statusu, kohne_odenis_statusu, qismen_mebleg } = await req.json();
 
     if (!sifaris_id) {
       return Response.json({ error: 'sifaris_id tələb olunur' }, { status: 400 });
@@ -32,7 +32,10 @@ Deno.serve(async (req) => {
     }
 
     const kassa = kassalar[0];
-    const mebleg = sifaris.umumi_mebleg || sifaris.qiymet || 0;
+    // Qismən ödənişdə göndərilən məbləği, tam ödənişdə isə ümumi məbləği götür
+    const mebleg = (odenis_statusu === 'Qismən ödənilib' && qismen_mebleg)
+      ? parseFloat(qismen_mebleg)
+      : (sifaris.umumi_mebleg || sifaris.qiymet || 0);
 
     // Eyni sifariş üçün artıq kassa girişi var mı?
     const movcut = await base44.asServiceRole.entities.KassaEmeliyyati.filter({ sifaris_id: sifaris_id });
