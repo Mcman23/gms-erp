@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Plus, DollarSign } from "lucide-react";
-import { sifarisOdenisKassa } from "@/functions/sifarisOdenisKassa";
 import SifarisXerciModal from "../components/SifarisXerciModal";
 import DeleteButton from "../components/DeleteButton";
 import { useAdmin } from "../hooks/useAdmin";
@@ -34,8 +33,6 @@ export default function Sifarisler() {
   const [showDialog, setShowDialog] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");
   const [xercSifaris, setXercSifaris] = useState(null);
-  const [qismenModal, setQismenModal] = useState(null); // { sifarisId, kohne }
-  const [qismenMebleg, setQismenMebleg] = useState("");
   const [form, setForm] = useState({
     musteri_id: "", sirket: "GMS (Ümumi)", xidmet_tipi: "Ev təmizliyi", unvan: "", tarix: "", saat: "",
     muddeti: "", qiymet: "", tekrarlanan: false, tekrar_periodu: "", qeydler: "",
@@ -58,7 +55,7 @@ export default function Sifarisler() {
     const edvMeblegi = musteri?.edv_odeyicisi ? qiymet * 0.18 : 0;
     const sifarisNo = `SIF-${Date.now().toString().slice(-6)}`;
 
-    const podratci = podratcilar.find(p => p.id === form.podratci_id && form.podratci_id !== "none");
+    const podratci = podratcilar.find(p => p.id === form.podratci_id);
     await base44.entities.Sifaris.create({
       ...form,
       sifaris_no: sifarisNo,
@@ -82,27 +79,7 @@ export default function Sifarisler() {
   };
 
   const handleOdenisChange = async (id, newOdenis) => {
-    const sifaris = sifarisler.find(s => s.id === id);
-    const kohne = sifaris?.odenis_statusu || "Ödənilməyib";
-    if (newOdenis === "Qismən ödənilib") {
-      setQismenModal({ sifarisId: id, kohne });
-      setQismenMebleg("");
-      return;
-    }
     await base44.entities.Sifaris.update(id, { odenis_statusu: newOdenis });
-    sifarisOdenisKassa({ sifaris_id: id, odenis_statusu: newOdenis, kohne_odenis_statusu: kohne }).catch(console.error);
-    fetchData();
-  };
-
-  const handleQismenTesdiq = async () => {
-    if (!qismenModal) return;
-    const mebleg = parseFloat(qismenMebleg);
-    if (!mebleg || mebleg <= 0) return;
-    const { sifarisId, kohne } = qismenModal;
-    await base44.entities.Sifaris.update(sifarisId, { odenis_statusu: "Qismən ödənilib" });
-    sifarisOdenisKassa({ sifaris_id: sifarisId, odenis_statusu: "Qismən ödənilib", kohne_odenis_statusu: kohne, qismen_mebleg: mebleg }).catch(console.error);
-    setQismenModal(null);
-    setQismenMebleg("");
     fetchData();
   };
 
@@ -197,7 +174,7 @@ export default function Sifarisler() {
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">Sifariş tapılmadı</td></tr>}
+              {filtered.length === 0 && <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">Sifariş tapılmadı</td></tr>}
             </tbody>
           </table>
         </div>
@@ -264,10 +241,10 @@ export default function Sifarisler() {
             )}
             <div>
               <Label>Podratçı (B2C)</Label>
-              <Select value={form.podratci_id || "none"} onValueChange={v => setForm(f => ({...f, podratci_id: v === "none" ? "" : v}))}>
+              <Select value={form.podratci_id} onValueChange={v => setForm(f => ({...f, podratci_id: v}))}>
                 <SelectTrigger><SelectValue placeholder="Podratçı seçin (isteğe bağlı)" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">— Podratçısız —</SelectItem>
+                  <SelectItem value={null}>— Podratçısız —</SelectItem>
                   {podratcilar.map(p => <SelectItem key={p.id} value={p.id}>{p.ad} ({p.komissiya_faizi || 20}%)</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -283,33 +260,6 @@ export default function Sifarisler() {
         open={!!xercSifaris}
         onClose={() => setXercSifaris(null)}
       />
-
-      {/* Qismən ödəniş məbləği modalı */}
-      <Dialog open={!!qismenModal} onOpenChange={() => setQismenModal(null)}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader><DialogTitle>Qismən Ödəniş Məbləği</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Nə qədər ödənilib? Məbləği daxil edin:</p>
-            <div>
-              <Label>Ödənilən məbləğ (₼)</Label>
-              <Input
-                type="number"
-                placeholder="0.00"
-                value={qismenMebleg}
-                onChange={e => setQismenMebleg(e.target.value)}
-                autoFocus
-                onKeyDown={e => e.key === "Enter" && handleQismenTesdiq()}
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" onClick={() => setQismenModal(null)}>Ləğv et</Button>
-              <Button className="flex-1" onClick={handleQismenTesdiq} disabled={!qismenMebleg || parseFloat(qismenMebleg) <= 0}>
-                Təsdiqlə
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

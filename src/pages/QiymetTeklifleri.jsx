@@ -105,7 +105,7 @@ export default function QiymetTeklifleri() {
           <h1 className="text-2xl font-bold tracking-tight">Qiymet Teklifleri</h1>
           <p className="text-muted-foreground text-sm mt-1">VOEN · EDV 18% · Imza · Status</p>
         </div>
-        <Button className="gap-2" onClick={() => setShowDialog(true)}><Plus className="w-4 h-4" /> Yeni Təklif</Button>
+        <Button className="gap-2" onClick={() => setShowDialog(true)}><Plus className="w-4 h-4" /> Yeni Teklif</Button>
       </div>
 
       <div className="flex gap-2 flex-wrap">

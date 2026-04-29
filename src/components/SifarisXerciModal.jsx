@@ -131,16 +131,15 @@ export default function SifarisXerciModal({ sifaris, open, onClose }) {
             </div>
             <div>
               <Label>İşçi (isteğe bağlı)</Label>
-              <Select value={form.isci_id || "none"} onValueChange={v => {
-                const realVal = v === "none" ? "" : v;
-                const isci = iscilar.find(i => i.id === realVal);
-                handleChange("isci_id", realVal);
+              <Select value={form.isci_id} onValueChange={v => {
+                const isci = iscilar.find(i => i.id === v);
+                handleChange("isci_id", v);
                 handleChange("isci_adi", isci?.ad_soyad || "");
                 if (isci && !form.aciklama) handleChange("aciklama", isci.ad_soyad + " işçi");
               }}>
                 <SelectTrigger><SelectValue placeholder="İşçi seçin" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">— Seçilməyib —</SelectItem>
+                  <SelectItem value={null}>— Seçilməyib —</SelectItem>
                   {iscilar.map(i => <SelectItem key={i.id} value={i.id}>{i.ad_soyad}</SelectItem>)}
                 </SelectContent>
               </Select>
