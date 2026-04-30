@@ -8,11 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Plus, Receipt } from "lucide-react";
 import moment from "moment";
-import DeleteButton from "../components/DeleteButton";
-import { useAdmin } from "../hooks/useAdmin";
 
 export default function Fakturalar() {
-  const isAdmin = useAdmin();
   const [fakturalar, setFakturalar] = useState([]);
   const [musteriler, setMusteriler] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -81,7 +78,6 @@ export default function Fakturalar() {
                 <th className="text-right px-4 py-3 font-medium">ƏDV</th>
                 <th className="text-right px-4 py-3 font-medium">Ümumi</th>
                 <th className="text-left px-4 py-3 font-medium">Status</th>
-                <th className="px-2 py-3"></th>
               </tr>
             </thead>
             <tbody>
@@ -94,13 +90,12 @@ export default function Fakturalar() {
                   <td className="px-4 py-3 text-right text-muted-foreground">{f.edv_faizi ? `${f.edv_faizi}% (${(f.edv_meblegi || 0).toFixed(2)} ₼)` : "—"}</td>
                   <td className="px-4 py-3 text-right font-semibold">{(f.umumi_mebleg || 0).toFixed(2)} ₼</td>
                   <td className="px-4 py-3">
-                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                     f.odenis_statusu === "Ödənilib" ? "bg-green-100 text-green-700" :
-                     f.odenis_statusu === "Qismən" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"
-                   }`}>{f.odenis_statusu}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      f.odenis_statusu === "Ödənilib" ? "bg-green-100 text-green-700" :
+                      f.odenis_statusu === "Qismən" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"
+                    }`}>{f.odenis_statusu}</span>
                   </td>
-                  {isAdmin && <td className="px-2 py-3"><DeleteButton onDelete={async () => { await base44.entities.Faktura.delete(f.id); fetchData(); }} /></td>}
-                  </tr>
+                </tr>
               ))}
               {fakturalar.length === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Faktura yoxdur</td></tr>}
             </tbody>

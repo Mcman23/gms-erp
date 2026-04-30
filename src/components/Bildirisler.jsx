@@ -3,7 +3,6 @@ import { base44 } from "@/api/base44Client";
 import { Bell, X, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import moment from "moment";
-import { createBildirisler } from "@/functions/createBildirisler";
 
 const prioritetBorder = {
   "Kritik": "border-l-red-500",
@@ -53,11 +52,8 @@ export default function Bildirisler() {
   };
 
   useEffect(() => {
-    // Bildirişləri yarat, sonra yüklə
-    createBildirisler({}).catch(() => {}).finally(() => fetchBildirisler());
-    const interval = setInterval(() => {
-      createBildirisler({}).catch(() => {}).finally(() => fetchBildirisler());
-    }, 60000);
+    fetchBildirisler();
+    const interval = setInterval(fetchBildirisler, 30000);
     return () => clearInterval(interval);
   }, []);
 

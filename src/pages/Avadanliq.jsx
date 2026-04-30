@@ -7,15 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Wrench } from "lucide-react";
-import DeleteButton from "../components/DeleteButton";
-import { useAdmin } from "../hooks/useAdmin";
 import moment from "moment";
 
 const kateqoriyalar = ["Tozsoran","Buxar aparatı","Cilalayıcı","Təzyiqli yuma","Digər"];
 const statuslar = ["İstifadədə","Anbarda","Təmirdə","Silindi"];
 
 export default function Avadanliq() {
-  const isAdmin = useAdmin();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
@@ -68,10 +65,9 @@ export default function Avadanliq() {
               {i.teyin_olunan && <p>Təyin: {i.teyin_olunan}</p>}
               {i.son_baxim_tarixi && <p>Son baxım: {moment(i.son_baxim_tarixi).format("DD.MM.YYYY")}</p>}
             </div>
-            <div className="mt-3 pt-3 border-t border-border/50 text-xs flex justify-between items-center">
+            <div className="mt-3 pt-3 border-t border-border/50 text-xs flex justify-between">
               <span className="text-muted-foreground">Qiymət</span>
               <span className="font-semibold">{(i.qiymeti || 0).toFixed(2)} ₼</span>
-              {isAdmin && <DeleteButton onDelete={async () => { await base44.entities.Avadanliq.delete(i.id); fetchData(); }} />}
             </div>
           </div>
         ))}

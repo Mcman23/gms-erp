@@ -69,28 +69,6 @@
         "Silindi"
       ],
       "default": "Aktiv"
-    },
-    "musteri_id": {
-      "type": "string",
-      "title": "M\u00fc\u015ft\u0259ri ID"
-    },
-    "sirket_adi": {
-      "type": "string",
-      "title": "\u015eirk\u0259t ad\u0131"
-    },
-    "sened_nomresi": {
-      "type": "string",
-      "title": "S\u0259n\u0259d n\u00f6mr\u0259si"
-    },
-    "imzalanma_tarixi": {
-      "type": "string",
-      "title": "\u0130mzalanma tarixi",
-      "format": "date"
-    },
-    "etibarliliq_tarixi": {
-      "type": "string",
-      "title": "Etibarl\u0131l\u0131q tarixi",
-      "format": "date"
     }
   },
   "required": [
