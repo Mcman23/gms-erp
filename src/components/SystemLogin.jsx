@@ -1,84 +1,147 @@
+import { useEffect, useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { Cake, PartyPopper, Calendar } from "lucide-react";
+import moment from "moment";
 
+function getAdGunuInfo(iscilar) {
+  const today = new Date();
+  const todayMD = `${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-    // 2. Check muvveqetiParol from DavetEdilmisIstifadeci
-    const matchedUser = davetler.find(
-      d => d.muvveqetiParol && d.muvveqetiParol === password && d.status !== "Bloklandı" && d.status !== "Deaktiv"
-    );
+  const bugun = [];
+  const yakinda = [];
+  const hamisi = [];
 
-    if (matchedUser) {
-      sessionStorage.setItem("gms_sys_auth", "1");
-      sessionStorage.setItem("gms_sys_user", JSON.stringify({
-        email: matchedUser.email,
-        ad_soyad: matchedUser.ad_soyad,
-        rol: matchedUser.rol,
-        id: matchedUser.id,
-        modul_erisimi: matchedUser.modul_erisimi || [],
-      }));
-      setLoading(false);
-      onSuccess();
-      return;
+  iscilar.forEach(isci => {
+    if (!isci.dogum_tarixi) return;
+    const parts = isci.dogum_tarixi.split("-");
+    if (parts.length < 3) return;
+    const md = `${parts[1]}-${parts[2]}`;
+    const yash = today.getFullYear() - parseInt(parts[0]);
+    hamisi.push({ ...isci, md, yash });
+
+    if (md === todayMD) {
+      bugun.push({ ...isci, yash });
+    } else {
+      for (let i = 1; i <= 30; i++) {
+        const future = new Date(today);
+        future.setDate(today.getDate() + i);
+        const futureMD = `${String(future.getMonth() + 1).padStart(2, "0")}-${String(future.getDate()).padStart(2, "0")}`;
+        if (md === futureMD) {
+          yakinda.push({ ...isci, gunQalir: i, yash, tarix: `${parts[2]}.${parts[1]}` });
+          break;
+        }
+      }
     }
+  });
 
-    setError("Şifrə yanlışdır. Yenidən cəhd edin.");
-    setPassword("");
-    setLoading(false);
-  };
+  yakinda.sort((a, b) => a.gunQalir - b.gunQalir);
+  return { bugun, yakinda, hamisi };
+}
+
+export default function AdGunleri() {
+  const [iscilar, setIscilar] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    base44.entities.Isci.list().then(d => { setIscilar(d); setLoading(false); }).catch(() => setLoading(false));
+  }, []);
+
+  const { bugun, yakinda, hamisi } = getAdGunuInfo(iscilar);
+
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center z-[9999]">
-      <div className="w-full max-w-sm mx-4">
-        {/* Logo / Header */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/30">
-            <ShieldCheck className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-white">GMS ERP</h1>
-          <p className="text-slate-400 text-sm mt-1">İdarəetmə Sistemi</p>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Ad Günü Bildirişləri</h1>
+        <p className="text-muted-foreground text-sm mt-1">Əməkdaşların ad günü təqvimi</p>
+      </div>
 
-        {/* Login Card */}
-        <div className="bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-8 shadow-2xl">
-          <h2 className="text-white font-semibold text-lg mb-1">Sisteme Giriş</h2>
-          <p className="text-slate-400 text-sm mb-6">Daxil olmaq üçün sistem şifrəsini daxil edin</p>
-
-          <div className="space-y-4">
-            <div>
-              <Label className="text-slate-300 text-sm mb-1.5 block">Sistem şifrəsi</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input
-                  type={show ? "text" : "password"}
-                  value={password}
-                  onChange={e => { setPassword(e.target.value); setError(""); }}
-                  onKeyDown={e => e.key === "Enter" && handleLogin()}
-                  placeholder="••••••••"
-                  className="pl-10 pr-10 bg-white/10 border-white/20 text-white placeholder:text-slate-500 focus-visible:ring-primary focus-visible:border-primary"
-                />
-                <button
-                  onClick={() => setShow(s => !s)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
-                >
-                  {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+      {/* Bu gün */}
+      {bugun.length > 0 ? (
+        <div className="space-y-3">
+          <h2 className="font-semibold text-lg flex items-center gap-2"><PartyPopper className="w-5 h-5 text-pink-500" /> Bu gün ad günü</h2>
+          {bugun.map(isci => (
+            <div key={isci.id} className="flex items-center gap-4 bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200 rounded-xl p-5">
+              <div className="w-14 h-14 rounded-full bg-pink-100 flex items-center justify-center text-2xl">🎂</div>
+              <div>
+                <p className="text-xl font-bold text-pink-800">{isci.ad_soyad}</p>
+                <p className="text-sm text-pink-600">{isci.vezife} • {isci.yash} yaş</p>
               </div>
-              {error && <p className="text-red-400 text-xs mt-1.5">{error}</p>}
             </div>
+          ))}
+        </div>
+      ) : (
+        <div className="bg-muted/30 rounded-xl p-5 text-center text-muted-foreground">
+          <Cake className="w-8 h-8 mx-auto mb-2 opacity-30" />
+          <p>Bu gün heç kimin ad günü yoxdur</p>
+        </div>
+      )}
 
-            <Button
-              className="w-full bg-primary hover:bg-primary/90 text-white font-semibold h-10"
-              onClick={handleLogin}
-              disabled={loading}
-            >
-              {loading ? "Yoxlanılır..." : "Daxil ol"}
-            </Button>
+      {/* Yaxında */}
+      <div>
+        <h2 className="font-semibold text-lg flex items-center gap-2 mb-3"><Calendar className="w-5 h-5 text-blue-500" /> Növbəti 30 gün</h2>
+        {yakinda.length > 0 ? (
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="text-left px-4 py-3 font-medium">Ad Soyad</th>
+                  <th className="text-left px-4 py-3 font-medium">Vəzifə</th>
+                  <th className="text-left px-4 py-3 font-medium">Tarix</th>
+                  <th className="text-left px-4 py-3 font-medium">Yaş</th>
+                  <th className="text-right px-4 py-3 font-medium">Nə vaxt</th>
+                </tr>
+              </thead>
+              <tbody>
+                {yakinda.map(isci => (
+                  <tr key={isci.id} className="border-t border-border/50 hover:bg-muted/20">
+                    <td className="px-4 py-3 font-medium">{isci.ad_soyad}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{isci.vezife}</td>
+                    <td className="px-4 py-3">{isci.tarix}</td>
+                    <td className="px-4 py-3">{isci.yash} yaş olacaq</td>
+                    <td className="px-4 py-3 text-right">
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${isci.gunQalir <= 3 ? "bg-orange-100 text-orange-700" : "bg-blue-100 text-blue-700"}`}>
+                        {isci.gunQalir} gün sonra
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
+        ) : (
+          <p className="text-muted-foreground text-sm">Növbəti 30 gün ərzində ad günü yoxdur</p>
+        )}
+      </div>
 
-          <p className="text-slate-500 text-xs text-center mt-4">
-            Parolunuzu unutmusunuzsa, sistem admininizlə əlaqə saxlayın.
-          </p>
-          <p className="text-slate-600 text-xs text-center mt-1">
-            GMS ERP • Məxfi sistem — icazəsiz giriş qadağandır
-          </p>
+      {/* Bütün işçilərin doğum tarixləri */}
+      <div>
+        <h2 className="font-semibold text-lg flex items-center gap-2 mb-3"><Cake className="w-5 h-5 text-muted-foreground" /> Bütün əməkdaşlar</h2>
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50">
+              <tr>
+                <th className="text-left px-4 py-3 font-medium">Ad Soyad</th>
+                <th className="text-left px-4 py-3 font-medium">Vəzifə</th>
+                <th className="text-left px-4 py-3 font-medium">Doğum tarixi</th>
+                <th className="text-left px-4 py-3 font-medium">Yaş</th>
+              </tr>
+            </thead>
+            <tbody>
+              {hamisi.filter(i => i.dogum_tarixi).map(isci => (
+                <tr key={isci.id} className="border-t border-border/50 hover:bg-muted/20">
+                  <td className="px-4 py-3 font-medium">{isci.ad_soyad}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{isci.vezife}</td>
+                  <td className="px-4 py-3">{moment(isci.dogum_tarixi).format("DD.MM.YYYY")}</td>
+                  <td className="px-4 py-3">{isci.yash}</td>
+                </tr>
+              ))}
+              {hamisi.filter(i => i.dogum_tarixi).length === 0 && (
+                <tr><td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">İşçilərin doğum tarixi məlumatı yoxdur</td></tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
