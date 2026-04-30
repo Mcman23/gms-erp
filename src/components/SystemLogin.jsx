@@ -1,37 +1,4 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Lock, Eye, EyeOff, ShieldCheck } from "lucide-react";
-import { base44 } from "@/api/base44Client";
 
-const SYSTEM_PASSWORD = "gms2026";
-
-export default function SystemLogin({ onSuccess }) {
-  const [password, setPassword] = useState("");
-  const [show, setShow] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [davetler, setDavetler] = useState([]);
-
-  useEffect(() => {
-    // Load invited users to check muvveqetiParol
-    base44.entities.DavetEdilmisIstifadeci.list().then(setDavetler).catch(() => {});
-  }, []);
-
-  const handleLogin = async () => {
-    if (!password) return;
-    setLoading(true);
-    setError("");
-
-    // 1. Check system master password
-    if (password === SYSTEM_PASSWORD) {
-      sessionStorage.setItem("gms_sys_auth", "1");
-      sessionStorage.removeItem("gms_sys_user");
-      setLoading(false);
-      onSuccess();
-      return;
-    }
 
     // 2. Check muvveqetiParol from DavetEdilmisIstifadeci
     const matchedUser = davetler.find(
