@@ -32,18 +32,54 @@ Deno.serve(async (req) => {
     }
 
     const kassa = kassalar[0];
-    // Qismən ödənişdə göndərilən məbləği, tam ödənişdə isə ümumi məbləği götür
-    const mebleg = (odenis_statusu === 'Qismən ödənilib' && qismen_mebleg)
-      ? parseFloat(qismen_mebleg)
-      : (sifaris.umumi_mebleg || sifaris.qiymet || 0);
+    // Qismən ödənişdə göndərilən məbləği götür
+    const mebleg = parseFloat(qismen_mebleg) || 0;
+    if (odenis_statusu === 'Qismən ödənilib' && mebleg <= 0) {
+      return Response.json({ error: 'Qismən ödəniş məbləği daxil edilməyib' }, { status: 400 });
+    }
 
     // Eyni sifariş üçün artıq kassa girişi var mı?
     const movcut = await base44.asServiceRole.entities.KassaEmeliyyati.filter({ sifaris_id: sifaris_id });
-    const artiqVar = movcut && movcut.some(e => e.tip === 'Mədaxil' && e.kateqoriya === 'Xidmət ödənişi');
+    const movcudlar = movcut ? movcut.filter(e => e.tip === 'Mədaxil' && e.kateqoriya === 'Xidmət ödənişi') : [];
 
-    if (artiqVar) {
-      return Response.json({ message: 'Bu sifariş üçün kassa girişi artıq mövcuddur' });
+    // Tam ödəniş seçilərsə: əvvəlki qismən ödənişlər qalır, üstəlik tam məbləğin qalan hissəsi girilir
+    if (odenis_statusu === 'Ödənilib') {
+      const artiqOdenilen = movcudlar.reduce((s, e) => s + (e.mebleg || 0), 0);
+      const tamMebleg = sifaris.umumi_mebleg || sifaris.qiymet || 0;
+      const qalan = tamMebleg - artiqOdenilen;
+      if (qalan <= 0) {
+        return Response.json({ message: 'Bu sifariş artıq tam ödənilib' });
+      }
+      // Yalnız qalan hissəni yaz
+      await base44.asServiceRole.entities.KassaEmeliyyati.create({
+        kassa_id: kassa.id,
+        tip: 'Mədaxil',
+        kateqoriya: 'Xidmət ödənişi',
+        mebleg: qalan,
+        valyuta: 'AZN',
+        odenis_metodu: 'Nağd',
+        tarix: new Date().toISOString(),
+        sifaris_id: sifaris_id,
+        musteri_id: sifaris.musteri_id || '',
+        aciklama: `Sifariş ödənişi (tam): ${sifaris.sifaris_no || sifaris_id} — ${sifaris.musteri_adi || ''}`,
+        qebz_nomresi: sifaris.sifaris_no || '',
+        status: 'Təsdiqləndi',
+      });
+      const yeniBalans = (kassa.balans || 0) + qalan;
+      await base44.asServiceRole.entities.Kassa.update(kassa.id, { balans: yeniBalans });
+      const jurnal_no2 = `J-${Date.now().toString().slice(-6)}`;
+      await base44.asServiceRole.entities.JurnalQeydi.create({
+        jurnal_no: jurnal_no2,
+        tarix: new Date().toISOString().slice(0, 10),
+        aciklama: `Sifariş tam ödənişi: ${sifaris.sifaris_no || sifaris_id} — ${sifaris.musteri_adi || ''}`,
+        debet_hesab: '1010', kredit_hesab: '4010',
+        debet_mebleg: qalan, kredit_mebleg: qalan,
+        edv_mebleg: 0, istinad_id: sifaris_id, istinad_tipi: 'Sifariş', status: 'Təsdiqləndi',
+      }).catch(() => null);
+      return Response.json({ success: true, mebleg: qalan, kassa_ad: kassa.ad });
     }
+
+    // Qismən ödəniş — hər zaman yeni kassa girişi əlavə et
 
     // KassaEmeliyyati yarat
     await base44.asServiceRole.entities.KassaEmeliyyati.create({

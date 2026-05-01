@@ -111,6 +111,17 @@ export default function Maliyye() {
   const kassaMedaxil = kassaEmeliyyatlar.filter(e => e.tip === "Mədaxil").reduce((s, e) => s + (e.mebleg || 0), 0);
   const kassaMexaric = kassaEmeliyyatlar.filter(e => e.tip === "Məxaric").reduce((s, e) => s + (e.mebleg || 0), 0);
 
+  // Qismən ödənişlər hesablaması
+  const qismenSifarisler = sifarisler.filter(s => s.odenis_statusu === "Qismən ödənilib");
+  const qismenOdenisler = qismenSifarisler.map(s => {
+    const sifKassa = kassaEmeliyyatlar.filter(k => k.sifaris_id === s.id && k.tip === "Mədaxil");
+    const odenilen = sifKassa.reduce((acc, k) => acc + (k.mebleg || 0), 0);
+    const umumi = s.umumi_mebleg || s.qiymet || 0;
+    return { ...s, odenilen, qaliq: umumi - odenilen };
+  });
+  const qismenUmumiOdenilen = qismenOdenisler.reduce((s, x) => s + x.odenilen, 0);
+  const qismenUmumiQaliq = qismenOdenisler.reduce((s, x) => s + x.qaliq, 0);
+
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
 
   return (
@@ -147,6 +158,7 @@ export default function Maliyye() {
           <TabsTrigger value="balans">Balans</TabsTrigger>
           <TabsTrigger value="edv">ƏDV Hesabatı</TabsTrigger>
           <TabsTrigger value="kassa">Kassa Hərəkəti</TabsTrigger>
+          <TabsTrigger value="qismen" className="gap-1">Qismən Ödənişlər {qismenSifarisler.length > 0 && <span className="bg-orange-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">{qismenSifarisler.length}</span>}</TabsTrigger>
           <TabsTrigger value="sirket" className="gap-1"><Building2 className="w-3.5 h-3.5" />Şirkət Dövriyyəsi</TabsTrigger>
         </TabsList>
 
@@ -467,6 +479,67 @@ export default function Maliyye() {
             </table>
           </div>
         </TabsContent>
+        {/* QİSMƏN ÖDƏNİŞLƏR */}
+        <TabsContent value="qismen" className="mt-4 space-y-4">
+          {/* KPI xülasə */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p className="text-xs text-orange-700">Qismən ödənilib (sifariş sayı)</p>
+              <p className="text-2xl font-bold text-orange-800">{qismenSifarisler.length}</p>
+            </div>
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+              <p className="text-xs text-green-700">Ümumi ödənilən</p>
+              <p className="text-2xl font-bold text-green-800">{qismenUmumiOdenilen.toFixed(2)} ₼</p>
+            </div>
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+              <p className="text-xs text-red-700">Ümumi qalıq borc</p>
+              <p className="text-2xl font-bold text-red-800">{qismenUmumiQaliq.toFixed(2)} ₼</p>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <div className="px-5 py-3 border-b border-border bg-muted/30 flex items-center justify-between">
+              <span className="font-semibold text-sm">Qismən Ödənilmiş Sifarişlər</span>
+              <span className="text-xs text-muted-foreground">Qalıq borc: <span className="font-bold text-red-600">{qismenUmumiQaliq.toFixed(2)} ₼</span></span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="text-left px-4 py-3 font-medium">Sifariş №</th>
+                    <th className="text-left px-4 py-3 font-medium">Müştəri</th>
+                    <th className="text-left px-4 py-3 font-medium">Xidmət</th>
+                    <th className="text-left px-4 py-3 font-medium">Tarix</th>
+                    <th className="text-right px-4 py-3 font-medium">Ümumi məbləğ</th>
+                    <th className="text-right px-4 py-3 font-medium text-green-700">Ödənilən</th>
+                    <th className="text-right px-4 py-3 font-medium text-red-700">Qalıq borc</th>
+                    <th className="text-left px-4 py-3 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {qismenOdenisler.map(s => (
+                    <tr key={s.id} className="border-t border-border/50 hover:bg-muted/20">
+                      <td className="px-4 py-3 font-medium font-mono text-xs">{s.sifaris_no || "—"}</td>
+                      <td className="px-4 py-3 font-medium">{s.musteri_adi || "—"}</td>
+                      <td className="px-4 py-3 text-muted-foreground text-xs max-w-[160px] truncate">{s.xidmet_tipi}</td>
+                      <td className="px-4 py-3 text-xs">{s.tarix ? moment(s.tarix).format("DD.MM.YYYY") : "—"}</td>
+                      <td className="px-4 py-3 text-right font-semibold">{(s.umumi_mebleg || s.qiymet || 0).toFixed(2)} ₼</td>
+                      <td className="px-4 py-3 text-right text-green-600 font-semibold">{s.odenilen.toFixed(2)} ₼</td>
+                      <td className="px-4 py-3 text-right font-bold text-red-600">{s.qaliq.toFixed(2)} ₼</td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 font-medium">Qismən ödənilib</span>
+                      </td>
+                    </tr>
+                  ))}
+                  {qismenOdenisler.length === 0 && (
+                    <tr><td colSpan={8} className="px-4 py-10 text-center text-muted-foreground">Qismən ödənilib sifarişi yoxdur</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </TabsContent>
+
         {/* ŞİRKƏT DÖVRİYYƏSİ */}
         <TabsContent value="sirket" className="mt-4">
           <SirketDovriiyyesi musteriler={musteriler} sifarisler={sifarisler} kassaEmeliyyatlar={kassaEmeliyyatlar} />
