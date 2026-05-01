@@ -28,6 +28,7 @@ import Podratcilar from './pages/Podratcilar';
 import PodratciHesabati from './pages/PodratciHesabati';
 import AdGunleri from './pages/AdGunleri';
 import CeoPaneli from './pages/CeoPaneli';
+import InviteRegister from './pages/InviteRegister';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -80,6 +81,7 @@ const AuthenticatedApp = () => {
         <Route path="/ceo-paneli" element={<CeoPaneli />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
+      <Route path="/invite" element={<InviteRegister />} />
     </Routes>
   );
 };
