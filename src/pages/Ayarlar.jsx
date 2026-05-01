@@ -86,13 +86,9 @@ export default function Ayarlar() {
   const [currentUser, setCurrentUser] = useState(null);
   const { toast } = useToast();
 
-  const generateGirisKodu = () => {
-    const num = Math.floor(100000 + Math.random() * 900000);
-    return `GMS-${num}`;
-  };
-  const generateParol = () => {
-    const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789#@!";
-    return Array.from({length: 8}, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  const generateToken = () => {
+    const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+    return Array.from({length: 32}, () => chars[Math.floor(Math.random() * chars.length)]).join("");
   };
 
   const fetchData = () => {
@@ -126,11 +122,10 @@ export default function Ayarlar() {
 
   const handleInvite = async () => {
     if (!inviteForm.email) return;
-    const girisKodu = generateGirisKodu();
-    const muvveqetiParol = generateParol();
-    // Invite to platform
-    await base44.users.inviteUser(inviteForm.email, ["Super Admin","Admin","Direktor"].includes(inviteForm.rol) ? "admin" : "user");
-    // Save to DavetEdilmisIstifadeci
+    const token = generateToken();
+    const appBaseUrl = window.location.origin;
+    const inviteLink = `${appBaseUrl}/invite?token=${token}&email=${encodeURIComponent(inviteForm.email)}`;
+
     await base44.entities.DavetEdilmisIstifadeci.create({
       email: inviteForm.email,
       ad_soyad: inviteForm.ad_soyad,
@@ -138,18 +133,15 @@ export default function Ayarlar() {
       rol: inviteForm.rol,
       departament: inviteForm.departament,
       modul_erisimi: inviteForm.modul_erisimi,
-      status: "Dəvət göndərilib",
+      status: "Gözləyir",
       davet_tarixi: new Date().toISOString(),
       giris_sayi: 0,
       token_aktiv: true,
-      girisKodu,
-      muvveqetiParol,
-      kodStatus: "Aktiv",
-      ilkGirisTamamlandi: false,
+      davet_token: token,
     });
     setShowInviteDialog(false);
     setInviteForm({ email: "", ad_soyad: "", telefon: "", rol: "Kassir", departament: "", modul_erisimi: [] });
-    setCreatedUser({ ad_soyad: inviteForm.ad_soyad, email: inviteForm.email, rol: inviteForm.rol, girisKodu, muvveqetiParol });
+    setCreatedUser({ ad_soyad: inviteForm.ad_soyad, email: inviteForm.email, rol: inviteForm.rol, inviteLink });
     fetchData();
   };
 
@@ -218,7 +210,7 @@ export default function Ayarlar() {
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
 
-  const statusColors = { "Dəvət göndərilib": "bg-yellow-100 text-yellow-700", "Aktiv": "bg-green-100 text-green-700", "Bloklandı": "bg-red-100 text-red-700", "Deaktiv": "bg-gray-100 text-gray-600" };
+  const statusColors = { "Gözləyir": "bg-yellow-100 text-yellow-700", "Dəvət göndərilib": "bg-yellow-100 text-yellow-700", "Aktiv": "bg-green-100 text-green-700", "Bloklandı": "bg-red-100 text-red-700", "Deaktiv": "bg-gray-100 text-gray-600" };
 
   return (
     <div className="space-y-6">
@@ -453,7 +445,7 @@ export default function Ayarlar() {
           <DialogHeader>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-6 h-6 text-green-500" />
-              <DialogTitle>İstifadəçi yaradıldı</DialogTitle>
+              <DialogTitle>İstifadəçi qeydiyyat linki yaradıldı</DialogTitle>
             </div>
           </DialogHeader>
           {createdUser && (
@@ -463,29 +455,18 @@ export default function Ayarlar() {
                 <div className="flex justify-between"><span className="text-muted-foreground">Email:</span><span className="font-medium">{createdUser.email}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Rol:</span><span className="font-medium">{createdUser.rol}</span></div>
               </div>
-              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-3">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Giriş Kodu</p>
-                  <p className="text-2xl font-bold tracking-widest text-primary">{createdUser.girisKodu}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Müvəqqəti Parol</p>
-                  <p className="text-xl font-mono font-bold">{createdUser.muvveqetiParol}</p>
-                </div>
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-2">
+                <p className="text-xs text-muted-foreground font-medium">Qeydiyyat Linki</p>
+                <p className="text-xs font-mono break-all text-foreground bg-muted/60 rounded p-2 select-all">{createdUser.inviteLink}</p>
+                <p className="text-xs text-muted-foreground">Bu linki istifadəçiyə göndərin. Link ilə giriş edərək öz parolunu təyin edə biləcək.</p>
               </div>
-              <p className="text-xs text-destructive font-medium text-center">⚠️ Bu məlumatı yalnız indi görə bilərsiniz. Sonra baxmaq mümkün olmayacaq.</p>
-              <div className="flex gap-2">
-                <Button variant="outline" className="flex-1 gap-2" onClick={() => {
-                  navigator.clipboard.writeText(`Giriş Kodu: ${createdUser.girisKodu}\nParol: ${createdUser.muvveqetiParol}`);
-                  toast({ title: "Kopyalandı!" });
-                }}>
-                  <Copy className="w-4 h-4" /> Kopyala
-                </Button>
-                <Button variant="outline" className="flex-1 gap-2" onClick={() => window.print()}>
-                  <Printer className="w-4 h-4" /> Çap Et
-                </Button>
-              </div>
-              <Button className="w-full" onClick={() => setCreatedUser(null)}>Başa düşdüm</Button>
+              <Button className="w-full gap-2" onClick={() => {
+                navigator.clipboard.writeText(createdUser.inviteLink);
+                toast({ title: "Link kopyalandı!" });
+              }}>
+                <Copy className="w-4 h-4" /> Linki Kopyala
+              </Button>
+              <Button variant="outline" className="w-full" onClick={() => setCreatedUser(null)}>Bağla</Button>
             </div>
           )}
         </DialogContent>
@@ -552,7 +533,7 @@ export default function Ayarlar() {
                 ))}
               </div>
             </div>
-            <Button className="w-full" onClick={handleInvite}>Dəvət göndər</Button>
+            <Button className="w-full" onClick={handleInvite}>Link Yarat</Button>
           </div>
         </DialogContent>
       </Dialog>
