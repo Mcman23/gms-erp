@@ -8,8 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Search, Phone, MapPin } from "lucide-react";
+import DeleteButton from "../components/DeleteButton";
+import { useAdmin } from "../hooks/useAdmin";
 
 export default function Musteriler() {
+  const isAdmin = useAdmin();
   const [musteriler, setMusteriler] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
@@ -74,6 +77,7 @@ export default function Musteriler() {
             <div className="flex justify-between items-center mt-3 pt-3 border-t border-border/50 text-xs text-muted-foreground">
               <span>Sifarişlər: {m.sifaris_sayi || 0}</span>
               <span>{(m.umumi_xercle || 0).toFixed(2)} ₼</span>
+              {isAdmin && <DeleteButton onDelete={async () => { await base44.entities.Musteri.delete(m.id); fetchData(); }} />}
             </div>
           </div>
         ))}

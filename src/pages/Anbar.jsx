@@ -6,11 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, AlertTriangle, Package } from "lucide-react";
+import DeleteButton from "../components/DeleteButton";
+import { useAdmin } from "../hooks/useAdmin";
 
 const kateqoriyalar = ["Kimyəvi maddə","Təmizlik aləti","Avadanlıq","Ehtiyat hissə","Digər"];
 const vahidler = ["ədəd","litr","kq","qutu","paket"];
 
 export default function Anbar() {
+  const isAdmin = useAdmin();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
@@ -83,6 +86,7 @@ export default function Anbar() {
                       i.status === "Az qalıb" ? "bg-orange-100 text-orange-700" : "bg-red-100 text-red-700"
                     }`}>{i.status}</span>
                   </td>
+                  {isAdmin && <td className="px-2 py-3"><DeleteButton onDelete={async () => { await base44.entities.Anbar.delete(i.id); fetchData(); }} /></td>}
                 </tr>
               ))}
               {items.length === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Məhsul yoxdur</td></tr>}

@@ -7,12 +7,15 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, MessageSquareWarning } from "lucide-react";
+import DeleteButton from "../components/DeleteButton";
+import { useAdmin } from "../hooks/useAdmin";
 import moment from "moment";
 
 const kateqoriyalar = ["Xidmət keyfiyyəti","Gecikmo","Qiymət","İşçi davranışı","Zərər","Digər"];
 const prioritetler = ["Aşağı","Orta","Yüksək","Kritik"];
 
 export default function Sikayetler() {
+  const isAdmin = useAdmin();
   const [sikayetler, setSikayetler] = useState([]);
   const [musteriler, setMusteriler] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -86,12 +89,15 @@ export default function Sikayetler() {
                   </td>
                   <td className="px-4 py-3">{moment(s.created_date).format("DD.MM.YYYY")}</td>
                   <td className="px-4 py-3 text-right">
-                    <Select value={s.status} onValueChange={v => handleStatusChange(s.id, v)}>
-                      <SelectTrigger className="h-7 text-xs w-28"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {["Açıq","İcrada","Həll edildi","Bağlı"].map(st => <SelectItem key={st} value={st}>{st}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex items-center justify-end gap-1">
+                      <Select value={s.status} onValueChange={v => handleStatusChange(s.id, v)}>
+                        <SelectTrigger className="h-7 text-xs w-28"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {["Açıq","İcrada","Həll edildi","Bağlı"].map(st => <SelectItem key={st} value={st}>{st}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      {isAdmin && <DeleteButton onDelete={async () => { await base44.entities.Sikayet.delete(s.id); fetchData(); }} />}
+                    </div>
                   </td>
                 </tr>
               ))}

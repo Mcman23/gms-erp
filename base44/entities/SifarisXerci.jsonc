@@ -1,0 +1,84 @@
+{
+  "name": "SifarisXerci",
+  "type": "object",
+  "properties": {
+    "sifaris_id": {
+      "title": "Sifari\u015f ID",
+      "type": "string"
+    },
+    "sifaris_no": {
+      "title": "Sifari\u015f n\u00f6mr\u0259si",
+      "type": "string"
+    },
+    "kateqoriya": {
+      "title": "X\u0259rc kateqoriyas\u0131",
+      "type": "string",
+      "enum": [
+        "Material/Kimy\u0259vi",
+        "Avadanl\u0131q istifad\u0259si",
+        "\u0130\u015f\u00e7i m\u0259zuniyy\u0259ti",
+        "Personal x\u0259rci",
+        "N\u0259qliyyat",
+        "Dig\u0259r birba\u015fa x\u0259rc"
+      ]
+    },
+    "aciklama": {
+      "title": "A\u00e7\u0131qlama",
+      "type": "string"
+    },
+    "edet_sayi": {
+      "title": "\u018fd\u0259d say\u0131",
+      "type": "number",
+      "default": 1
+    },
+    "gun_sayi": {
+      "title": "G\u00fcn say\u0131",
+      "type": "number",
+      "default": 1
+    },
+    "gun_qiymet": {
+      "title": "G\u00fcn/Qiym\u0259t (\u20bc)",
+      "type": "number",
+      "default": 0
+    },
+    "baxsis": {
+      "title": "Bax\u015fi\u015f (\u20bc)",
+      "type": "number",
+      "default": 0
+    },
+    "miqdar": {
+      "title": "Miqdar",
+      "type": "number"
+    },
+    "vahid_qiymet": {
+      "title": "Vahid qiym\u0259t",
+      "type": "number"
+    },
+    "mebleg": {
+      "title": "M\u0259bl\u0259\u011f (AZN)",
+      "type": "number"
+    },
+    "isci_id": {
+      "title": "\u0130\u015f\u00e7i ID",
+      "type": "string"
+    },
+    "isci_adi": {
+      "title": "\u0130\u015f\u00e7i ad\u0131 (varsa)",
+      "type": "string"
+    },
+    "material_id": {
+      "title": "Material ID (varsa)",
+      "type": "string"
+    },
+    "tarix": {
+      "title": "Tarix",
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "sifaris_id",
+    "kateqoriya",
+    "mebleg"
+  ]
+}

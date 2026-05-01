@@ -3,7 +3,8 @@ import { base44 } from "@/api/base44Client";
 import KPICard from "../components/dashboard/KPICard";
 import KassaBalansCard from "../components/dashboard/KassaBalansCard";
 import RecentOrders from "../components/dashboard/RecentOrders";
-import { ClipboardList, Users, Banknote, Package, AlertTriangle, UserCog } from "lucide-react";
+import AdGunuBildiris from "../components/AdGunuBildiris";
+import { ClipboardList, Users, Banknote, Package, AlertTriangle, UserCog, TrendingDown } from "lucide-react";
 
 export default function Dashboard() {
   const [kassalar, setKassalar] = useState([]);
@@ -11,6 +12,8 @@ export default function Dashboard() {
   const [musteriler, setMusteriler] = useState([]);
   const [iscilar, setIscilar] = useState([]);
   const [anbar, setAnbar] = useState([]);
+  const [maaslar, setMaaslar] = useState([]);
+  const [podratciSifarisleri, setPodratciSifarisleri] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,12 +23,16 @@ export default function Dashboard() {
       base44.entities.Musteri.list().catch(() => []),
       base44.entities.Isci.list().catch(() => []),
       base44.entities.Anbar.list().catch(() => []),
-    ]).then(([k, s, m, i, a]) => {
+      base44.entities.MaasHesablamasi.list().catch(() => []),
+      base44.entities.PodratciSifarisi.list().catch(() => []),
+    ]).then(([k, s, m, i, a, ms, ps]) => {
       setKassalar(k);
       setSifarisler(s);
       setMusteriler(m);
       setIscilar(i);
       setAnbar(a);
+      setMaaslar(ms);
+      setPodratciSifarisleri(ps);
       setLoading(false);
     });
   }, []);
@@ -43,8 +50,24 @@ export default function Dashboard() {
     return s.tarix && s.tarix.slice(0, 10) === today;
   });
 
+  const aciqSifarisler = sifarisler.filter(s => !["Tamamlandı", "Ləğv edildi"].includes(s.status));
   const aktivIscilar = iscilar.filter(i => i.status === "Aktiv");
   const azQalanStok = anbar.filter(a => a.miqdar <= a.min_miqdar);
+
+  // Bu ay maaş xərci
+  const buAy = new Date();
+  const buAyMaaslar = maaslar.filter(m => {
+    const ay = String(buAy.getMonth() + 1).padStart(2, "0");
+    const il = String(buAy.getFullYear());
+    return m.ay === ay && m.il === il;
+  });
+  const buAyMaasToplam = buAyMaaslar.reduce((s, m) => s + (m.nagilmaas || 0), 0);
+
+  // Ödənilməmiş podratçı borcu
+  const odenmemisBorc = podratciSifarisleri
+    .filter(ps => ps.odenis_statusu === "Gözlənilir")
+    .reduce((s, ps) => s + (ps.podratci_payi || 0), 0);
+
   const totalGelir = sifarisler
     .filter(s => s.status === "Tamamlandı")
     .reduce((sum, s) => sum + (s.umumi_mebleg || s.qiymet || 0), 0);
@@ -56,28 +79,31 @@ export default function Dashboard() {
         <p className="text-muted-foreground text-sm mt-1">Xoş gəldiniz! Bugünkü ümumi baxış</p>
       </div>
 
+      {/* Ad günü bildirişləri */}
+      <AdGunuBildiris />
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard
-          title="Bugünkü Sifarişlər"
-          value={bugunSifarisler.length}
-          subtitle={`Ümumi: ${sifarisler.length}`}
+          title="Açıq Sifarişlər"
+          value={aciqSifarisler.length}
+          subtitle={`Bu gün: ${bugunSifarisler.length}`}
           icon={ClipboardList}
           color="primary"
         />
         <KPICard
-          title="Müştərilər"
-          value={musteriler.length}
-          subtitle="Aktiv müştərilər"
-          icon={Users}
-          color="accent"
-        />
-        <KPICard
-          title="Gəlir"
-          value={`${totalGelir.toFixed(2)} ₼`}
-          subtitle="Tamamlanan sifarişlər"
+          title="Bu ay maaş xərci"
+          value={`${buAyMaasToplam.toFixed(2)} ₼`}
+          subtitle={`${buAyMaaslar.length} işçi`}
           icon={Banknote}
           color="chart3"
+        />
+        <KPICard
+          title="Podratçı borcu"
+          value={`${odenmemisBorc.toFixed(2)} ₼`}
+          subtitle="Ödənilməmiş"
+          icon={TrendingDown}
+          color="chart5"
         />
         <KPICard
           title="Aktiv İşçilər"
@@ -85,6 +111,24 @@ export default function Dashboard() {
           subtitle={`Ümumi: ${iscilar.length}`}
           icon={UserCog}
           color="chart4"
+        />
+      </div>
+
+      {/* Second row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <KPICard
+          title="Müştərilər"
+          value={musteriler.length}
+          subtitle="Qeydiyyatlı müştərilər"
+          icon={Users}
+          color="accent"
+        />
+        <KPICard
+          title="Ümumi Gəlir"
+          value={`${totalGelir.toFixed(2)} ₼`}
+          subtitle="Tamamlanan sifarişlər"
+          icon={Banknote}
+          color="chart2"
         />
       </div>
 

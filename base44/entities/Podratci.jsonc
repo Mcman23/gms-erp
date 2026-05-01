@@ -1,0 +1,57 @@
+{
+  "name": "Podratci",
+  "type": "object",
+  "properties": {
+    "ad": {
+      "type": "string",
+      "title": "Podrat\u00e7\u0131 ad\u0131 / \u015eirk\u0259t ad\u0131"
+    },
+    "telefon": {
+      "type": "string",
+      "title": "Telefon"
+    },
+    "email": {
+      "type": "string",
+      "title": "Email"
+    },
+    "voen": {
+      "type": "string",
+      "title": "V\u00d6EN"
+    },
+    "unvan": {
+      "type": "string",
+      "title": "\u00dcnvan"
+    },
+    "tip": {
+      "type": "string",
+      "title": "Tip",
+      "enum": [
+        "F\u0259rdi",
+        "\u015eirk\u0259t"
+      ],
+      "default": "F\u0259rdi"
+    },
+    "komissiya_faizi": {
+      "type": "number",
+      "title": "\u015eirk\u0259tin komissiya faizi (%)",
+      "default": 20
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "Aktiv",
+        "Passiv"
+      ],
+      "default": "Aktiv"
+    },
+    "qeydler": {
+      "type": "string",
+      "title": "Qeydl\u0259r"
+    }
+  },
+  "required": [
+    "ad",
+    "telefon"
+  ]
+}

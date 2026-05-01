@@ -1,32 +1,74 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Save, Pencil, Trash2 } from "lucide-react";
+import { Save, Pencil, Copy, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { Shield, LogOut, Plus, Lock, UserX, UserCheck } from "lucide-react";
+import { Shield, LogOut, Plus, Lock, UserX, UserCheck, CheckCircle, KeyRound, Trash2 } from "lucide-react";
 import moment from "moment";
+import ParolTeyinModal from "@/components/ayarlar/ParolTeyinModal";
 
-const ROLLER = ["Super Admin","Admin","Direktor","Amaliyyat meneceri","Dispatcher","Supervisor","Sahe iscisi","Satis meneceri","HR meneceri","Maliyye meneceri","Kassir","Anbar muduru","Audit/Baxis"];
+const ROLLER = [
+  "Super Admin",
+  "Admin",
+  "Direktor",
+  "Əməliyyat meneceri",
+  "Dispatcher",
+  "Supervisor",
+  "Sahə işçisi",
+  "Satış meneceri",
+  "HR meneceri",
+  "Maliyyə meneceri",
+  "Kassir",
+  "Anbar müdürü",
+  "Audit/Baxış",
+];
+
+const BUTUN_MODULLER = [
+  "Ana Panel",
+  "Kassa Əməliyyatları",
+  "Maliyyə Hesabatları",
+  "Qiymət Kalkulyatoru",
+  "Qiymət Təklifləri",
+  "Fakturalar",
+  "Sifarişlər",
+  "Müştərilər",
+  "Podratçılar",
+  "Podratçı Hesabatı",
+  "Şikayətlər",
+  "Anbar",
+  "Avadanlıq",
+  "Əməkdaşlar",
+  "Planlama",
+  "Məzuniyyət",
+  "Maaş Hesablaması",
+  "Ad Günü Bildirişləri",
+  "Sənədlər",
+  "Hesabatlar",
+  "Sistem Ayarları",
+  "CEO Paneli",
+];
 
 const ROL_MODULLER = {
-  "Kassir": ["Kassa","Fakturalar","Sifarisler"],
-  "HR meneceri": ["Iscilar","Mezuniyyet","Maas"],
-  "Dispatcher": ["Sifarisler","Planlama"],
-  "Maliyye meneceri": ["Maliyye","Fakturalar","Hesabatlar","Kassa"],
-  "Sahe iscisi": ["Oz tapsirilari"],
-  "Supervisor": ["Sifarisler","Iscilar"],
-  "Anbar muduru": ["Anbar"],
-  "Admin": ["Hamisi"],
-  "Super Admin": ["Hamisi"],
-  "Direktor": ["Hamisi"],
+  "Super Admin": BUTUN_MODULLER,
+  "Admin": BUTUN_MODULLER,
+  "Direktor": BUTUN_MODULLER,
+  "CEO Paneli": ["Ana Panel", "CEO Paneli", "Hesabatlar", "Maliyyə Hesabatları"],
+  "Əməliyyat meneceri": ["Ana Panel","Sifarişlər","Müştərilər","Planlama","Podratçılar","Podratçı Hesabatı","Şikayətlər","Hesabatlar"],
+  "Dispatcher": ["Ana Panel","Sifarişlər","Planlama"],
+  "Supervisor": ["Ana Panel","Sifarişlər","Əməkdaşlar","Planlama","Şikayətlər"],
+  "Sahə işçisi": ["Ana Panel","Sifarişlər"],
+  "Satış meneceri": ["Ana Panel","Sifarişlər","Müştərilər","Qiymət Kalkulyatoru","Qiymət Təklifləri","Şikayətlər"],
+  "HR meneceri": ["Ana Panel","Əməkdaşlar","Məzuniyyət","Maaş Hesablaması","Ad Günü Bildirişləri"],
+  "Maliyyə meneceri": ["Ana Panel","Kassa Əməliyyatları","Maliyyə Hesabatları","Fakturalar","Hesabatlar","Qiymət Kalkulyatoru","Qiymət Təklifləri"],
+  "Kassir": ["Ana Panel","Kassa Əməliyyatları","Fakturalar","Sifarişlər"],
+  "Anbar müdürü": ["Ana Panel","Anbar","Avadanlıq"],
+  "Audit/Baxış": ["Ana Panel","Hesabatlar","Maliyyə Hesabatları","Podratçı Hesabatı","Sənədlər"],
 };
-
-const BUTUN_MODULLER = ["Dashboard","Kassa","Musteriler","Sifarisler","Planlama","Iscilar","Mezuniyyet","Maas","Anbar","Fakturalar","Maliyye","Avadanliq","Sikayetler","Hesabatlar","Ayarlar"];
 
 export default function Ayarlar() {
   const [users, setUsers] = useState([]);
@@ -36,8 +78,22 @@ export default function Ayarlar() {
   const [qiymetForm, setQiymetForm] = useState({ xidmet_adi: "", b2c_qiymet: "", b2b_qiymet: "", vahid: "m²" });
   const [editingQiymet, setEditingQiymet] = useState(null);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
-  const [inviteForm, setInviteForm] = useState({ email: "", ad_soyad: "", telefon: "", rol: "Kassir", departament: "", modul_erisimi: [] });
+  const [inviteForm, setInviteForm] = useState({ email: "", ad_soyad: "", telefon: "", rol: "Kassir", departament: "", modul_erisimi: ROL_MODULLER["Kassir"] || [] });
+  const [createdUser, setCreatedUser] = useState(null);
+  const [deactivateTarget, setDeactivateTarget] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [parolTarget, setParolTarget] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const { toast } = useToast();
+
+  const generateGirisKodu = () => {
+    const num = Math.floor(100000 + Math.random() * 900000);
+    return `GMS-${num}`;
+  };
+  const generateParol = () => {
+    const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789#@!";
+    return Array.from({length: 8}, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  };
 
   const fetchData = () => {
     Promise.all([
@@ -47,11 +103,16 @@ export default function Ayarlar() {
     ]).then(([u, d, q]) => { setUsers(u); setDavetler(d); setQiymetler(q); setLoading(false); });
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchData();
+    base44.auth.me().then(me => {
+      setCurrentUser(me);
+    }).catch(() => {});
+  }, []);
 
   const handleRolChange = (rol) => {
     const moduller = ROL_MODULLER[rol] || [];
-    setInviteForm(f => ({ ...f, rol, modul_erisimi: moduller[0] === "Hamısı" ? BUTUN_MODULLER : moduller }));
+    setInviteForm(f => ({ ...f, rol, modul_erisimi: moduller }));
   };
 
   const toggleModul = (modul) => {
@@ -65,6 +126,8 @@ export default function Ayarlar() {
 
   const handleInvite = async () => {
     if (!inviteForm.email) return;
+    const girisKodu = generateGirisKodu();
+    const muvveqetiParol = generateParol();
     // Invite to platform
     await base44.users.inviteUser(inviteForm.email, ["Super Admin","Admin","Direktor"].includes(inviteForm.rol) ? "admin" : "user");
     // Save to DavetEdilmisIstifadeci
@@ -79,15 +142,36 @@ export default function Ayarlar() {
       davet_tarixi: new Date().toISOString(),
       giris_sayi: 0,
       token_aktiv: true,
+      girisKodu,
+      muvveqetiParol,
+      kodStatus: "Aktiv",
+      ilkGirisTamamlandi: false,
     });
-    toast({ title: "Dəvət göndərildi", description: `${inviteForm.email} adresinə dəvət göndərildi.` });
     setShowInviteDialog(false);
     setInviteForm({ email: "", ad_soyad: "", telefon: "", rol: "Kassir", departament: "", modul_erisimi: [] });
+    setCreatedUser({ ad_soyad: inviteForm.ad_soyad, email: inviteForm.email, rol: inviteForm.rol, girisKodu, muvveqetiParol });
     fetchData();
   };
 
   const handleBlok = async (davet, blok) => {
     await base44.entities.DavetEdilmisIstifadeci.update(davet.id, { status: blok ? "Bloklandı" : "Aktiv" });
+    fetchData();
+  };
+
+  const handleDeaktiv = async (davet) => {
+    await base44.entities.DavetEdilmisIstifadeci.update(davet.id, { status: "Deaktiv" });
+    setDeactivateTarget(null);
+    fetchData();
+  };
+
+  const handleBerpaEt = async (davet) => {
+    await base44.entities.DavetEdilmisIstifadeci.update(davet.id, { status: "Aktiv" });
+    fetchData();
+  };
+
+  const handleDelete = async (davet) => {
+    await base44.entities.DavetEdilmisIstifadeci.delete(davet.id);
+    toast({ title: "İstifadəçi silindi", description: `${davet.ad_soyad || davet.email} sistemdən silindi` });
     fetchData();
   };
 
@@ -193,16 +277,24 @@ export default function Ayarlar() {
                         {d.son_giris ? moment(d.son_giris).format("DD.MM.YYYY") : "—"}
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <div className="flex gap-1 justify-end">
-                          {d.status === "Bloklandı" ? (
-                            <Button size="sm" variant="ghost" className="h-7 px-2 text-green-600" onClick={() => handleBlok(d, false)} title="Aç">
-                              <UserCheck className="w-3.5 h-3.5" />
-                            </Button>
+                        <div className="flex gap-1 justify-end flex-wrap">
+                          {d.status === "Deaktiv" ? (
+                            <>
+                              <Button size="sm" variant="ghost" className="h-7 px-2 text-green-600 text-xs" onClick={() => handleBerpaEt(d)}>
+                                <UserCheck className="w-3.5 h-3.5 mr-1" />Bərpa Et
+                              </Button>
+                              <Button size="sm" variant="ghost" className="h-7 px-2 text-red-700 text-xs" onClick={() => setDeleteTarget(d)} title="Sil">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </>
                           ) : (
-                            <Button size="sm" variant="ghost" className="h-7 px-2 text-red-600" onClick={() => handleBlok(d, true)} title="Blokla">
-                              <UserX className="w-3.5 h-3.5" />
+                            <Button size="sm" variant="ghost" className="h-7 px-2 text-red-600 text-xs" onClick={() => setDeactivateTarget(d)}>
+                              <UserX className="w-3.5 h-3.5 mr-1" />Çıxar
                             </Button>
                           )}
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-amber-600" onClick={() => setParolTarget(d)} title="Parol təyin et">
+                            <KeyRound className="w-3.5 h-3.5" />
+                          </Button>
                           <Button size="sm" variant="ghost" className="h-7 px-2 text-muted-foreground" onClick={() => handleTokenReset(d)} title="Token sıfırla">
                             <Lock className="w-3.5 h-3.5" />
                           </Button>
@@ -294,19 +386,28 @@ export default function Ayarlar() {
           <div className="bg-card rounded-xl border border-border p-5">
             <h3 className="font-semibold text-sm mb-4">Mövcud Rollar və Modul Erişimi</h3>
             <div className="space-y-3">
-              {ROLLER.map(r => (
-                <div key={r} className="flex items-start gap-3 py-2 border-b border-border/50">
-                  <div className="flex items-center gap-2 min-w-[180px]">
-                    <Shield className="w-4 h-4 text-primary" />
-                    <span className="text-sm font-medium">{r}</span>
+              {ROLLER.map(r => {
+                const moduller = ROL_MODULLER[r] || [];
+                const hamisi = moduller.length === BUTUN_MODULLER.length;
+                return (
+                  <div key={r} className="flex items-start gap-3 py-2 border-b border-border/50">
+                    <div className="flex items-center gap-2 min-w-[180px]">
+                      <Shield className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-medium">{r}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {hamisi
+                        ? <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">Bütün modullara giriş</span>
+                        : moduller.length === 0
+                          ? <span className="text-xs text-muted-foreground">—</span>
+                          : moduller.map(m => (
+                            <span key={m} className="text-xs bg-muted px-2 py-0.5 rounded-full">{m}</span>
+                          ))
+                      }
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-1">
-                    {(ROL_MODULLER[r] || ["—"]).map(m => (
-                      <span key={m} className="text-xs bg-muted px-2 py-0.5 rounded-full">{m}</span>
-                    ))}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </TabsContent>
@@ -329,6 +430,91 @@ export default function Ayarlar() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Deaktiv Confirm Dialog */}
+      <Dialog open={!!deactivateTarget} onOpenChange={() => setDeactivateTarget(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>İstifadəçini Çıxar</DialogTitle>
+            <DialogDescription>
+              <strong>{deactivateTarget?.ad_soyad || deactivateTarget?.email}</strong> adlı istifadəçini sistemdən çıxarmaq istədiyinizə əminsiniz? Bu istifadəçi daxil ola bilməyəcək.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2 justify-end mt-2">
+            <Button variant="outline" onClick={() => setDeactivateTarget(null)}>Ləğv et</Button>
+            <Button variant="destructive" onClick={() => handleDeaktiv(deactivateTarget)}>Çıxar</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Created User Info Modal */}
+      <Dialog open={!!createdUser} onOpenChange={() => setCreatedUser(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-6 h-6 text-green-500" />
+              <DialogTitle>İstifadəçi yaradıldı</DialogTitle>
+            </div>
+          </DialogHeader>
+          {createdUser && (
+            <div className="space-y-4">
+              <div className="bg-muted/40 rounded-xl p-4 space-y-2 text-sm">
+                <div className="flex justify-between"><span className="text-muted-foreground">Ad Soyad:</span><span className="font-medium">{createdUser.ad_soyad || "—"}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Email:</span><span className="font-medium">{createdUser.email}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Rol:</span><span className="font-medium">{createdUser.rol}</span></div>
+              </div>
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-3">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Giriş Kodu</p>
+                  <p className="text-2xl font-bold tracking-widest text-primary">{createdUser.girisKodu}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Müvəqqəti Parol</p>
+                  <p className="text-xl font-mono font-bold">{createdUser.muvveqetiParol}</p>
+                </div>
+              </div>
+              <p className="text-xs text-destructive font-medium text-center">⚠️ Bu məlumatı yalnız indi görə bilərsiniz. Sonra baxmaq mümkün olmayacaq.</p>
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1 gap-2" onClick={() => {
+                  navigator.clipboard.writeText(`Giriş Kodu: ${createdUser.girisKodu}\nParol: ${createdUser.muvveqetiParol}`);
+                  toast({ title: "Kopyalandı!" });
+                }}>
+                  <Copy className="w-4 h-4" /> Kopyala
+                </Button>
+                <Button variant="outline" className="flex-1 gap-2" onClick={() => window.print()}>
+                  <Printer className="w-4 h-4" /> Çap Et
+                </Button>
+              </div>
+              <Button className="w-full" onClick={() => setCreatedUser(null)}>Başa düşdüm</Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirm Dialog */}
+      <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>İstifadəçini Sil</DialogTitle>
+            <DialogDescription>
+              <strong>{deleteTarget?.ad_soyad || deleteTarget?.email}</strong> adlı istifadəçini sistemdən <strong>tamamilə silmək</strong> istədiyinizə əminsiniz? Bu əməliyyat geri alına bilməz.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2 justify-end mt-2">
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>Ləğv et</Button>
+            <Button variant="destructive" onClick={() => { handleDelete(deleteTarget); setDeleteTarget(null); }}>
+              <Trash2 className="w-4 h-4 mr-1" /> Sil
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Parol Təyin Modal */}
+      <ParolTeyinModal
+        target={parolTarget}
+        currentAdmin={currentUser ? davetler.find(d => d.email === currentUser.email) : null}
+        onClose={() => setParolTarget(null)}
+      />
 
       {/* Invite Dialog */}
       <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
