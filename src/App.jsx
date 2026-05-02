@@ -81,7 +81,6 @@ const AuthenticatedApp = () => {
         <Route path="/ceo-paneli" element={<CeoPaneli />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
-      <Route path="/invite" element={<InviteRegister />} />
     </Routes>
   );
 };
@@ -93,7 +92,10 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
-          <AuthenticatedApp />
+          <Routes>
+            <Route path="/invite" element={<InviteRegister />} />
+            <Route path="/*" element={<AuthenticatedApp />} />
+          </Routes>
         </Router>
         <Toaster />
       </QueryClientProvider>
