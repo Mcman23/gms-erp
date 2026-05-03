@@ -139,9 +139,39 @@ export default function Ayarlar() {
       token_aktiv: true,
       davet_token: token,
     });
+
+    // Dəvət emailini göndər
+    await base44.integrations.Core.SendEmail({
+      to: inviteForm.email,
+      from_name: "GMS ERP Sistemi",
+      subject: "GMS ERP — Sistemə dəvət",
+      body: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f8fafc;border-radius:8px;">
+          <div style="background:#1e40af;color:white;padding:16px 20px;border-radius:6px 6px 0 0;">
+            <h2 style="margin:0;font-size:20px;">GMS ERP Sistemə Dəvət</h2>
+          </div>
+          <div style="background:white;padding:24px;border-radius:0 0 6px 6px;border:1px solid #e2e8f0;">
+            <p style="color:#374151;font-size:15px;">Hörmətli <strong>${inviteForm.ad_soyad || inviteForm.email}</strong>,</p>
+            <p style="color:#374151;font-size:14px;line-height:1.6;">Siz <strong>GMS ERP</strong> sisteminə dəvət edildiniz. Qeydiyyatı tamamlamaq üçün aşağıdakı linkə klikləyin:</p>
+            <div style="text-align:center;margin:24px 0;">
+              <a href="${inviteLink}" style="background:#1e40af;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-size:15px;font-weight:600;">Qeydiyyatı Tamamla</a>
+            </div>
+            <p style="color:#6b7280;font-size:13px;">Rol: <strong>${inviteForm.rol}</strong></p>
+            <p style="color:#9ca3af;font-size:12px;margin-top:16px;">Link yalnız bir dəfə istifadə edilə bilər. Əgər siz bu dəvəti göndərməmisinizsə, bu emaili nəzərə almayın.</p>
+            <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;" />
+            <p style="color:#9ca3af;font-size:12px;">GMS Facility Group — ERP Sistemi</p>
+          </div>
+        </div>
+      `
+    }).catch(() => {
+      // Email göndərilməsə belə davam et, link yaradılıb
+      toast({ title: "Xəbərdarlıq", description: "Dəvət linki yaradıldı, lakin email göndərilmədi.", variant: "destructive" });
+    });
+
     setShowInviteDialog(false);
     setInviteForm({ email: "", ad_soyad: "", telefon: "", rol: "Kassir", departament: "", modul_erisimi: [] });
     setCreatedUser({ ad_soyad: inviteForm.ad_soyad, email: inviteForm.email, rol: inviteForm.rol, inviteLink });
+    toast({ title: "Dəvət göndərildi!", description: `${inviteForm.email} ünvanına dəvət emaili göndərildi.` });
     fetchData();
   };
 

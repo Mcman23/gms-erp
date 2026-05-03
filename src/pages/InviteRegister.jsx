@@ -51,15 +51,14 @@ export default function InviteRegister() {
 
     setSaving(true);
     try {
-      // Invite user to platform
-      await base44.users.inviteUser(email, ["Super Admin", "Admin", "Direktor"].includes(davet.rol) ? "admin" : "user");
-
-      // Mark as active
+      // Mark as active and store temp password — platform invite happens when admin logs in
       await base44.entities.DavetEdilmisIstifadeci.update(davet.id, {
         status: "Aktiv",
         ad_soyad: form.ad_soyad,
         token_aktiv: false,
         davet_token: null,
+        muvveqetiParol: form.parol,
+        ilkGirisTamamlandi: false,
       });
 
       setDone(true);
