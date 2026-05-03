@@ -86,8 +86,9 @@ Deno.serve(async (req) => {
     // Qismən ödəniş — hər zaman yeni kassa girişi əlavə et
 
     // Sifariş üzərindəki mövcud ödənilmiş məbləği yenilə
-    const artiqQismenOdenilen = movcudlar.reduce((s, e) => s + (e.mebleg || 0), 0);
-    const yeniOdenilmisMebleg = artiqQismenOdenilen + mebleg;
+    // Sifariş-dəki mövcud odenilmis_mebleg-i əsas götür (KassaEmeliyyati ilə uyğunsuzluq olmasın)
+    const movcudOdenilmis = parseFloat(sifaris.odenilmis_mebleg) || 0;
+    const yeniOdenilmisMebleg = movcudOdenilmis + mebleg;
     await base44.asServiceRole.entities.Sifaris.update(sifaris_id, {
       odenilmis_mebleg: yeniOdenilmisMebleg,
     });
