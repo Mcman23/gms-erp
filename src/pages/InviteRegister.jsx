@@ -31,6 +31,8 @@ export default function InviteRegister() {
           const d = results[0];
           if (d.status === "Deaktiv" || d.status === "Bloklandı") {
             setError("Bu dəvət linki deaktiv edilib. Adminlə əlaqə saxlayın.");
+          } else if (d.status === "Aktiv" && !d.token_aktiv) {
+            setError("Bu link artıq istifadə edilib. Hesabınız aktivdir, sisteme daxil olun.");
           } else {
             setDavet(d);
             setForm(f => ({ ...f, ad_soyad: d.ad_soyad || "" }));
