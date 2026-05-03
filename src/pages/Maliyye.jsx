@@ -111,13 +111,18 @@ export default function Maliyye() {
   const kassaMedaxil = kassaEmeliyyatlar.filter(e => e.tip === "Mədaxil").reduce((s, e) => s + (e.mebleg || 0), 0);
   const kassaMexaric = kassaEmeliyyatlar.filter(e => e.tip === "Məxaric").reduce((s, e) => s + (e.mebleg || 0), 0);
 
-  // Qismən ödənişlər hesablaması
+  // Qismən ödənişlər hesablaması — odenilmis_mebleg birbaşa Sifaris-dən oxunur
   const qismenSifarisler = sifarisler.filter(s => s.odenis_statusu === "Qismən ödənilib");
   const qismenOdenisler = qismenSifarisler.map(s => {
-    const sifKassa = kassaEmeliyyatlar.filter(k => k.sifaris_id === s.id && k.tip === "Mədaxil");
-    const odenilen = sifKassa.reduce((acc, k) => acc + (k.mebleg || 0), 0);
     const umumi = s.umumi_mebleg || s.qiymet || 0;
-    return { ...s, odenilen, qaliq: umumi - odenilen };
+    // Əgər Sifaris-də odenilmis_mebleg varsa istifadə et, yoxdursa KassaEmeliyyati-dan hesabla
+    let odenilen = s.odenilmis_mebleg || 0;
+    if (!odenilen) {
+      const sifKassa = kassaEmeliyyatlar.filter(k => k.sifaris_id === s.id && k.tip === "Mədaxil");
+      odenilen = sifKassa.reduce((acc, k) => acc + (k.mebleg || 0), 0);
+    }
+    const qaliq = Math.max(0, umumi - odenilen);
+    return { ...s, odenilen, qaliq };
   });
   const qismenUmumiOdenilen = qismenOdenisler.reduce((s, x) => s + x.odenilen, 0);
   const qismenUmumiQaliq = qismenOdenisler.reduce((s, x) => s + x.qaliq, 0);

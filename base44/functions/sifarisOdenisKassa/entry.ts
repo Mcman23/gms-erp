@@ -67,6 +67,10 @@ Deno.serve(async (req) => {
       });
       const yeniBalans = (kassa.balans || 0) + qalan;
       await base44.asServiceRole.entities.Kassa.update(kassa.id, { balans: yeniBalans });
+      // Sifariş üzərindəki ödənilmiş məbləği tam yenilə
+      await base44.asServiceRole.entities.Sifaris.update(sifaris_id, {
+        odenilmis_mebleg: tamMebleg,
+      });
       const jurnal_no2 = `J-${Date.now().toString().slice(-6)}`;
       await base44.asServiceRole.entities.JurnalQeydi.create({
         jurnal_no: jurnal_no2,
@@ -80,6 +84,13 @@ Deno.serve(async (req) => {
     }
 
     // Qismən ödəniş — hər zaman yeni kassa girişi əlavə et
+
+    // Sifariş üzərindəki mövcud ödənilmiş məbləği yenilə
+    const artiqQismenOdenilen = movcudlar.reduce((s, e) => s + (e.mebleg || 0), 0);
+    const yeniOdenilmisMebleg = artiqQismenOdenilen + mebleg;
+    await base44.asServiceRole.entities.Sifaris.update(sifaris_id, {
+      odenilmis_mebleg: yeniOdenilmisMebleg,
+    });
 
     // KassaEmeliyyati yarat
     await base44.asServiceRole.entities.KassaEmeliyyati.create({
