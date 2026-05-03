@@ -1,4 +1,5 @@
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { TrendingDown } from "lucide-react";
 import { Users, UserCheck, UserX, Star, Briefcase, TrendingUp } from "lucide-react";
 import StatKart from "./StatKart";
 
@@ -16,10 +17,25 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
-export default function HRHesabati({ iscilar, sifarisler }) {
+export default function HRHesabati({ iscilar, sifarisler, maaslar = [] }) {
   const aktiv = iscilar.filter(i => i.status === "Aktiv").length;
   const mezuniyyetde = iscilar.filter(i => i.status === "Məzuniyyətdə").length;
   const xeste = iscilar.filter(i => i.status === "Xəstə").length;
+
+  // Maaş ödəniş statistikası
+  const maasOdenilmis = maaslar.filter(m => m.odenis_statusu === "Ödənilib").reduce((s, m) => s + (m.ixtisarici_maas || 0), 0);
+  const maasGozleyir = maaslar.filter(m => m.odenis_statusu === "Ödənilməyib").reduce((s, m) => s + (m.ixtisarici_maas || 0), 0);
+  const maasIsverenXerc = maaslar.reduce((s, m) => s + (m.umumi_isverenin_xerci || 0), 0);
+
+  // Aylıq maaş xərci
+  const aylikMaas = {};
+  maaslar.forEach(m => {
+    const key = `${m.il || "?"}-${String(m.ay || "?").padStart(2, "0")}`;
+    if (!aylikMaas[key]) aylikMaas[key] = { ay: key, xalis_maas: 0, iverenin_xerci: 0 };
+    aylikMaas[key].xalis_maas += m.ixtisarici_maas || 0;
+    aylikMaas[key].iverenin_xerci += m.umumi_isverenin_xerci || 0;
+  });
+  const aylikMaasArr = Object.values(aylikMaas).sort((a, b) => a.ay.localeCompare(b.ay)).slice(-6);
 
   // By role
   const vezifeStats = {};
@@ -55,8 +71,44 @@ export default function HRHesabati({ iscilar, sifarisler }) {
         <StatKart icon={Users} label="Ümumi işçi sayı" value={iscilar.length} color="blue" />
         <StatKart icon={UserCheck} label="Aktiv işçi" value={aktiv} color="green" />
         <StatKart icon={Star} label="Məzuniyyətdə" value={mezuniyyetde} color="orange" />
-        <StatKart icon={Briefcase} label="Ümumi maaş fondu" value={`${umumi_maas.toFixed(0)} ₼`} color="purple" />
+        <StatKart icon={Briefcase} label="Nominal maaş fondu" value={`${umumi_maas.toFixed(0)} ₼`} color="purple" />
       </div>
+
+      {/* Maaş KPI kartları */}
+      {maaslar.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-4">
+            <div className="text-xs text-slate-400 mb-1">Ödənilmiş xalis maaş</div>
+            <div className="text-xl font-bold text-green-400">{maasOdenilmis.toFixed(0)} ₼</div>
+          </div>
+          <div className="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-4">
+            <div className="text-xs text-slate-400 mb-1">Gözləyən maaş öhdəliyi</div>
+            <div className="text-xl font-bold text-yellow-400">{maasGozleyir.toFixed(0)} ₼</div>
+          </div>
+          <div className="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-4">
+            <div className="text-xs text-slate-400 mb-1">İşverənin ümumi xərci</div>
+            <div className="text-xl font-bold text-red-400">{maasIsverenXerc.toFixed(0)} ₼</div>
+          </div>
+        </div>
+      )}
+
+      {/* Aylıq maaş xərci qrafiki */}
+      {aylikMaasArr.length > 0 && (
+        <div className="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-5">
+          <h3 className="font-semibold text-white text-sm mb-4">Aylıq maaş xərci (son 6 ay)</h3>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={aylikMaasArr}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+              <XAxis dataKey="ay" tick={{ fontSize: 11, fill: "#94a3b8" }} />
+              <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} tickFormatter={v => `${v} ₼`} />
+              <Tooltip formatter={v => `${v.toFixed(2)} ₼`} contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, fontSize: 12 }} />
+              <Legend wrapperStyle={{ fontSize: 11, color: "#94a3b8" }} />
+              <Bar dataKey="xalis_maas" name="Xalis maaş" fill="#10b981" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="iverenin_xerci" name="İşverən xərci" fill="#ef4444" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-5">

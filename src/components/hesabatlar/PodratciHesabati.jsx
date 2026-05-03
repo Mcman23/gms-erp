@@ -12,13 +12,13 @@ export default function PodratciHesabati() {
 
   useEffect(() => {
     Promise.all([
-      base44.entities.Podratci.list(),
+      base44.entities.Podratci?.list().catch(() => []),
       base44.entities.Sifaris.list("-created_date", 500),
-      base44.entities.SifarisXerci.list("-created_date", 500),
+      base44.entities.SifarisXerci?.list("-created_date", 500).catch(() => []),
     ]).then(([p, s, x]) => {
-      setPodratcilar(p);
+      setPodratcilar(p || []);
       setSifarisler(s);
-      setXercler(x);
+      setXercler(x || []);
       setLoading(false);
     });
   }, []);
