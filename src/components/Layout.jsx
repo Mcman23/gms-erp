@@ -1,14 +1,24 @@
-import { Outlet, useLocation, Navigate } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
 import SystemLogin from "./SystemLogin";
+import UserLogin from "./UserLogin";
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { getSystemUser, hasRouteAccess } from "@/lib/systemUser";
 
+// step: "system" | "user" | "done"
+function getInitialStep() {
+  if (sessionStorage.getItem("gms_sys_auth") !== "1") return "system";
+  // master giriş — gms_sys_user yoxdur
+  if (!sessionStorage.getItem("gms_sys_user")) return "done";
+  // user giriş — var
+  return "done";
+}
+
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sysAuthed, setSysAuthed] = useState(() => sessionStorage.getItem("gms_sys_auth") === "1");
+  const [step, setStep] = useState(getInitialStep);
   const [user, setUser] = useState(null);
   const [systemUser, setSystemUser] = useState(null);
   const location = useLocation();
@@ -18,16 +28,34 @@ export default function Layout() {
     setSystemUser(getSystemUser());
   }, []);
 
-  // Session user-i refresh et (login sonrası dəyişə bilər)
-  useEffect(() => {
-    setSystemUser(getSystemUser());
-  }, [sysAuthed]);
+  // Step 1: Sistem şifrəsi
+  if (step === "system") {
+    return (
+      <SystemLogin
+        onSuccess={(type) => {
+          if (type === "master") {
+            sessionStorage.setItem("gms_sys_auth", "1");
+            sessionStorage.removeItem("gms_sys_user");
+            setSystemUser(null);
+            setStep("done");
+          }
+        }}
+        onUserLogin={() => setStep("user")}
+      />
+    );
+  }
 
-  if (!sysAuthed) {
-    return <SystemLogin onSuccess={() => {
-      setSysAuthed(true);
-      setSystemUser(getSystemUser());
-    }} />;
+  // Step 2: İstifadəçi email + şifrə
+  if (step === "user") {
+    return (
+      <UserLogin
+        onSuccess={() => {
+          setSystemUser(getSystemUser());
+          setStep("done");
+        }}
+        onBack={() => setStep("system")}
+      />
+    );
   }
 
   // Erişim yoxlaması

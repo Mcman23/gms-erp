@@ -54,53 +54,27 @@ function detectLang() {
 
 const SYSTEM_PASSWORD = "gms2026";
 
-export default function SystemLogin({ onSuccess }) {
+export default function SystemLogin({ onSuccess, onUserLogin }) {
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [davetler, setDavetler] = useState([]);
   const [lang, setLang] = useState(detectLang);
   const t = TRANSLATIONS[lang];
-
-  useEffect(() => {
-    // Load invited users to check muvveqetiParol
-    base44.entities.DavetEdilmisIstifadeci.list().then(setDavetler).catch(() => {});
-  }, []);
 
   const handleLogin = async () => {
     if (!password) return;
     setLoading(true);
     setError("");
 
-    // 1. Check system master password
+    // Master şifrə ilə birbaşa giriş (tam admin)
     if (password === SYSTEM_PASSWORD) {
-      sessionStorage.setItem("gms_sys_auth", "1");
-      sessionStorage.removeItem("gms_sys_user");
       setLoading(false);
-      onSuccess();
+      onSuccess("master");
       return;
     }
 
-    // 2. Check muvveqetiParol from DavetEdilmisIstifadeci
-    const matchedUser = davetler.find(
-      d => d.muvveqetiParol && d.muvveqetiParol === password && d.status !== "Bloklandı" && d.status !== "Deaktiv"
-    );
-
-    if (matchedUser) {
-      sessionStorage.setItem("gms_sys_auth", "1");
-      sessionStorage.setItem("gms_sys_user", JSON.stringify({
-        email: matchedUser.email,
-        ad_soyad: matchedUser.ad_soyad,
-        rol: matchedUser.rol,
-        id: matchedUser.id,
-        modul_erisimi: matchedUser.modul_erisimi || [],
-      }));
-      setLoading(false);
-      onSuccess();
-      return;
-    }
-
+    // Sistem şifrəsi yanlışdır
     setError(t.errorMsg);
     setPassword("");
     setLoading(false);
@@ -169,8 +143,18 @@ export default function SystemLogin({ onSuccess }) {
             </Button>
           </div>
 
-          <p className="text-slate-500 text-xs text-center mt-4">{t.forgotMsg}</p>
-          <p className="text-slate-600 text-xs text-center mt-1">{t.confidential}</p>
+          <div className="border-t border-white/10 pt-4 mt-4">
+            <p className="text-slate-400 text-xs text-center mb-3">Sistemə dəvət edilmiş istifadəçisinizsə:</p>
+            <Button
+              variant="outline"
+              className="w-full border-white/20 text-slate-300 bg-white/5 hover:bg-white/10 hover:text-white"
+              onClick={onUserLogin}
+            >
+              İstifadəçi girişi →
+            </Button>
+          </div>
+
+          <p className="text-slate-600 text-xs text-center mt-3">{t.confidential}</p>
         </div>
       </div>
     </div>
