@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { sendDavetEmail } from "@/functions/sendDavetEmail";
 import { Save, Pencil, Copy, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -150,29 +151,29 @@ export default function Ayarlar() {
     setCreatedUser({ ad_soyad: savedAdSoyad, email: savedEmail, rol: savedRol, inviteLink });
     fetchData();
 
-    // Emaili arxa planda göndər, xəta olsa ayrıca bildiriş ver
-    base44.integrations.Core.SendEmail({
-      to: savedEmail,
-      from_name: "GMS ERP Sistemi",
-      subject: "GMS ERP — Sistemə dəvət",
-      body: `
-        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f8fafc;border-radius:8px;">
-          <div style="background:#1e40af;color:white;padding:16px 20px;border-radius:6px 6px 0 0;">
-            <h2 style="margin:0;font-size:20px;">GMS ERP Sistemə Dəvət</h2>
-          </div>
-          <div style="background:white;padding:24px;border-radius:0 0 6px 6px;border:1px solid #e2e8f0;">
-            <p style="color:#374151;font-size:15px;">Hörmətli <strong>${savedAdSoyad || savedEmail}</strong>,</p>
-            <p style="color:#374151;font-size:14px;line-height:1.6;">Siz <strong>GMS ERP</strong> sisteminə dəvət edildiniz. Qeydiyyatı tamamlamaq üçün aşağıdakı linkə klikləyin:</p>
-            <div style="text-align:center;margin:24px 0;">
-              <a href="${inviteLink}" style="background:#1e40af;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-size:15px;font-weight:600;">Qeydiyyatı Tamamla</a>
+    // Gmail API vasitəsilə email göndər
+    sendDavetEmail({
+        to: savedEmail,
+        subject: "GMS ERP — Sistemə dəvət",
+        fromName: "GMS ERP Sistemi",
+        htmlBody: `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f8fafc;border-radius:8px;">
+            <div style="background:#1e40af;color:white;padding:16px 20px;border-radius:6px 6px 0 0;">
+              <h2 style="margin:0;font-size:20px;">GMS ERP Sistemə Dəvət</h2>
             </div>
-            <p style="color:#6b7280;font-size:13px;">Rol: <strong>${savedRol}</strong></p>
-            <p style="color:#9ca3af;font-size:12px;margin-top:16px;">Link yalnız bir dəfə istifadə edilə bilər.</p>
-            <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;" />
-            <p style="color:#9ca3af;font-size:12px;">GMS Facility Group — ERP Sistemi</p>
+            <div style="background:white;padding:24px;border-radius:0 0 6px 6px;border:1px solid #e2e8f0;">
+              <p style="color:#374151;font-size:15px;">Hörmətli <strong>${savedAdSoyad || savedEmail}</strong>,</p>
+              <p style="color:#374151;font-size:14px;line-height:1.6;">Siz <strong>GMS ERP</strong> sisteminə dəvət edildiniz. Qeydiyyatı tamamlamaq üçün aşağıdakı linkə klikləyin:</p>
+              <div style="text-align:center;margin:24px 0;">
+                <a href="${inviteLink}" style="background:#1e40af;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-size:15px;font-weight:600;">Qeydiyyatı Tamamla</a>
+              </div>
+              <p style="color:#6b7280;font-size:13px;">Rol: <strong>${savedRol}</strong></p>
+              <p style="color:#9ca3af;font-size:12px;margin-top:16px;">Link yalnız bir dəfə istifadə edilə bilər.</p>
+              <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;" />
+              <p style="color:#9ca3af;font-size:12px;">GMS Facility Group — ERP Sistemi</p>
+            </div>
           </div>
-        </div>
-      `
+        `
     }).then(() => {
       toast({ title: "Dəvət göndərildi!", description: `${savedEmail} ünvanına email göndərildi.` });
     }).catch(() => {
