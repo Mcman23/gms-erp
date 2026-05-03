@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { getDavetByToken } from "@/functions/getDavetByToken";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,26 +24,23 @@ export default function InviteRegister() {
       setLoading(false);
       return;
     }
-    base44.entities.DavetEdilmisIstifadeci.list()
-      .then(allRecords => {
-        const results = allRecords.filter(r => r.davet_token === token);
-        if (!results || results.length === 0) {
+    getDavetByToken({ token })
+      .then(res => {
+        const d = res.data?.davet;
+        if (!d) {
           setError("Link tapılmadı və ya artıq istifadə edilib.");
+        } else if (d.status === "Deaktiv" || d.status === "Bloklandı") {
+          setError("Bu dəvət linki deaktiv edilib. Adminlə əlaqə saxlayın.");
+        } else if (d.status === "Aktiv" && !d.token_aktiv) {
+          setError("Bu link artıq istifadə edilib. Hesabınız aktivdir, sisteme daxil olun.");
         } else {
-          const d = results[0];
-          if (d.status === "Deaktiv" || d.status === "Bloklandı") {
-            setError("Bu dəvət linki deaktiv edilib. Adminlə əlaqə saxlayın.");
-          } else if (d.status === "Aktiv" && !d.token_aktiv) {
-            setError("Bu link artıq istifadə edilib. Hesabınız aktivdir, sisteme daxil olun.");
-          } else {
-            setDavet(d);
-            setForm(f => ({ ...f, ad_soyad: d.ad_soyad || "" }));
-          }
+          setDavet(d);
+          setForm(f => ({ ...f, ad_soyad: d.ad_soyad || "" }));
         }
         setLoading(false);
       })
       .catch(() => {
-        setError("Xəta baş verdi. Yenidən cəhd edin.");
+        setError("Link tapılmadı və ya keçərsizdir.");
         setLoading(false);
       });
   }, [token, email]);
