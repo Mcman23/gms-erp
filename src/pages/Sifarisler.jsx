@@ -139,7 +139,9 @@ export default function Sifarisler() {
                 <th className="text-left px-4 py-3 font-medium">Şirkət</th>
                 <th className="text-left px-4 py-3 font-medium">Xidmət</th>
                 <th className="text-left px-4 py-3 font-medium">Tarix</th>
-                <th className="text-right px-4 py-3 font-medium">Məbləğ</th>
+                <th className="text-right px-4 py-3 font-medium">Ümumi</th>
+                <th className="text-right px-4 py-3 font-medium">Ödənilib</th>
+                <th className="text-right px-4 py-3 font-medium">Qalıq borc</th>
                 <th className="text-left px-4 py-3 font-medium">Status</th>
                 <th className="text-left px-4 py-3 font-medium">Ödəniş</th>
               </tr>
@@ -162,6 +164,23 @@ export default function Sifarisler() {
                   <td className="px-4 py-3 text-right font-semibold">
                     {(s.umumi_mebleg || s.qiymet || 0).toFixed(2)} ₼
                     {s.edv_meblegi > 0 && <span className="text-xs text-muted-foreground ml-1">(+ƏDV)</span>}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {s.odenilmis_mebleg > 0 ? (
+                      <span className="text-green-600 font-medium">{(s.odenilmis_mebleg || 0).toFixed(2)} ₼</span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {(() => {
+                      const umumi = s.umumi_mebleg || s.qiymet || 0;
+                      const odenilmis = s.odenilmis_mebleg || 0;
+                      const qalig = umumi - odenilmis;
+                      if (s.odenis_statusu === "Ödənilib") return <span className="text-green-600 font-medium">0.00 ₼</span>;
+                      if (qalig <= 0) return <span className="text-green-600 font-medium">0.00 ₼</span>;
+                      return <span className={`font-medium ${s.odenis_statusu === "Qismən ödənilib" ? "text-orange-600" : "text-red-500"}`}>{qalig.toFixed(2)} ₼</span>;
+                    })()}
                   </td>
                   <td className="px-4 py-3">
                     <Select value={s.status} onValueChange={v => handleStatusChange(s.id, v)}>
@@ -197,7 +216,7 @@ export default function Sifarisler() {
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">Sifariş tapılmadı</td></tr>}
+              {filtered.length === 0 && <tr><td colSpan={11} className="px-4 py-8 text-center text-muted-foreground">Sifariş tapılmadı</td></tr>}
             </tbody>
           </table>
         </div>
