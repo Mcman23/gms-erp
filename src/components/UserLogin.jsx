@@ -24,14 +24,20 @@ export default function UserLogin({ onSuccess, onBack }) {
       const davetler = await base44.entities.DavetEdilmisIstifadeci.list();
       const matched = davetler.find(
         d =>
-          d.email?.toLowerCase() === email.toLowerCase() &&
-          d.muvveqetiParol === password &&
-          d.status !== "Bloklandı" &&
-          d.status !== "Deaktiv"
+          d.email?.toLowerCase().trim() === email.toLowerCase().trim() &&
+          d.muvveqetiParol?.trim() === password.trim()
       );
 
       if (!matched) {
         setError("Email və ya şifrə yanlışdır.");
+        setLoading(false);
+        return;
+      }
+
+      // Bloklanmış və ya deaktiv istifadəçilər
+      const blockedStatuses = ["Bloklandı", "Blokland\u0131", "Deaktiv"];
+      if (blockedStatuses.includes(matched.status)) {
+        setError("Hesabınız bloklanmış və ya deaktiv edilmişdir.");
         setLoading(false);
         return;
       }
