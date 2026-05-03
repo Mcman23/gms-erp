@@ -23,8 +23,9 @@ export default function InviteRegister() {
       setLoading(false);
       return;
     }
-    base44.entities.DavetEdilmisIstifadeci.filter({ davet_token: token })
-      .then(results => {
+    base44.entities.DavetEdilmisIstifadeci.list()
+      .then(allRecords => {
+        const results = allRecords.filter(r => r.davet_token === token);
         if (!results || results.length === 0) {
           setError("Link tapılmadı və ya artıq istifadə edilib.");
         } else {
