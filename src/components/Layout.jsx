@@ -10,9 +10,9 @@ import { getSystemUser, hasRouteAccess } from "@/lib/systemUser";
 // step: "system" | "user" | "done"
 function getInitialStep() {
   if (sessionStorage.getItem("gms_sys_auth") !== "1") return "system";
-  // master giriş — gms_sys_user yoxdur
-  if (!sessionStorage.getItem("gms_sys_user")) return "done";
-  // user giriş — var
+  // Sistem şifrəsi keçilib amma user girişi yoxdur
+  if (!sessionStorage.getItem("gms_sys_user")) return "user";
+  // Hər ikisi var — tam giriş
   return "done";
 }
 
@@ -35,9 +35,8 @@ export default function Layout() {
         onSuccess={(type) => {
           if (type === "master") {
             sessionStorage.setItem("gms_sys_auth", "1");
-            sessionStorage.removeItem("gms_sys_user");
-            setSystemUser(null);
-            setStep("done");
+            // Master şifrə doğrulandı — indi user girişi tələb et
+            setStep("user");
           }
         }}
         onUserLogin={() => setStep("user")}
