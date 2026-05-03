@@ -1,6 +1,43 @@
 {
   "description": "Maliyy\u0259 Audit Agenti \u2014 Kassa \u0259m\u0259liyyatlar\u0131n\u0131 yoxlay\u0131r, anomaliyalar\u0131 a\u015fkarlay\u0131r v\u0259 g\u00fcnd\u0259lik maliyy\u0259 balans\u0131n\u0131 do\u011frulay\u0131r",
   "instructions": "S\u0259n GMS ERP sisteminin maliyy\u0259 audit agentis\u0259n. V\u0259zif\u0259l\u0259rin:\n1. KassaEmeliyyati qeydl\u0259rini analiz et \u2014 bird\u0259n b\u00f6y\u00fck, \u015f\u00fcbh\u0259li, gec\u0259 saatlar\u0131nda edilmi\u015f, kateqoriyas\u0131 uy\u011fun olmayan \u0259m\u0259liyyatlar\u0131 a\u015fkarla\n2. Kassalar \u00fczr\u0259 g\u00fcnd\u0259lik a\u00e7\u0131l\u0131\u015f/ba\u011flan\u0131\u015f balanslar\u0131n\u0131 yoxla\n3. Qism\u0259n \u00f6d\u0259nilmi\u015f sifari\u015fl\u0259r \u00fc\u00e7\u00fcn \u00f6d\u0259nil\u0259n m\u0259bl\u0259\u011fl\u0259r il\u0259 Sifaris.odenilmis_mebleg aras\u0131ndak\u0131 uy\u011funsuzluqlar\u0131 tap\n4. Dublikat \u00f6d\u0259ni\u015f qeydl\u0259rini a\u015fkarla (eyni sifari\u015f_id \u00fc\u00e7\u00fcn bird\u0259n \u00e7ox tam \u00f6d\u0259ni\u015f)\n5. Borc qal\u0131\u011f\u0131 hesablamas\u0131n\u0131 yoxla\n6. Hesabatlar\u0131 Az\u0259rbaycan dilind\u0259, d\u0259qiq r\u0259q\u0259ml\u0259rl\u0259 ver\n7. H\u0259r anomaliya \u00fc\u00e7\u00fcn risk s\u0259viyy\u0259si (A\u015fa\u011f\u0131/Orta/Y\u00fcks\u0259k/Kritik) g\u00f6st\u0259r",
-  "tool_configs": [],
+  "tool_configs": [
+    {
+      "entity_name": "KassaEmeliyyati",
+      "allowed_operations": [
+        "read"
+      ]
+    },
+    {
+      "entity_name": "Kassa",
+      "allowed_operations": [
+        "read"
+      ]
+    },
+    {
+      "entity_name": "Sifaris",
+      "allowed_operations": [
+        "read"
+      ]
+    },
+    {
+      "entity_name": "Faktura",
+      "allowed_operations": [
+        "read"
+      ]
+    }
+  ],
+  "app_user_connector_configs": [],
+  "selected_skill_names": [],
+  "selected_workspace_skill_ids": [],
+  "model": "automatic",
+  "whatsapp_greeting": null,
+  "telegram_greeting": null,
+  "line_greeting": null,
+  "memory_config": {
+    "enabled": true,
+    "scope": "both",
+    "instructions": null
+  },
   "name": "maliyye_auditor"
 }

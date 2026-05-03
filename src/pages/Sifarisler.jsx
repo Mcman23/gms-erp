@@ -46,8 +46,8 @@ export default function Sifarisler() {
     Promise.all([
       base44.entities.Sifaris.list("-created_date", 100),
       base44.entities.Musteri.list("-created_date", 200),
-      base44.entities.Podratci.list(),
-    ]).then(([s, m, p]) => { setSifarisler(s); setMusteriler(m); setPodratcilar(p); setLoading(false); });
+      base44.entities.Podratci?.list().catch(() => []),
+    ]).then(([s, m, p]) => { setSifarisler(s); setMusteriler(m); setPodratcilar(p || []); setLoading(false); });
   };
 
   useEffect(() => { fetchData(); }, []);
