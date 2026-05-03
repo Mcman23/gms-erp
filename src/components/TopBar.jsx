@@ -65,7 +65,6 @@ export default function TopBar({ onMenuClick }) {
               </div>
               <button
                 onClick={() => {
-                  sessionStorage.removeItem("gms_sys_auth");
                   sessionStorage.removeItem("gms_sys_user");
                   window.location.reload();
                 }}

@@ -9,11 +9,12 @@ import { getSystemUser, hasRouteAccess } from "@/lib/systemUser";
 
 // step: "system" | "user" | "done"
 function getInitialStep() {
-  if (sessionStorage.getItem("gms_sys_auth") !== "1") return "system";
-  // Sistem şifrəsi keçilib amma user girişi yoxdur
-  if (!sessionStorage.getItem("gms_sys_user")) return "user";
-  // Hər ikisi var — tam giriş
-  return "done";
+  // User session varsa — tam giriş
+  if (sessionStorage.getItem("gms_sys_user")) return "done";
+  // Sistem şifrəsi keçilibsə amma user yoxdursa — user girişi
+  if (sessionStorage.getItem("gms_sys_auth") === "1") return "user";
+  // Heç biri yoxdur — sistem şifrəsi
+  return "system";
 }
 
 export default function Layout() {
