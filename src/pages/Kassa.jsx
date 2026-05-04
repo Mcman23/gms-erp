@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, ArrowUpRight, ArrowDownRight, Wallet, Lock, RotateCcw } from "lucide-react";
+import EmeliyyatlarTable from "@/components/kassa/EmeliyyatlarTable";
 import DeleteButton from "../components/DeleteButton";
 import { useAdmin } from "../hooks/useAdmin";
 import moment from "moment";
@@ -204,48 +205,7 @@ export default function Kassa() {
         </TabsContent>
 
         <TabsContent value="emeliyyatlar" className="mt-4">
-          <div className="bg-card rounded-xl border border-border overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-muted/50">
-                  <tr>
-                    <th className="text-left px-4 py-3 font-medium">Tarix</th>
-                    <th className="text-left px-4 py-3 font-medium">Kassa</th>
-                    <th className="text-left px-4 py-3 font-medium">Tip</th>
-                    <th className="text-left px-4 py-3 font-medium">Kateqoriya</th>
-                    <th className="text-right px-4 py-3 font-medium">Məbləğ</th>
-                    <th className="text-left px-4 py-3 font-medium">Açıqlama</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {emeliyyatlar.map(em => {
-                    const kassa = kassalar.find(k => k.id === em.kassa_id);
-                    return (
-                      <tr key={em.id} className="border-t border-border/50 hover:bg-muted/30">
-                        <td className="px-4 py-3">{em.tarix ? moment(em.tarix).format("DD.MM.YYYY HH:mm") : "—"}</td>
-                        <td className="px-4 py-3">{kassa?.ad || "—"}</td>
-                        <td className="px-4 py-3">
-                          <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${em.tip === "Mədaxil" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-                            {em.tip === "Mədaxil" ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                            {em.tip}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground">{em.kateqoriya}</td>
-                        <td className={`px-4 py-3 text-right font-semibold ${em.tip === "Mədaxil" ? "text-green-600" : "text-red-600"}`}>
-                          {em.tip === "Mədaxil" ? "+" : "−"}{(em.mebleg || 0).toFixed(2)} ₼
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground max-w-[200px] truncate">{em.aciklama || "—"}</td>
-                        {isAdmin && <td className="px-2 py-3"><DeleteButton onDelete={async () => { await base44.entities.KassaEmeliyyati.delete(em.id); fetchData(); }} /></td>}
-                      </tr>
-                    );
-                  })}
-                  {emeliyyatlar.length === 0 && (
-                    <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">Əməliyyat yoxdur</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <EmeliyyatlarTable emeliyyatlar={emeliyyatlar} kassalar={kassalar} isAdmin={isAdmin} onDelete={async (id) => { await base44.entities.KassaEmeliyyati.delete(id); fetchData(); }} />
         </TabsContent>
       </Tabs>
 
