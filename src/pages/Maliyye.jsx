@@ -11,6 +11,8 @@ import { Plus, Check, BookOpen, Layers, FileText, TrendingUp, Building2 } from "
 import moment from "moment";
 import SirketDovriiyyesi from "@/components/maliyye/SirketDovriiyyesi";
 import DebitorKreditorTab from "@/components/maliyye/DebitorKreditorTab";
+import DeleteButton from "@/components/DeleteButton";
+import { useAdmin } from "@/hooks/useAdmin";
 
 const SINIFLER = ["1 - Aktivlər", "2 - Öhdəliklər", "3 - Kapital", "4 - Gəlirlər", "5 - Xərclər"];
 const ISTINAD_TIPLERI = ["Faktura", "Sifariş", "Kassa", "Maaş", "Satınalma", "Manual"];
@@ -22,6 +24,7 @@ export default function Maliyye() {
   const [kassaEmeliyyatlar, setKassaEmeliyyatlar] = useState([]);
   const [musteriler, setMusteriler] = useState([]);
   const [sifarisler, setSifarisler] = useState([]);
+  const isAdmin = useAdmin();
   const [loading, setLoading] = useState(true);
   const [showHesabDialog, setShowHesabDialog] = useState(false);
   const [showJurnalDialog, setShowJurnalDialog] = useState(false);
@@ -243,6 +246,7 @@ export default function Maliyye() {
                     <th className="text-left px-4 py-3 font-medium">Açıqlama</th>
                     <th className="text-left px-4 py-3 font-medium">Status</th>
                     <th className="px-4 py-3"></th>
+                    {isAdmin && <th className="px-2 py-3"></th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -265,6 +269,11 @@ export default function Maliyye() {
                           </Button>
                         )}
                       </td>
+                      {isAdmin && (
+                        <td className="px-2 py-2.5">
+                          <DeleteButton onDelete={async () => { await base44.entities.JurnalQeydi.delete(j.id); fetchData(); }} />
+                        </td>
+                      )}
                     </tr>
                   ))}
                   {filteredJurnallar.length === 0 && <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">Jurnal qeydi yoxdur</td></tr>}

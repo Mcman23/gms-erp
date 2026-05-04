@@ -67,7 +67,7 @@
     },
     "qebz_nomresi": {
       "type": "string",
-      "title": "Q\u0259bz n\u00f6mr\u0259si"
+      "title": "Q\u0259bz n\u00f6m\u0259si"
     },
     "status": {
       "type": "string",
@@ -85,28 +85,5 @@
     "tip",
     "mebleg",
     "tarix"
-  ],
-  "rls": {
-    "create": {
-      "kassa_id": "{{user.id}}"
-    },
-    "read": {
-      "$or": [
-        {
-          "kassa_id": "{{user.id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    },
-    "update": {
-      "kassa_id": "{{user.id}}"
-    },
-    "delete": {
-      "kassa_id": "{{user.id}}"
-    }
-  }
+  ]
 }
