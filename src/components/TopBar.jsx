@@ -3,16 +3,17 @@ import { useState, useRef, useEffect } from "react";
 import Bildirisler from "./Bildirisler";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { base44 } from "@/api/base44Client";
+import { getSystemUser } from "@/lib/systemUser";
 
 export default function TopBar({ onMenuClick }) {
-  const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
-  useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
-  }, []);
+  // GMS sistem istifadəçisi (sessionStorage)
+  const sysUser = getSystemUser();
+  const displayName = sysUser?.ad_soyad || "İstifadəçi";
+  const displayRole = sysUser?.rol || "";
+  const displayEmail = sysUser?.email || "";
 
   useEffect(() => {
     const handler = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false); };
@@ -50,21 +51,24 @@ export default function TopBar({ onMenuClick }) {
             className="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-muted transition-colors"
           >
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary">
-              {user?.full_name?.charAt(0) || "U"}
+              {displayName.charAt(0).toUpperCase()}
             </div>
             <div className="hidden md:block text-left">
-              <p className="text-sm font-medium leading-tight">{user?.full_name || "İstifadəçi"}</p>
-              <p className="text-[11px] text-muted-foreground">{user?.role || "user"}</p>
+              <p className="text-sm font-medium leading-tight">{displayName}</p>
+              <p className="text-[11px] text-muted-foreground">{displayRole}</p>
             </div>
           </button>
           {menuOpen && (
             <div ref={menuRef} className="absolute right-0 top-full mt-2 w-48 bg-card border border-border rounded-xl shadow-lg z-50 py-1">
               <div className="px-4 py-2 border-b border-border">
-                <p className="text-sm font-medium">{user?.full_name}</p>
-                <p className="text-xs text-muted-foreground">{user?.email}</p>
+                <p className="text-sm font-medium">{displayName}</p>
+                <p className="text-xs text-muted-foreground">{displayEmail}</p>
               </div>
               <button
-                onClick={() => base44.auth.logout()}
+                onClick={() => {
+                  sessionStorage.removeItem("gms_sys_user");
+                  window.location.reload();
+                }}
                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
               >
                 <LogOut className="w-4 h-4" /> Çıxış

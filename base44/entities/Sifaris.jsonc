@@ -14,28 +14,20 @@
       "type": "string",
       "title": "M\u00fc\u015ft\u0259ri ad\u0131"
     },
-    "podratci_id": {
-      "type": "string",
-      "title": "Podrat\u00e7\u0131 ID"
-    },
-    "podratci_adi": {
-      "type": "string",
-      "title": "Podrat\u00e7\u0131 ad\u0131"
-    },
-    "sirket": {
-      "type": "string",
-      "title": "\u015eirk\u0259t",
-      "enum": [
-        "GMS (\u00dcmumi)",
-        "M\u0259rm\u0259r\u00e7i",
-        "Service Plus",
-        "Ganbaro\u011flu"
-      ],
-      "default": "GMS (\u00dcmumi)"
-    },
     "xidmet_tipi": {
       "type": "string",
-      "title": "Xidm\u0259t tipi"
+      "title": "Xidm\u0259t tipi",
+      "enum": [
+        "Ev t\u0259mizliyi",
+        "Ofis t\u0259mizliyi",
+        "P\u0259nc\u0259r\u0259 t\u0259mizliyi",
+        "Xal\u00e7a yuma",
+        "Divan yuma",
+        "Tikintid\u0259n sonra",
+        "D\u0259rin t\u0259mizlik",
+        "M\u0259tb\u0259x t\u0259mizliyi",
+        "Dig\u0259r"
+      ]
     },
     "unvan": {
       "type": "string",
@@ -98,6 +90,11 @@
       ],
       "default": "\u00d6d\u0259nilm\u0259yib"
     },
+    "odenilmis_mebleg": {
+      "type": "number",
+      "title": "\u00d6d\u0259nilmi\u015f m\u0259bl\u0259\u011f",
+      "default": 0
+    },
     "tekrarlanan": {
       "type": "boolean",
       "title": "T\u0259krarlanan sifari\u015f",
@@ -119,6 +116,18 @@
     "qiymetlendirme": {
       "type": "number",
       "title": "Qiym\u0259tl\u0259ndirm\u0259 (1-5)"
+    },
+    "sirket": {
+      "type": "string",
+      "title": "\u015eirk\u0259t"
+    },
+    "podratci_id": {
+      "type": "string",
+      "title": "Podrat\u00e7\u0131 ID"
+    },
+    "podratci_adi": {
+      "type": "string",
+      "title": "Podrat\u00e7\u0131 ad\u0131"
     }
   },
   "required": [

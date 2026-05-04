@@ -15,6 +15,7 @@ export default function Hesabatlar() {
   const [kassalar, setKassalar] = useState([]);
   const [iscilar, setIscilar] = useState([]);
   const [musteriler, setMusteriler] = useState([]);
+  const [maaslar, setMaaslar] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,12 +25,14 @@ export default function Hesabatlar() {
       base44.entities.Kassa.list(),
       base44.entities.Isci.list(),
       base44.entities.Musteri.list("-created_date", 300),
-    ]).then(([s, e, k, i, m]) => {
+      base44.entities.MaasHesablamasi.list("-created_date", 200),
+    ]).then(([s, e, k, i, m, mh]) => {
       setSifarisler(s);
       setEmeliyyatlar(e);
       setKassalar(k);
       setIscilar(i);
       setMusteriler(m);
+      setMaaslar(mh);
       setLoading(false);
     });
   }, []);
@@ -85,7 +88,7 @@ export default function Hesabatlar() {
         </TabsContent>
 
         <TabsContent value="hr" className="mt-6">
-          <HRHesabati iscilar={iscilar} sifarisler={sifarisler} />
+          <HRHesabati iscilar={iscilar} sifarisler={sifarisler} maaslar={maaslar} />
         </TabsContent>
 
         <TabsContent value="kassa" className="mt-6">

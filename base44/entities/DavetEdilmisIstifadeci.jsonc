@@ -2,40 +2,21 @@
   "name": "DavetEdilmisIstifadeci",
   "type": "object",
   "properties": {
-    "ad_soyad": {
-      "title": "Ad Soyad",
-      "type": "string"
-    },
-    "davet_eden": {
-      "title": "D\u0259v\u0259t ed\u0259n admin",
-      "type": "string"
-    },
-    "davet_tarixi": {
-      "format": "date-time",
-      "title": "D\u0259v\u0259t tarixi",
-      "type": "string"
-    },
-    "departament": {
-      "title": "Departament",
-      "type": "string"
-    },
     "email": {
       "title": "Email",
       "type": "string"
     },
-    "giris_sayi": {
-      "default": 0,
-      "title": "Giri\u015f say\u0131",
-      "type": "number"
+    "ad_soyad": {
+      "title": "Ad Soyad",
+      "type": "string"
     },
-    "modul_erisimi": {
-      "items": {
-        "type": "string"
-      },
-      "title": "Modul eri\u015fimi",
-      "type": "array"
+    "telefon": {
+      "title": "Telefon",
+      "type": "string"
     },
     "rol": {
+      "title": "Rol",
+      "type": "string",
       "enum": [
         "Super Admin",
         "Admin",
@@ -50,51 +31,61 @@
         "Kassir",
         "Anbar m\u00fcd\u00fcr\u00fc",
         "Audit/Bax\u0131\u015f"
-      ],
-      "title": "Rol",
+      ]
+    },
+    "departament": {
+      "title": "Departament",
       "type": "string"
     },
-    "son_giris": {
-      "format": "date-time",
-      "title": "Son giri\u015f tarixi",
-      "type": "string"
+    "modul_erisimi": {
+      "title": "Modul erisimi",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "status": {
-      "default": "D\u0259v\u0259t g\u00f6nd\u0259rilib",
+      "title": "Status",
+      "type": "string",
+      "default": "G\u00f6zl\u0259yir",
       "enum": [
+        "G\u00f6zl\u0259yir",
         "D\u0259v\u0259t g\u00f6nd\u0259rilib",
         "Aktiv",
         "Blokland\u0131",
         "Deaktiv"
-      ],
-      "title": "Status",
-      "type": "string"
+      ]
     },
-    "telefon": {
-      "title": "Telefon",
-      "type": "string"
+    "davet_tarixi": {
+      "title": "D\u0259v\u0259t tarixi",
+      "type": "string",
+      "format": "date-time"
+    },
+    "son_giris": {
+      "title": "Son giri\u015f tarixi",
+      "type": "string",
+      "format": "date-time"
+    },
+    "giris_sayi": {
+      "title": "Giri\u015f say\u0131",
+      "type": "number",
+      "default": 0
     },
     "token_aktiv": {
-      "default": true,
       "title": "Token giri\u015f aktiv",
-      "type": "boolean"
+      "type": "boolean",
+      "default": true
     },
-    "girisKodu": {
-      "title": "Giri\u015f Kodu",
+    "davet_token": {
+      "title": "D\u0259v\u0259t token",
       "type": "string"
     },
-    "kodStatus": {
-      "title": "Kod Statusu",
-      "type": "string",
-      "enum": [
-        "Aktiv",
-        "\u0130stifad\u0259 Edilib",
-        "Deaktiv"
-      ],
-      "default": "Aktiv"
+    "davet_eden": {
+      "title": "D\u0259v\u0259t ed\u0259n admin",
+      "type": "string"
     },
     "muvveqetiParol": {
-      "title": "M\u00fcvv\u0259q\u0259ti Parol",
+      "title": "M\u00fcvv\u0259q\u0259ti parol",
       "type": "string"
     },
     "ilkGirisTamamlandi": {

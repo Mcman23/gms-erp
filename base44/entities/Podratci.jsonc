@@ -4,7 +4,7 @@
   "properties": {
     "ad": {
       "type": "string",
-      "title": "Podrat\u00e7\u0131 ad\u0131 / \u015eirk\u0259t ad\u0131"
+      "title": "Ad / \u015eirk\u0259t ad\u0131"
     },
     "telefon": {
       "type": "string",
@@ -33,7 +33,7 @@
     },
     "komissiya_faizi": {
       "type": "number",
-      "title": "\u015eirk\u0259tin komissiya faizi (%)",
+      "title": "Komissiya faizi (%)",
       "default": 20
     },
     "status": {
@@ -41,7 +41,7 @@
       "title": "Status",
       "enum": [
         "Aktiv",
-        "Passiv"
+        "Deaktiv"
       ],
       "default": "Aktiv"
     },
