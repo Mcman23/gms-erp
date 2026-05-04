@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Printer, Plus, Check } from "lucide-react";
 import DeleteButton from "@/components/DeleteButton";
+import { useAdmin } from "../hooks/useAdmin";
 
 const AYLAR = ["Yanvar","Fevral","Mart","Aprel","May","İyun","İyul","Avqust","Sentyabr","Oktyabr","Noyabr","Dekabr"];
 
@@ -87,6 +88,7 @@ function Payslip({ isci, ay, il, hesab, eldenOdenis, bankOdenis }) {
 }
 
 export default function Maas() {
+  const isAdmin = useAdmin();
   const [iscilar, setIscilar] = useState([]);
   const [hesablamalar, setHesablamalar] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -262,7 +264,7 @@ export default function Maas() {
                                <Check className="w-3.5 h-3.5" />
                              </Button>
                            )}
-                           <DeleteButton onDelete={() => handleDelete(h.id)} />
+                           {isAdmin && <DeleteButton onDelete={() => handleDelete(h.id)} />}
                           </div>
                         </td>
                       </tr>

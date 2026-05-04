@@ -7,10 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useAdmin } from "../hooks/useAdmin";
+import DeleteButton from "../components/DeleteButton";
 
 const emptyForm = { ad: "", telefon: "", email: "", voen: "", unvan: "", tip: "Fərdi", komissiya_faizi: 20, status: "Aktiv", qeydler: "" };
 
 export default function Podratcilar() {
+  const isAdmin = useAdmin();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
@@ -35,7 +38,6 @@ export default function Podratcilar() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Silmək istədiyinizə əminsiniz?")) return;
     await base44.entities.Podratci.delete(id);
     fetchData();
   };
@@ -80,7 +82,7 @@ export default function Podratcilar() {
                   <td className="px-4 py-3 text-center">
                     <div className="flex items-center justify-center gap-2">
                       <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => openEdit(p)}><Pencil className="w-3.5 h-3.5" /></Button>
-                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive" onClick={() => handleDelete(p.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
+                      {isAdmin && <DeleteButton onDelete={() => handleDelete(p.id)} />}
                     </div>
                   </td>
                 </tr>

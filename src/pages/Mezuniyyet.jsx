@@ -8,8 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Check, X } from "lucide-react";
 import moment from "moment";
+import { useAdmin } from "../hooks/useAdmin";
+import DeleteButton from "../components/DeleteButton";
 
 export default function Mezuniyyet() {
+  const isAdmin = useAdmin();
   const [mezuniyyetler, setMezuniyyetler] = useState([]);
   const [iscilar, setIscilar] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -81,16 +84,19 @@ export default function Mezuniyyet() {
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColors[m.status] || ""}`}>{m.status}</span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    {m.status === "Gözləyir" && (
-                      <div className="flex gap-1 justify-end">
-                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-green-600" onClick={() => handleStatus(m.id, "Təsdiqləndi")}>
-                          <Check className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-600" onClick={() => handleStatus(m.id, "Rədd edildi")}>
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    )}
+                    <div className="flex gap-1 justify-end items-center">
+                      {m.status === "Gözləyir" && (
+                        <>
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-green-600" onClick={() => handleStatus(m.id, "Təsdiqləndi")}>
+                            <Check className="w-4 h-4" />
+                          </Button>
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-600" onClick={() => handleStatus(m.id, "Rədd edildi")}>
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </>
+                      )}
+                      {isAdmin && <DeleteButton onDelete={async () => { await base44.entities.Mezuniyyet.delete(m.id); fetchData(); }} />}
+                    </div>
                   </td>
                 </tr>
               ))}
