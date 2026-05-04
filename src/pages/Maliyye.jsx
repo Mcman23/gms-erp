@@ -108,9 +108,14 @@ export default function Maliyye() {
   const totalOhd = ohdHesablar.reduce((s, h) => s + (h.qalan || 0), 0);
   const totalKapital = kapitalHesablar.reduce((s, h) => s + (h.qalan || 0), 0);
 
-  const odenmemis = fakturalar.filter(f => f.odenis_statusu !== "Ödənilib");
-  const debitorBorc = odenmemis.reduce((s, f) => s + (f.umumi_mebleg || 0) - (f.odenilmis_mebleg || 0), 0);
-  const totalEdv = fakturalar.reduce((s, f) => s + (f.edv_meblegi || 0), 0);
+  const odenmemisFakturalar = fakturalar.filter(f => f.odenis_statusu !== "Ödənilib");
+  const odenmemisSifarisler = sifarisler.filter(s => s.odenis_statusu !== "Ödənilib" && s.status !== "Ləğv edildi");
+  const debitorBorc = odenmemisSifarisler.reduce((acc, s) => {
+    const umumi = s.umumi_mebleg || s.qiymet || 0;
+    const odenilen = s.odenilmis_mebleg || 0;
+    return acc + Math.max(0, umumi - odenilen);
+  }, 0);
+  const totalEdv = sifarisler.filter(s => s.status !== "Ləğv edildi").reduce((acc, s) => acc + (s.edv_meblegi || 0), 0);
 
   const kassaMedaxil = kassaEmeliyyatlar.filter(e => e.tip === "Mədaxil").reduce((s, e) => s + (e.mebleg || 0), 0);
   const kassaMexaric = kassaEmeliyyatlar.filter(e => e.tip === "Məxaric").reduce((s, e) => s + (e.mebleg || 0), 0);
