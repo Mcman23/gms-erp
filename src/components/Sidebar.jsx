@@ -51,6 +51,13 @@ const sections = [
     ],
   },
   {
+    id: "tapshiriqlar",
+    label: "Tapşırıqlar",
+    icon: ClipboardList,
+    direct: true,
+    path: "/tapshiriqlar",
+  },
+  {
     id: "hr",
     label: "HR və Əməkdaşlar",
     icon: UserCog,
