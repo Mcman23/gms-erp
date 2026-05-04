@@ -64,7 +64,7 @@ export default function Fakturalar() {
       xidmet_tipi: form.xidmet_tipi,
     });
 
-    // Satış fakturası olarsa → Kreditor cədvəlinə avtomatik əlavə et
+    // Satış fakturası olarsa → Debitor (müştəri bizə borcludur)
     if ((form.tip || "Satış") === "Satış") {
       base44.entities.Kreditor.create({
         faktura_id: faktura.id,
@@ -217,12 +217,12 @@ export default function Fakturalar() {
                   <button key={t}
                     onClick={() => setForm(f => ({ ...f, tip: t }))}
                     className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ${form.tip === t ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-muted/50"}`}>
-                    {t === "Satış" ? "📤 Satış (Kreditor)" : "📥 Alış (Debitor)"}
+                    {t === "Satış" ? "📤 Satış (Debitor)" : "📥 Alış (Kreditor)"}
                   </button>
                 ))}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                {form.tip === "Satış" ? "Müştəri bizə borclu olacaq → Kreditor siyahısına düşür" : "Biz kiminsə məhsulunu/xidmətini aldıq → Debitor siyahısına düşür"}
+                {form.tip === "Satış" ? "Müştəri bizə borclu olacaq → Debitor siyahısına düşür" : "Biz kiminsə məhsulunu/xidmətini aldıq → Kreditor siyahısına düşür"}
               </p>
             </div>
 

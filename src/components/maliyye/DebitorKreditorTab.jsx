@@ -82,11 +82,11 @@ function KreditorTable() {
     <div className="space-y-3">
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-          <p className="text-xs text-blue-700">Ümumi kreditor</p>
+          <p className="text-xs text-blue-700">Ümumi debitor</p>
           <p className="text-xl font-bold text-blue-800">{kreditorlar.length}</p>
         </div>
         <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
-          <p className="text-xs text-orange-700">Alacaq (qalıq)</p>
+          <p className="text-xs text-orange-700">Alacağımız (qalıq)</p>
           <p className="text-xl font-bold text-orange-800">{totalAlacag.toFixed(2)} ₼</p>
         </div>
         <div className="bg-green-50 border border-green-200 rounded-xl p-4">
@@ -106,10 +106,10 @@ function KreditorTable() {
       <div className="bg-card border border-border rounded-xl overflow-hidden">
         <div className="px-5 py-3 border-b border-border flex items-center justify-between bg-blue-50/50">
           <div>
-            <h3 className="font-semibold text-sm text-blue-900">Kreditorlar</h3>
-            <p className="text-xs text-blue-700 mt-0.5">Satış fakturalarından — müştərilər bizdən aldı, borcludur</p>
+            <h3 className="font-semibold text-sm text-blue-900">Debitorlar</h3>
+            <p className="text-xs text-blue-700 mt-0.5">Satış fakturalarından — müştərilər bizdən aldı, bizə borcludur</p>
           </div>
-          <span className="text-sm font-bold text-blue-700">{totalAlacag.toFixed(2)} ₼ alacaq</span>
+          <span className="text-sm font-bold text-blue-700">{totalAlacag.toFixed(2)} ₼ alacağımız</span>
         </div>
         <table className="w-full text-sm">
           <thead className="bg-muted/50">
@@ -200,11 +200,11 @@ function DebitorTable({ fakturalar, onRefresh }) {
     <div className="space-y-3">
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
-          <p className="text-xs text-orange-700">Ümumi debitor</p>
+          <p className="text-xs text-orange-700">Ümumi kreditor</p>
           <p className="text-xl font-bold text-orange-800">{debitorlar.length}</p>
         </div>
         <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-          <p className="text-xs text-red-700">Ödənilməmiş borc</p>
+          <p className="text-xs text-red-700">Ödənilməmiş borcumuz</p>
           <p className="text-xl font-bold text-red-800">{totalBorc.toFixed(2)} ₼</p>
         </div>
         <div className="bg-green-50 border border-green-200 rounded-xl p-4">
@@ -224,10 +224,10 @@ function DebitorTable({ fakturalar, onRefresh }) {
       <div className="bg-card border border-border rounded-xl overflow-hidden">
         <div className="px-5 py-3 border-b border-border flex items-center justify-between bg-orange-50/50">
           <div>
-            <h3 className="font-semibold text-sm text-orange-900">Debitorlar</h3>
-            <p className="text-xs text-orange-700 mt-0.5">Alış fakturalarından — bizim aldığımız mallar/xidmətlər</p>
+            <h3 className="font-semibold text-sm text-orange-900">Kreditorlar</h3>
+            <p className="text-xs text-orange-700 mt-0.5">Alış fakturalarından — biz aldıq, borcluluq</p>
           </div>
-          <span className="text-sm font-bold text-orange-700">{totalBorc.toFixed(2)} ₼ qalıq</span>
+          <span className="text-sm font-bold text-orange-700">{totalBorc.toFixed(2)} ₼ borcumuz</span>
         </div>
         <table className="w-full text-sm">
           <thead className="bg-muted/50">
@@ -299,13 +299,13 @@ export default function DebitorKreditorTab({ fakturalar }) {
           onClick={() => setActiveTab("kreditor")}
           className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === "kreditor" ? "bg-white shadow text-blue-700" : "text-muted-foreground hover:text-foreground"}`}
         >
-          📤 Kreditorlar <span className="text-xs">(bizdən alanlar)</span>
+          📥 Debitorlar <span className="text-xs">(satış — müştəri bizə borclular)</span>
         </button>
         <button
           onClick={() => setActiveTab("debitor")}
           className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === "debitor" ? "bg-white shadow text-orange-700" : "text-muted-foreground hover:text-foreground"}`}
         >
-          📥 Debitorlar <span className="text-xs">(bizim aldıqlarımız)</span>
+          📤 Kreditorlar <span className="text-xs">(alış — biz borcluluq)</span>
         </button>
       </div>
 

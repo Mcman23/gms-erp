@@ -68,7 +68,7 @@ export default function Kassa() {
     });
     await base44.entities.Kassa.update(kassa.id, { balans: yeniBalans });
 
-    // Mədaxil → Kreditor (bizdən pul gəldi)
+    // Mədaxil → Debitor (pul gəldi, müştəri ödədi — Kreditor entity-si debitor kimi işlənir)
     if (emeliyyatForm.tip === "Mədaxil") {
       await base44.entities.Kreditor.create({
         faktura_no,
@@ -85,7 +85,7 @@ export default function Kassa() {
       });
     }
 
-    // Məxaric → Faktura/Alış (biz ödədik — debitor kimi)
+    // Məxaric → Kreditor/Alış (biz ödədik — biz borcluydun, ödədik)
     if (emeliyyatForm.tip === "Məxaric") {
       await base44.entities.Faktura.create({
         faktura_no,
