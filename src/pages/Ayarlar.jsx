@@ -86,6 +86,8 @@ export default function Ayarlar() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [parolTarget, setParolTarget] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [modulEditTarget, setModulEditTarget] = useState(null);
+  const [modulEditValue, setModulEditValue] = useState([]);
   const { toast } = useToast();
 
   const generateToken = () => {
@@ -204,6 +206,22 @@ export default function Ayarlar() {
     fetchData();
   };
 
+  const openModulEdit = (davet) => {
+    setModulEditTarget(davet);
+    setModulEditValue(davet.modul_erisimi || []);
+  };
+
+  const saveModulEdit = async () => {
+    await base44.entities.DavetEdilmisIstifadeci.update(modulEditTarget.id, { modul_erisimi: modulEditValue });
+    toast({ title: "Modul erişimi yeniləndi" });
+    setModulEditTarget(null);
+    fetchData();
+  };
+
+  const toggleModulEdit = (m) => {
+    setModulEditValue(v => v.includes(m) ? v.filter(x => x !== m) : [...v, m]);
+  };
+
   const handleTokenReset = async (davet) => {
     await base44.entities.DavetEdilmisIstifadeci.update(davet.id, { token_aktiv: true });
     toast({ title: "Token sifirlandir" });
@@ -299,8 +317,14 @@ export default function Ayarlar() {
                       <td className="px-4 py-3">
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColors[d.status] || ""}`}>{d.status}</span>
                       </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground max-w-[180px] truncate">
-                        {(d.modul_erisimi || []).join(", ") || "—"}
+                      <td className="px-4 py-3 text-xs text-muted-foreground max-w-[180px]">
+                        <button
+                          onClick={() => openModulEdit(d)}
+                          className="text-left truncate block max-w-[180px] hover:text-primary hover:underline transition-colors"
+                          title="Modul erişimini düzəlt"
+                        >
+                          {(d.modul_erisimi || []).join(", ") || "—"}
+                        </button>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">
                         {d.son_giris ? moment(d.son_giris).format("DD.MM.YYYY") : "—"}
@@ -523,6 +547,33 @@ export default function Ayarlar() {
             <Button variant="destructive" onClick={() => { handleDelete(deleteTarget); setDeleteTarget(null); }}>
               <Trash2 className="w-4 h-4 mr-1" /> Sil
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modul Erişimi Düzəliş Dialog */}
+      <Dialog open={!!modulEditTarget} onOpenChange={() => setModulEditTarget(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Modul Erişimini Düzəlt</DialogTitle>
+            <DialogDescription>{modulEditTarget?.ad_soyad || modulEditTarget?.email}</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-2 max-h-[55vh] overflow-y-auto py-2">
+            {BUTUN_MODULLER.map(m => (
+              <label key={m} className="flex items-center gap-2 cursor-pointer text-sm">
+                <input
+                  type="checkbox"
+                  checked={modulEditValue.includes(m)}
+                  onChange={() => toggleModulEdit(m)}
+                  className="rounded"
+                />
+                {m}
+              </label>
+            ))}
+          </div>
+          <div className="flex gap-2 justify-end mt-2">
+            <Button variant="outline" onClick={() => setModulEditTarget(null)}>Ləğv et</Button>
+            <Button onClick={saveModulEdit}>Yadda saxla</Button>
           </div>
         </DialogContent>
       </Dialog>
