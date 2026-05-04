@@ -205,7 +205,10 @@ export default function Kassa() {
         </TabsContent>
 
         <TabsContent value="emeliyyatlar" className="mt-4">
-          <EmeliyyatlarTable emeliyyatlar={emeliyyatlar} kassalar={kassalar} isAdmin={isAdmin} onDelete={async (id) => { await base44.entities.KassaEmeliyyati.delete(id); fetchData(); }} />
+          <EmeliyyatlarTable emeliyyatlar={emeliyyatlar} kassalar={kassalar} isAdmin={isAdmin} onDelete={async (id) => {
+            try { await base44.entities.KassaEmeliyyati.delete(id); } catch {}
+            fetchData();
+          }} />
         </TabsContent>
       </Tabs>
 
