@@ -22,10 +22,17 @@ export default function HRHesabati({ iscilar, sifarisler, maaslar = [] }) {
   const mezuniyyetde = iscilar.filter(i => i.status === "Məzuniyyətdə").length;
   const xeste = iscilar.filter(i => i.status === "Xəstə").length;
 
-  // Maaş ödəniş statistikası
+  // Maaş ödəniş statistikası — yalnız aktiv dövr üçün (son ay)
   const maasOdenilmis = maaslar.filter(m => m.odenis_statusu === "Ödənilib").reduce((s, m) => s + (m.ixtisarici_maas || 0), 0);
-  const maasGozleyir = maaslar.filter(m => m.odenis_statusu === "Ödənilməyib").reduce((s, m) => s + (m.ixtisarici_maas || 0), 0);
+  const maasGozleyir = maaslar.filter(m => m.odenis_statusu !== "Ödənilib").reduce((s, m) => s + (m.ixtisarici_maas || 0), 0);
   const maasIsverenXerc = maaslar.reduce((s, m) => s + (m.umumi_isverenin_xerci || 0), 0);
+
+  // Unikal işçi sayı (maaslardan, əgər iscilar boşdursa)
+  const uniqueIsciIds = new Set(maaslar.map(m => m.isci_id).filter(Boolean));
+  const effektifIsciSayi = iscilar.length > 0 ? iscilar.length : uniqueIsciIds.size;
+  const umumi_maas = iscilar.length > 0
+    ? iscilar.reduce((s, i) => s + (i.maas || 0), 0)
+    : maaslar.filter(m => m.odenis_statusu !== "Ödənilib").reduce((s, m) => s + (m.nagilmaas || 0), 0);
 
   // Aylıq maaş xərci
   const aylikMaas = {};
@@ -62,13 +69,10 @@ export default function HRHesabati({ iscilar, sifarisler, maaslar = [] }) {
     .sort((a, b) => b.tamamlandi - a.tamamlandi)
     .slice(0, 10);
 
-  // Salary summary
-  const umumi_maas = iscilar.reduce((s, i) => s + (i.maas || 0), 0);
-
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatKart icon={Users} label="Ümumi işçi sayı" value={iscilar.length} color="blue" />
+        <StatKart icon={Users} label="Ümumi işçi sayı" value={effektifIsciSayi} color="blue" />
         <StatKart icon={UserCheck} label="Aktiv işçi" value={aktiv} color="green" />
         <StatKart icon={Star} label="Məzuniyyətdə" value={mezuniyyetde} color="orange" />
         <StatKart icon={Briefcase} label="Nominal maaş fondu" value={`${umumi_maas.toFixed(0)} ₼`} color="purple" />
