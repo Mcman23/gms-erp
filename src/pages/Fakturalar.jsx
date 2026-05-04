@@ -189,11 +189,11 @@ export default function Fakturalar() {
                       "bg-red-100 text-red-700"
                     }`}>{f.odenis_statusu || "Ödənilməyib"}</span>
                   </td>
-                  {isAdmin && (
-                    <td className="px-2 py-3">
+                  <td className="px-2 py-3">
+                    {isAdmin && (
                       <DeleteButton onDelete={async () => { await base44.entities.Faktura.delete(f.id); fetchData(); }} />
-                    </td>
-                  )}
+                    )}
+                  </td>
                 </tr>
               );
             })}
