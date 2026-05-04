@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { sendDavetEmail } from "@/functions/sendDavetEmail";
 import { Save, Pencil, Copy, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,7 +47,6 @@ const BUTUN_MODULLER = [
   "Məzuniyyət",
   "Maaş Hesablaması",
   "Ad Günü Bildirişləri",
-  "Tapşırıqlar",
   "Sənədlər",
   "Hesabatlar",
   "Sistem Ayarları",
@@ -86,13 +84,15 @@ export default function Ayarlar() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [parolTarget, setParolTarget] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
-  const [modulEditTarget, setModulEditTarget] = useState(null);
-  const [modulEditValue, setModulEditValue] = useState([]);
   const { toast } = useToast();
 
-  const generateToken = () => {
-    const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
-    return Array.from({length: 32}, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  const generateGirisKodu = () => {
+    const num = Math.floor(100000 + Math.random() * 900000);
+    return `GMS-${num}`;
+  };
+  const generateParol = () => {
+    const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789#@!";
+    return Array.from({length: 8}, () => chars[Math.floor(Math.random() * chars.length)]).join("");
   };
 
   const fetchData = () => {
@@ -126,62 +126,31 @@ export default function Ayarlar() {
 
   const handleInvite = async () => {
     if (!inviteForm.email) return;
-    const token = generateToken();
-    const appBaseUrl = window.location.origin;
-    const inviteLink = `${appBaseUrl}/invite?token=${token}&email=${encodeURIComponent(inviteForm.email)}`;
-
-    const savedEmail = inviteForm.email;
-    const savedAdSoyad = inviteForm.ad_soyad;
-    const savedRol = inviteForm.rol;
-
+    const girisKodu = generateGirisKodu();
+    const muvveqetiParol = generateParol();
+    // Invite to platform
+    await base44.users.inviteUser(inviteForm.email, ["Super Admin","Admin","Direktor"].includes(inviteForm.rol) ? "admin" : "user");
+    // Save to DavetEdilmisIstifadeci
     await base44.entities.DavetEdilmisIstifadeci.create({
-      email: savedEmail,
-      ad_soyad: savedAdSoyad,
+      email: inviteForm.email,
+      ad_soyad: inviteForm.ad_soyad,
       telefon: inviteForm.telefon,
-      rol: savedRol,
+      rol: inviteForm.rol,
       departament: inviteForm.departament,
       modul_erisimi: inviteForm.modul_erisimi,
-      status: "Gözləyir",
+      status: "Dəvət göndərilib",
       davet_tarixi: new Date().toISOString(),
       giris_sayi: 0,
       token_aktiv: true,
-      davet_token: token,
+      girisKodu,
+      muvveqetiParol,
+      kodStatus: "Aktiv",
+      ilkGirisTamamlandi: false,
     });
-
-    // Dialog bağla və nəticəni göstər
     setShowInviteDialog(false);
-    setInviteForm({ email: "", ad_soyad: "", telefon: "", rol: "Kassir", departament: "", modul_erisimi: ROL_MODULLER["Kassir"] || [] });
-    setCreatedUser({ ad_soyad: savedAdSoyad, email: savedEmail, rol: savedRol, inviteLink });
+    setInviteForm({ email: "", ad_soyad: "", telefon: "", rol: "Kassir", departament: "", modul_erisimi: [] });
+    setCreatedUser({ ad_soyad: inviteForm.ad_soyad, email: inviteForm.email, rol: inviteForm.rol, girisKodu, muvveqetiParol });
     fetchData();
-
-    // Gmail API vasitəsilə email göndər
-    sendDavetEmail({
-        to: savedEmail,
-        subject: "GMS ERP — Sistemə dəvət",
-        fromName: "GMS ERP Sistemi",
-        htmlBody: `
-          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f8fafc;border-radius:8px;">
-            <div style="background:#1e40af;color:white;padding:16px 20px;border-radius:6px 6px 0 0;">
-              <h2 style="margin:0;font-size:20px;">GMS ERP Sistemə Dəvət</h2>
-            </div>
-            <div style="background:white;padding:24px;border-radius:0 0 6px 6px;border:1px solid #e2e8f0;">
-              <p style="color:#374151;font-size:15px;">Hörmətli <strong>${savedAdSoyad || savedEmail}</strong>,</p>
-              <p style="color:#374151;font-size:14px;line-height:1.6;">Siz <strong>GMS ERP</strong> sisteminə dəvət edildiniz. Qeydiyyatı tamamlamaq üçün aşağıdakı linkə klikləyin:</p>
-              <div style="text-align:center;margin:24px 0;">
-                <a href="${inviteLink}" style="background:#1e40af;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-size:15px;font-weight:600;">Qeydiyyatı Tamamla</a>
-              </div>
-              <p style="color:#6b7280;font-size:13px;">Rol: <strong>${savedRol}</strong></p>
-              <p style="color:#9ca3af;font-size:12px;margin-top:16px;">Link yalnız bir dəfə istifadə edilə bilər.</p>
-              <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;" />
-              <p style="color:#9ca3af;font-size:12px;">GMS Facility Group — ERP Sistemi</p>
-            </div>
-          </div>
-        `
-    }).then(() => {
-      toast({ title: "Dəvət göndərildi!", description: `${savedEmail} ünvanına email göndərildi.` });
-    }).catch(() => {
-      toast({ title: "Link yaradıldı", description: "İstifadəçi əlavə edildi, lakin email göndərilmədi. Linki əl ilə paylaşın.", variant: "destructive" });
-    });
   };
 
   const handleBlok = async (davet, blok) => {
@@ -204,22 +173,6 @@ export default function Ayarlar() {
     await base44.entities.DavetEdilmisIstifadeci.delete(davet.id);
     toast({ title: "İstifadəçi silindi", description: `${davet.ad_soyad || davet.email} sistemdən silindi` });
     fetchData();
-  };
-
-  const openModulEdit = (davet) => {
-    setModulEditTarget(davet);
-    setModulEditValue(davet.modul_erisimi || []);
-  };
-
-  const saveModulEdit = async () => {
-    await base44.entities.DavetEdilmisIstifadeci.update(modulEditTarget.id, { modul_erisimi: modulEditValue });
-    toast({ title: "Modul erişimi yeniləndi" });
-    setModulEditTarget(null);
-    fetchData();
-  };
-
-  const toggleModulEdit = (m) => {
-    setModulEditValue(v => v.includes(m) ? v.filter(x => x !== m) : [...v, m]);
   };
 
   const handleTokenReset = async (davet) => {
@@ -265,7 +218,7 @@ export default function Ayarlar() {
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
 
-  const statusColors = { "Gözləyir": "bg-yellow-100 text-yellow-700", "Dəvət göndərilib": "bg-yellow-100 text-yellow-700", "Aktiv": "bg-green-100 text-green-700", "Bloklandı": "bg-red-100 text-red-700", "Deaktiv": "bg-gray-100 text-gray-600" };
+  const statusColors = { "Dəvət göndərilib": "bg-yellow-100 text-yellow-700", "Aktiv": "bg-green-100 text-green-700", "Bloklandı": "bg-red-100 text-red-700", "Deaktiv": "bg-gray-100 text-gray-600" };
 
   return (
     <div className="space-y-6">
@@ -317,14 +270,8 @@ export default function Ayarlar() {
                       <td className="px-4 py-3">
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColors[d.status] || ""}`}>{d.status}</span>
                       </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground max-w-[180px]">
-                        <button
-                          onClick={() => openModulEdit(d)}
-                          className="text-left truncate block max-w-[180px] hover:text-primary hover:underline transition-colors"
-                          title="Modul erişimini düzəlt"
-                        >
-                          {(d.modul_erisimi || []).join(", ") || "—"}
-                        </button>
+                      <td className="px-4 py-3 text-xs text-muted-foreground max-w-[180px] truncate">
+                        {(d.modul_erisimi || []).join(", ") || "—"}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">
                         {d.son_giris ? moment(d.son_giris).format("DD.MM.YYYY") : "—"}
@@ -506,7 +453,7 @@ export default function Ayarlar() {
           <DialogHeader>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-6 h-6 text-green-500" />
-              <DialogTitle>İstifadəçi qeydiyyat linki yaradıldı</DialogTitle>
+              <DialogTitle>İstifadəçi yaradıldı</DialogTitle>
             </div>
           </DialogHeader>
           {createdUser && (
@@ -516,18 +463,29 @@ export default function Ayarlar() {
                 <div className="flex justify-between"><span className="text-muted-foreground">Email:</span><span className="font-medium">{createdUser.email}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Rol:</span><span className="font-medium">{createdUser.rol}</span></div>
               </div>
-              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-2">
-                <p className="text-xs text-muted-foreground font-medium">Qeydiyyat Linki</p>
-                <p className="text-xs font-mono break-all text-foreground bg-muted/60 rounded p-2 select-all">{createdUser.inviteLink}</p>
-                <p className="text-xs text-muted-foreground">Bu linki istifadəçiyə göndərin. Link ilə giriş edərək öz parolunu təyin edə biləcək.</p>
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-3">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Giriş Kodu</p>
+                  <p className="text-2xl font-bold tracking-widest text-primary">{createdUser.girisKodu}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Müvəqqəti Parol</p>
+                  <p className="text-xl font-mono font-bold">{createdUser.muvveqetiParol}</p>
+                </div>
               </div>
-              <Button className="w-full gap-2" onClick={() => {
-                navigator.clipboard.writeText(createdUser.inviteLink);
-                toast({ title: "Link kopyalandı!" });
-              }}>
-                <Copy className="w-4 h-4" /> Linki Kopyala
-              </Button>
-              <Button variant="outline" className="w-full" onClick={() => setCreatedUser(null)}>Bağla</Button>
+              <p className="text-xs text-destructive font-medium text-center">⚠️ Bu məlumatı yalnız indi görə bilərsiniz. Sonra baxmaq mümkün olmayacaq.</p>
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1 gap-2" onClick={() => {
+                  navigator.clipboard.writeText(`Giriş Kodu: ${createdUser.girisKodu}\nParol: ${createdUser.muvveqetiParol}`);
+                  toast({ title: "Kopyalandı!" });
+                }}>
+                  <Copy className="w-4 h-4" /> Kopyala
+                </Button>
+                <Button variant="outline" className="flex-1 gap-2" onClick={() => window.print()}>
+                  <Printer className="w-4 h-4" /> Çap Et
+                </Button>
+              </div>
+              <Button className="w-full" onClick={() => setCreatedUser(null)}>Başa düşdüm</Button>
             </div>
           )}
         </DialogContent>
@@ -547,33 +505,6 @@ export default function Ayarlar() {
             <Button variant="destructive" onClick={() => { handleDelete(deleteTarget); setDeleteTarget(null); }}>
               <Trash2 className="w-4 h-4 mr-1" /> Sil
             </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modul Erişimi Düzəliş Dialog */}
-      <Dialog open={!!modulEditTarget} onOpenChange={() => setModulEditTarget(null)}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Modul Erişimini Düzəlt</DialogTitle>
-            <DialogDescription>{modulEditTarget?.ad_soyad || modulEditTarget?.email}</DialogDescription>
-          </DialogHeader>
-          <div className="grid grid-cols-2 gap-2 max-h-[55vh] overflow-y-auto py-2">
-            {BUTUN_MODULLER.map(m => (
-              <label key={m} className="flex items-center gap-2 cursor-pointer text-sm">
-                <input
-                  type="checkbox"
-                  checked={modulEditValue.includes(m)}
-                  onChange={() => toggleModulEdit(m)}
-                  className="rounded"
-                />
-                {m}
-              </label>
-            ))}
-          </div>
-          <div className="flex gap-2 justify-end mt-2">
-            <Button variant="outline" onClick={() => setModulEditTarget(null)}>Ləğv et</Button>
-            <Button onClick={saveModulEdit}>Yadda saxla</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -621,7 +552,7 @@ export default function Ayarlar() {
                 ))}
               </div>
             </div>
-            <Button className="w-full" onClick={handleInvite}>Link Yarat</Button>
+            <Button className="w-full" onClick={handleInvite}>Dəvət göndər</Button>
           </div>
         </DialogContent>
       </Dialog>

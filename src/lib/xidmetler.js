@@ -37,28 +37,6 @@ export const SIRKET_XIDMETLER = {
     "Marketinq xidməti",
     "IT və proqramlaşdırma xidmətləri",
   ],
-  "GMS IT": [
-    "Proqram təminatı hazırlanması",
-    "Vebsayt hazırlanması",
-    "Mobil tətbiq hazırlanması",
-    "IT infrastruktur qurulması",
-    "Kibertəhlükəsizlik",
-    "Texniki dəstək",
-    "Şəbəkə qurulması",
-    "Bulud xidmətləri",
-    "Digər IT xidmət",
-  ],
-  "GMS Marketinq": [
-    "Sosial media idarəetməsi",
-    "SEO optimallaşdırma",
-    "Reklam kampaniyası",
-    "Kontent hazırlanması",
-    "Brend dizayn",
-    "Email marketinq",
-    "Video produksiya",
-    "Fotoqrafiya",
-    "Digər marketinq xidməti",
-  ],
 };
 
 export const SIRKETLER = Object.keys(SIRKET_XIDMETLER);

@@ -13,13 +13,6 @@ export default function SirketDovriiyyesi({ musteriler, sifarisler, kassaEmeliyy
   const [tarixBas, setTarixBas] = useState("");
   const [tarixSon, setTarixSon] = useState("");
 
-  // Sifariş üçün real ödənilən məbləği KassaEmeliyyati-dən al
-  const getSifarisOdenilen = (sifarisId) => {
-    return kassaEmeliyyatlar
-      .filter(k => k.sifaris_id === sifarisId && k.tip === "Mədaxil")
-      .reduce((s, k) => s + (k.mebleg || 0), 0);
-  };
-
   // Build company summary table
   const sirketler = useMemo(() => {
     return musteriler.map(m => {
@@ -29,19 +22,15 @@ export default function SirketDovriiyyesi({ musteriler, sifarisler, kassaEmeliyy
       if (filterOdenis !== "all") mSif = mSif.filter(s => s.odenis_statusu === filterOdenis);
 
       const umumiMebleg = mSif.reduce((s, x) => s + (x.umumi_mebleg || x.qiymet || 0), 0);
-      const odenilen = mSif.reduce((s, x) => {
-        if (x.odenis_statusu === "Ödənilib") return s + (x.umumi_mebleg || x.qiymet || 0);
-        if (x.odenis_statusu === "Qismən ödənilib") return s + getSifarisOdenilen(x.id);
-        return s;
-      }, 0);
+      const odenilen = mSif.filter(s => s.odenis_statusu === "Ödənilib").reduce((s, x) => s + (x.umumi_mebleg || x.qiymet || 0), 0);
       const borc = umumiMebleg - odenilen;
-      const sonEmeliyyat = mSif.length > 0 ? [...mSif].sort((a, b) => (b.tarix || "") > (a.tarix || "") ? 1 : -1)[0]?.tarix : null;
+      const sonEmeliyyat = mSif.length > 0 ? mSif.sort((a, b) => (b.tarix || "") > (a.tarix || "") ? 1 : -1)[0]?.tarix : null;
 
       return { ...m, sifaris_sayi: mSif.length, umumi_mebleg: umumiMebleg, odenilen, borc, son_emeliyyat: sonEmeliyyat };
     }).filter(m => m.sifaris_sayi > 0 || parseFloat(minMebleg || "0") === 0)
       .filter(m => !minMebleg || m.umumi_mebleg >= parseFloat(minMebleg))
       .sort((a, b) => b.umumi_mebleg - a.umumi_mebleg);
-  }, [musteriler, sifarisler, kassaEmeliyyatlar, filterOdenis, minMebleg, tarixBas, tarixSon]);
+  }, [musteriler, sifarisler, filterOdenis, minMebleg, tarixBas, tarixSon]);
 
   const detay = useMemo(() => {
     if (!selectedMusteri) return null;
@@ -59,11 +48,7 @@ export default function SirketDovriiyyesi({ musteriler, sifarisler, kassaEmeliyy
     }
 
     const umumiMebleg = mSif.reduce((s, x) => s + (x.umumi_mebleg || x.qiymet || 0), 0);
-    const odenilen = mSif.reduce((s, x) => {
-      if (x.odenis_statusu === "Ödənilib") return s + (x.umumi_mebleg || x.qiymet || 0);
-      if (x.odenis_statusu === "Qismən ödənilib") return s + getSifarisOdenilen(x.id);
-      return s;
-    }, 0);
+    const odenilen = mSif.filter(s => s.odenis_statusu === "Ödənilib").reduce((s, x) => s + (x.umumi_mebleg || x.qiymet || 0), 0);
     const ilkSifaris = mSif.length > 0 ? [...mSif].sort((a, b) => (a.tarix || "") > (b.tarix || "") ? 1 : -1)[0]?.tarix : null;
     const ortSifaris = mSif.length > 0 ? umumiMebleg / mSif.length : 0;
 
@@ -216,7 +201,7 @@ export default function SirketDovriiyyesi({ musteriler, sifarisler, kassaEmeliyy
                         <td className="px-3 py-1.5 text-muted-foreground">{s.xidmet_tipi}</td>
                         <td className="px-3 py-1.5 text-right font-medium">{(s.umumi_mebleg || s.qiymet || 0).toFixed(2)} ₼</td>
                         <td className="px-3 py-1.5">
-                          <span className={`text-xs px-1.5 py-0.5 rounded-full ${s.odenis_statusu === "Ödənilib" ? "bg-green-100 text-green-700" : s.odenis_statusu === "Qismən ödənilib" ? "bg-orange-100 text-orange-700" : "bg-red-100 text-red-700"}`}>{s.odenis_statusu || "—"}</span>
+                          <span className={`text-xs px-1.5 py-0.5 rounded-full ${s.odenis_statusu === "Ödənilib" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{s.odenis_statusu || "—"}</span>
                         </td>
                       </tr>
                     ))}

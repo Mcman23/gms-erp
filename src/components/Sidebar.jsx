@@ -51,13 +51,6 @@ const sections = [
     ],
   },
   {
-    id: "tapshiriqlar",
-    label: "Tapşırıqlar",
-    icon: ClipboardList,
-    direct: true,
-    path: "/tapshiriqlar",
-  },
-  {
     id: "hr",
     label: "HR və Əməkdaşlar",
     icon: UserCog,
@@ -107,11 +100,12 @@ const sections = [
 
 export default function Sidebar({ open, onClose, user, systemUser }) {
   const location = useLocation();
+  const isAdmin = user?.role === "admin";
+
   // systemUser null → master şifrə ilə giriş → tam giriş
   // systemUser var → modul_erisimi ilə filtrləmə
   const allowedModuls = systemUser?.modul_erisimi || null;
   const isMasterOrAdmin = !systemUser || ["Super Admin", "Admin", "Direktor"].includes(systemUser?.rol);
-  const isCeoOrDirector = !systemUser || ["Super Admin", "Admin", "Direktor", "CEO"].includes(systemUser?.rol);
 
   const canSeeItem = (itemPath) => {
     if (isMasterOrAdmin) return true;
@@ -179,8 +173,8 @@ export default function Sidebar({ open, onClose, user, systemUser }) {
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
           {sections.map((section) => {
-            if (section.adminOnly && !isMasterOrAdmin) return null;
-            if (section.ceoOnly && !isCeoOrDirector) return null;
+            if (section.adminOnly && !isAdmin) return null;
+            if (section.ceoOnly && !isAdmin) return null;
 
             if (section.direct) {
               if (!canSeeItem(section.path)) return null;

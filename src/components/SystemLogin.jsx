@@ -5,96 +5,60 @@ import { Label } from "@/components/ui/label";
 import { Lock, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
-const TRANSLATIONS = {
-  az: {
-    subtitle: "Şirkətlər üçün tam funksional və korporativ daxili ERP sistemi",
-    devBy: "Developed by GMS Facility",
-    cardTitle: "Sisteme Giriş",
-    cardDesc: "Daxil olmaq üçün sistem şifrəsini daxil edin",
-    passLabel: "Sistem şifrəsi",
-    btnLogin: "Daxil ol",
-    btnLoading: "Yoxlanılır...",
-    errorMsg: "Şifrə yanlışdır. Yenidən cəhd edin.",
-    forgotMsg: "Parolunuzu unutmusunuzsa, sistem admininizlə əlaqə saxlayın.",
-    confidential: "GMS ERP • Məxfi sistem — icazəsiz giriş qadağandır",
-  },
-  en: {
-    subtitle: "A fully functional and corporate internal ERP system for companies",
-    devBy: "Developed by GMS Facility",
-    cardTitle: "System Login",
-    cardDesc: "Enter the system password to sign in",
-    passLabel: "System password",
-    btnLogin: "Sign in",
-    btnLoading: "Checking...",
-    errorMsg: "Incorrect password. Please try again.",
-    forgotMsg: "If you forgot your password, contact your system administrator.",
-    confidential: "GMS ERP • Confidential system — unauthorized access is prohibited",
-  },
-  ru: {
-    subtitle: "Полнофункциональная корпоративная внутренняя ERP-система для компаний",
-    devBy: "Разработано GMS Facility",
-    cardTitle: "Вход в систему",
-    cardDesc: "Введите системный пароль для входа",
-    passLabel: "Системный пароль",
-    btnLogin: "Войти",
-    btnLoading: "Проверка...",
-    errorMsg: "Неверный пароль. Попробуйте снова.",
-    forgotMsg: "Если вы забыли пароль, свяжитесь с системным администратором.",
-    confidential: "GMS ERP • Конфиденциальная система — несанкционированный доступ запрещён",
-  },
-};
-
-function detectLang() {
-  const nav = navigator.language || navigator.userLanguage || "az";
-  const code = nav.slice(0, 2).toLowerCase();
-  if (code === "ru") return "ru";
-  if (code === "en") return "en";
-  return "az";
-}
-
 const SYSTEM_PASSWORD = "gms2026";
 
-export default function SystemLogin({ onSuccess, onUserLogin }) {
+export default function SystemLogin({ onSuccess }) {
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [lang, setLang] = useState(detectLang);
-  const t = TRANSLATIONS[lang];
+  const [davetler, setDavetler] = useState([]);
+
+  useEffect(() => {
+    // Load invited users to check muvveqetiParol
+    base44.entities.DavetEdilmisIstifadeci.list().then(setDavetler).catch(() => {});
+  }, []);
 
   const handleLogin = async () => {
     if (!password) return;
     setLoading(true);
     setError("");
 
-    // Master şifrə ilə birbaşa giriş (tam admin)
+    // 1. Check system master password
     if (password === SYSTEM_PASSWORD) {
+      sessionStorage.setItem("gms_sys_auth", "1");
+      sessionStorage.removeItem("gms_sys_user");
       setLoading(false);
-      onSuccess("master");
+      onSuccess();
       return;
     }
 
-    // Sistem şifrəsi yanlışdır
-    setError(t.errorMsg);
+    // 2. Check muvveqetiParol from DavetEdilmisIstifadeci
+    const matchedUser = davetler.find(
+      d => d.muvveqetiParol && d.muvveqetiParol === password && d.status !== "Bloklandı" && d.status !== "Deaktiv"
+    );
+
+    if (matchedUser) {
+      sessionStorage.setItem("gms_sys_auth", "1");
+      sessionStorage.setItem("gms_sys_user", JSON.stringify({
+        email: matchedUser.email,
+        ad_soyad: matchedUser.ad_soyad,
+        rol: matchedUser.rol,
+        id: matchedUser.id,
+        modul_erisimi: matchedUser.modul_erisimi || [],
+      }));
+      setLoading(false);
+      onSuccess();
+      return;
+    }
+
+    setError("Şifrə yanlışdır. Yenidən cəhd edin.");
     setPassword("");
     setLoading(false);
   };
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center z-[9999]">
-      {/* Language switcher */}
-      <div className="absolute top-4 right-4 flex gap-1">
-        {["az", "en", "ru"].map(l => (
-          <button
-            key={l}
-            onClick={() => setLang(l)}
-            className={`px-2 py-1 rounded text-xs font-medium transition-colors ${lang === l ? "bg-primary text-white" : "bg-white/10 text-slate-400 hover:bg-white/20 hover:text-white"}`}
-          >
-            {l.toUpperCase()}
-          </button>
-        ))}
-      </div>
-
       <div className="w-full max-w-sm mx-4">
         {/* Logo / Header */}
         <div className="text-center mb-8">
@@ -102,18 +66,17 @@ export default function SystemLogin({ onSuccess, onUserLogin }) {
             <ShieldCheck className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-white">GMS ERP</h1>
-          <p className="text-slate-300 text-sm mt-2 leading-snug px-2">{t.subtitle}</p>
-          <p className="text-slate-500 text-xs mt-2">{t.devBy}</p>
+          <p className="text-slate-400 text-sm mt-1">İdarəetmə Sistemi</p>
         </div>
 
         {/* Login Card */}
         <div className="bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-8 shadow-2xl">
-          <h2 className="text-white font-semibold text-lg mb-1">{t.cardTitle}</h2>
-          <p className="text-slate-400 text-sm mb-6">{t.cardDesc}</p>
+          <h2 className="text-white font-semibold text-lg mb-1">Sisteme Giriş</h2>
+          <p className="text-slate-400 text-sm mb-6">Daxil olmaq üçün sistem şifrəsini daxil edin</p>
 
           <div className="space-y-4">
             <div>
-              <Label className="text-slate-300 text-sm mb-1.5 block">{t.passLabel}</Label>
+              <Label className="text-slate-300 text-sm mb-1.5 block">Sistem şifrəsi</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
@@ -139,22 +102,16 @@ export default function SystemLogin({ onSuccess, onUserLogin }) {
               onClick={handleLogin}
               disabled={loading}
             >
-              {loading ? t.btnLoading : t.btnLogin}
+              {loading ? "Yoxlanılır..." : "Daxil ol"}
             </Button>
           </div>
 
-          <div className="border-t border-white/10 pt-4 mt-4">
-            <p className="text-slate-400 text-xs text-center mb-3">Sistemə dəvət edilmiş istifadəçisinizsə:</p>
-            <Button
-              variant="outline"
-              className="w-full border-white/20 text-slate-300 bg-white/5 hover:bg-white/10 hover:text-white"
-              onClick={onUserLogin}
-            >
-              İstifadəçi girişi →
-            </Button>
-          </div>
-
-          <p className="text-slate-600 text-xs text-center mt-3">{t.confidential}</p>
+          <p className="text-slate-500 text-xs text-center mt-4">
+            Parolunuzu unutmusunuzsa, sistem admininizlə əlaqə saxlayın.
+          </p>
+          <p className="text-slate-600 text-xs text-center mt-1">
+            GMS ERP • Məxfi sistem — icazəsiz giriş qadağandır
+          </p>
         </div>
       </div>
     </div>

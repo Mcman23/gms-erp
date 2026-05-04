@@ -37,8 +37,9 @@ export default function ParolTeyinModal({ target, currentAdmin, onClose }) {
 
   // Super Admin cannot change another Super Admin's password
   const isSuperAdminTarget = target.rol === "Super Admin";
-  // Only block if target is another Super Admin (not yourself)
-  const blocked = isSuperAdminTarget && currentAdmin && target.email !== currentAdmin?.email;
+  const currentIsSuperAdmin = currentAdmin?.rol === "Super Admin";
+  // Only block if target is ALSO super admin and target != current admin
+  const blocked = isSuperAdminTarget && target.email !== currentAdmin?.email;
 
   const handleAutoGenerate = () => {
     const p = generateStrongPassword();
