@@ -57,6 +57,9 @@ export default function Kassa() {
       ? (kassa.balans || 0) + mebleg
       : (kassa.balans || 0) - mebleg;
 
+    const today = new Date().toISOString().split("T")[0];
+    const faktura_no = `KAS-${Date.now()}`;
+
     await base44.entities.KassaEmeliyyati.create({
       ...emeliyyatForm,
       mebleg,
@@ -64,6 +67,40 @@ export default function Kassa() {
       status: "Təsdiqləndi",
     });
     await base44.entities.Kassa.update(kassa.id, { balans: yeniBalans });
+
+    // Mədaxil → Kreditor (bizdən pul gəldi)
+    if (emeliyyatForm.tip === "Mədaxil") {
+      await base44.entities.Kreditor.create({
+        faktura_no,
+        musteri_adi: emeliyyatForm.aciklama || emeliyyatForm.kateqoriya,
+        tarix: today,
+        ara_cem: mebleg,
+        edv_faizi: 0,
+        edv_meblegi: 0,
+        umumi_mebleg: mebleg,
+        odenilmis_mebleg: mebleg,
+        odenis_statusu: "Ödənilib",
+        xidmet_tipi: emeliyyatForm.kateqoriya,
+        qeydler: `Kassa: ${kassa.ad} | ${emeliyyatForm.aciklama || ""}`,
+      });
+    }
+
+    // Məxaric → Faktura/Alış (biz ödədik — debitor kimi)
+    if (emeliyyatForm.tip === "Məxaric") {
+      await base44.entities.Faktura.create({
+        faktura_no,
+        musteri_adi: emeliyyatForm.aciklama || emeliyyatForm.kateqoriya,
+        tarix: today,
+        ara_cem: mebleg,
+        edv_faizi: 0,
+        edv_meblegi: 0,
+        umumi_mebleg: mebleg,
+        odenilmis_mebleg: mebleg,
+        odenis_statusu: "Ödənilib",
+        tip: "Alış",
+        qeydler: `Kassa: ${kassa.ad} | ${emeliyyatForm.aciklama || ""}`,
+      });
+    }
 
     setShowEmeliyyatDialog(false);
     setEmeliyyatForm({ kassa_id: "", tip: "Mədaxil", kateqoriya: "Xidmət ödənişi", mebleg: "", odenis_metodu: "Nağd", aciklama: "" });
