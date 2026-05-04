@@ -56,13 +56,31 @@ function OdenisInput({ id, umumi, odenilmis, onSave, entity }) {
 
 function KreditorTable() {
   const [kreditorlar, setKreditorlar] = useState([]);
+  const [kassaMedaxil, setKassaMedaxil] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("all");
 
   useEffect(() => {
-    base44.entities.Kreditor.list("-created_date", 200)
-      .then(setKreditorlar)
-      .finally(() => setLoading(false));
+    Promise.all([
+      base44.entities.Kreditor.list("-created_date", 200),
+      base44.entities.KassaEmeliyyati.filter({ tip: "Mədaxil" }, "-tarix", 200),
+    ]).then(([kred, kassa]) => {
+      setKreditorlar(kred);
+      // Kassa mədaxillərini debitor formatına çevir
+      const kassaRows = kassa.map(k => ({
+        id: "kassa_" + k.id,
+        _source: "kassa",
+        faktura_no: k.qebz_nomresi || "—",
+        musteri_adi: k.aciklama || "Kassa mədaxili",
+        xidmet_tipi: k.kateqoriya || "—",
+        tarix: k.tarix,
+        son_odenis_tarixi: null,
+        umumi_mebleg: k.mebleg || 0,
+        odenilmis_mebleg: k.mebleg || 0,
+        odenis_statusu: "Ödənilib",
+      }));
+      setKassaMedaxil(kassaRows);
+    }).finally(() => setLoading(false));
   }, []);
 
   const handleSave = (id, newOdenilmis, newStatus) => {
@@ -71,8 +89,9 @@ function KreditorTable() {
     ));
   };
 
-  const filtered = filterStatus === "all" ? kreditorlar : kreditorlar.filter(k => k.odenis_statusu === filterStatus);
-  const totalAlacag = kreditorlar
+  const allRows = [...kreditorlar, ...kassaMedaxil];
+  const filtered = filterStatus === "all" ? allRows : allRows.filter(k => k.odenis_statusu === filterStatus);
+  const totalAlacag = allRows
     .filter(k => k.odenis_statusu !== "Ödənilib")
     .reduce((s, k) => s + Math.max(0, (k.umumi_mebleg || 0) - (k.odenilmis_mebleg || 0)), 0);
 
@@ -83,7 +102,7 @@ function KreditorTable() {
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
           <p className="text-xs text-blue-700">Ümumi debitor</p>
-          <p className="text-xl font-bold text-blue-800">{kreditorlar.length}</p>
+          <p className="text-xl font-bold text-blue-800">{allRows.length}</p>
         </div>
         <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
           <p className="text-xs text-orange-700">Alacağımız (qalıq)</p>
@@ -91,7 +110,7 @@ function KreditorTable() {
         </div>
         <div className="bg-green-50 border border-green-200 rounded-xl p-4">
           <p className="text-xs text-green-700">Tam ödənilmiş</p>
-          <p className="text-xl font-bold text-green-800">{kreditorlar.filter(k => k.odenis_statusu === "Ödənilib").length}</p>
+          <p className="text-xl font-bold text-green-800">{allRows.filter(k => k.odenis_statusu === "Ödənilib").length}</p>
         </div>
       </div>
 
@@ -107,22 +126,23 @@ function KreditorTable() {
         <div className="px-5 py-3 border-b border-border flex items-center justify-between bg-blue-50/50">
           <div>
             <h3 className="font-semibold text-sm text-blue-900">Debitorlar</h3>
-            <p className="text-xs text-blue-700 mt-0.5">Satış fakturalarından — müştərilər bizdən aldı, bizə borcludur</p>
+            <p className="text-xs text-blue-700 mt-0.5">Satış fakturalarından + kassa mədaxillərindən</p>
           </div>
           <span className="text-sm font-bold text-blue-700">{totalAlacag.toFixed(2)} ₼ alacağımız</span>
         </div>
         <table className="w-full text-sm">
           <thead className="bg-muted/50">
             <tr>
-              <th className="text-left px-4 py-3 font-medium">Faktura №</th>
-              <th className="text-left px-4 py-3 font-medium">Müştəri</th>
-              <th className="text-left px-4 py-3 font-medium">Xidmət</th>
+              <th className="text-left px-4 py-3 font-medium">Faktura/Qəbz №</th>
+              <th className="text-left px-4 py-3 font-medium">Müştəri / Açıqlama</th>
+              <th className="text-left px-4 py-3 font-medium">Xidmət / Kateqoriya</th>
               <th className="text-left px-4 py-3 font-medium">Tarix</th>
               <th className="text-left px-4 py-3 font-medium">Son Ödəniş</th>
               <th className="text-right px-4 py-3 font-medium">Ümumi</th>
               <th className="text-right px-4 py-3 font-medium">Ödənilib ✏️</th>
               <th className="text-right px-4 py-3 font-medium">Qalıq</th>
               <th className="text-left px-4 py-3 font-medium">Status</th>
+              <th className="text-left px-4 py-3 font-medium">Mənbə</th>
             </tr>
           </thead>
           <tbody>
@@ -130,6 +150,7 @@ function KreditorTable() {
               const qalig = Math.max(0, (k.umumi_mebleg || 0) - (k.odenilmis_mebleg || 0));
               const sonOdenis = k.son_odenis_tarixi;
               const gechib = sonOdenis && moment(sonOdenis).isBefore(moment(), "day") && k.odenis_statusu !== "Ödənilib";
+              const isKassa = k._source === "kassa";
               return (
                 <tr key={k.id} className={`border-t border-border/50 hover:bg-muted/20 ${gechib ? "bg-red-50/30" : ""}`}>
                   <td className="px-4 py-3 font-mono text-xs font-medium">{k.faktura_no || "—"}</td>
@@ -137,20 +158,28 @@ function KreditorTable() {
                   <td className="px-4 py-3 text-muted-foreground text-xs">{k.xidmet_tipi || "—"}</td>
                   <td className="px-4 py-3 text-xs">{k.tarix ? moment(k.tarix).format("DD.MM.YYYY") : "—"}</td>
                   <td className="px-4 py-3 text-xs">
-                    <span className={gechib ? "text-red-600 font-semibold" : ""}>
-                      {sonOdenis ? moment(sonOdenis).format("DD.MM.YYYY") : "—"}
-                    </span>
-                    {gechib && <span className="ml-1 text-[10px] bg-red-100 text-red-600 px-1 rounded">Keçib</span>}
+                    {isKassa ? <span className="text-muted-foreground">—</span> : (
+                      <>
+                        <span className={gechib ? "text-red-600 font-semibold" : ""}>
+                          {sonOdenis ? moment(sonOdenis).format("DD.MM.YYYY") : "—"}
+                        </span>
+                        {gechib && <span className="ml-1 text-[10px] bg-red-100 text-red-600 px-1 rounded">Keçib</span>}
+                      </>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right font-semibold">{(k.umumi_mebleg || 0).toFixed(2)} ₼</td>
                   <td className="px-4 py-3 text-right">
-                    <OdenisInput
-                      id={k.id}
-                      umumi={k.umumi_mebleg || 0}
-                      odenilmis={k.odenilmis_mebleg || 0}
-                      onSave={handleSave}
-                      entity="Kreditor"
-                    />
+                    {isKassa ? (
+                      <span className="text-xs text-green-600 font-medium">{(k.odenilmis_mebleg || 0).toFixed(2)} ₼</span>
+                    ) : (
+                      <OdenisInput
+                        id={k.id}
+                        umumi={k.umumi_mebleg || 0}
+                        odenilmis={k.odenilmis_mebleg || 0}
+                        onSave={handleSave}
+                        entity="Kreditor"
+                      />
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right font-bold">
                     <span className={qalig > 0 ? "text-orange-600" : "text-green-600"}>{qalig.toFixed(2)} ₼</span>
@@ -160,11 +189,16 @@ function KreditorTable() {
                       {k.odenis_statusu || "Ödənilməyib"}
                     </span>
                   </td>
+                  <td className="px-4 py-3">
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${isKassa ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700"}`}>
+                      {isKassa ? "Kassa" : "Faktura"}
+                    </span>
+                  </td>
                 </tr>
               );
             })}
             {filtered.length === 0 && (
-              <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">Kreditor tapılmadı</td></tr>
+              <tr><td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">Debitor tapılmadı</td></tr>
             )}
           </tbody>
         </table>
@@ -176,12 +210,31 @@ function KreditorTable() {
 function DebitorTable({ fakturalar, onRefresh }) {
   const [filterStatus, setFilterStatus] = useState("all");
   const [localFakturalar, setLocalFakturalar] = useState(fakturalar);
+  const [kassaMexaric, setKassaMexaric] = useState([]);
 
   useEffect(() => { setLocalFakturalar(fakturalar); }, [fakturalar]);
 
-  const debitorlar = localFakturalar.filter(f => (f.tip || "Satış") === "Alış");
-  const filtered = filterStatus === "all" ? debitorlar : debitorlar.filter(f => f.odenis_statusu === filterStatus);
-  const totalBorc = debitorlar
+  useEffect(() => {
+    base44.entities.KassaEmeliyyati.filter({ tip: "Məxaric" }, "-tarix", 200).then(kassa => {
+      const kassaRows = kassa.map(k => ({
+        id: "kassa_" + k.id,
+        _source: "kassa",
+        faktura_no: k.qebz_nomresi || "—",
+        musteri_adi: k.aciklama || "Kassa məxarici",
+        tarix: k.tarix,
+        son_odenis_tarixi: null,
+        umumi_mebleg: k.mebleg || 0,
+        odenilmis_mebleg: k.mebleg || 0,
+        odenis_statusu: "Ödənilib",
+      }));
+      setKassaMexaric(kassaRows);
+    });
+  }, []);
+
+  const alishFakturalari = localFakturalar.filter(f => (f.tip || "Satış") === "Alış");
+  const allRows = [...alishFakturalari, ...kassaMexaric];
+  const filtered = filterStatus === "all" ? allRows : allRows.filter(f => f.odenis_statusu === filterStatus);
+  const totalBorc = allRows
     .filter(f => f.odenis_statusu !== "Ödənilib")
     .reduce((s, f) => s + Math.max(0, (f.umumi_mebleg || 0) - (f.odenilmis_mebleg || 0)), 0);
 
@@ -189,7 +242,6 @@ function DebitorTable({ fakturalar, onRefresh }) {
     setLocalFakturalar(prev => prev.map(f =>
       f.id === id ? { ...f, odenilmis_mebleg: newOdenilmis, odenis_statusu: newStatus } : f
     ));
-    // Faktura entity-ni də yenilə
     base44.entities.Faktura.update(id, {
       odenilmis_mebleg: newOdenilmis,
       odenis_statusu: newStatus,
@@ -201,7 +253,7 @@ function DebitorTable({ fakturalar, onRefresh }) {
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
           <p className="text-xs text-orange-700">Ümumi kreditor</p>
-          <p className="text-xl font-bold text-orange-800">{debitorlar.length}</p>
+          <p className="text-xl font-bold text-orange-800">{allRows.length}</p>
         </div>
         <div className="bg-red-50 border border-red-200 rounded-xl p-4">
           <p className="text-xs text-red-700">Ödənilməmiş borcumuz</p>
@@ -209,7 +261,7 @@ function DebitorTable({ fakturalar, onRefresh }) {
         </div>
         <div className="bg-green-50 border border-green-200 rounded-xl p-4">
           <p className="text-xs text-green-700">Tam ödənilmiş</p>
-          <p className="text-xl font-bold text-green-800">{debitorlar.filter(f => f.odenis_statusu === "Ödənilib").length}</p>
+          <p className="text-xl font-bold text-green-800">{allRows.filter(f => f.odenis_statusu === "Ödənilib").length}</p>
         </div>
       </div>
 
@@ -225,21 +277,22 @@ function DebitorTable({ fakturalar, onRefresh }) {
         <div className="px-5 py-3 border-b border-border flex items-center justify-between bg-orange-50/50">
           <div>
             <h3 className="font-semibold text-sm text-orange-900">Kreditorlar</h3>
-            <p className="text-xs text-orange-700 mt-0.5">Alış fakturalarından — biz aldıq, borcluluq</p>
+            <p className="text-xs text-orange-700 mt-0.5">Alış fakturalarından + kassa məxaricindən</p>
           </div>
           <span className="text-sm font-bold text-orange-700">{totalBorc.toFixed(2)} ₼ borcumuz</span>
         </div>
         <table className="w-full text-sm">
           <thead className="bg-muted/50">
             <tr>
-              <th className="text-left px-4 py-3 font-medium">Faktura №</th>
-              <th className="text-left px-4 py-3 font-medium">Təchizatçı</th>
+              <th className="text-left px-4 py-3 font-medium">Faktura/Qəbz №</th>
+              <th className="text-left px-4 py-3 font-medium">Təchizatçı / Açıqlama</th>
               <th className="text-left px-4 py-3 font-medium">Tarix</th>
               <th className="text-left px-4 py-3 font-medium">Son Ödəniş</th>
               <th className="text-right px-4 py-3 font-medium">Ümumi</th>
               <th className="text-right px-4 py-3 font-medium">Ödənilib ✏️</th>
               <th className="text-right px-4 py-3 font-medium">Qalıq</th>
               <th className="text-left px-4 py-3 font-medium">Status</th>
+              <th className="text-left px-4 py-3 font-medium">Mənbə</th>
             </tr>
           </thead>
           <tbody>
@@ -247,26 +300,35 @@ function DebitorTable({ fakturalar, onRefresh }) {
               const qalig = Math.max(0, (f.umumi_mebleg || 0) - (f.odenilmis_mebleg || 0));
               const sonOdenis = f.son_odenis_tarixi;
               const gechib = sonOdenis && moment(sonOdenis).isBefore(moment(), "day") && f.odenis_statusu !== "Ödənilib";
+              const isKassa = f._source === "kassa";
               return (
                 <tr key={f.id} className={`border-t border-border/50 hover:bg-muted/20 ${gechib ? "bg-red-50/30" : ""}`}>
-                  <td className="px-4 py-3 font-mono text-xs font-medium">{f.faktura_no}</td>
+                  <td className="px-4 py-3 font-mono text-xs font-medium">{f.faktura_no || "—"}</td>
                   <td className="px-4 py-3 font-medium">{f.musteri_adi}</td>
                   <td className="px-4 py-3 text-xs">{f.tarix ? moment(f.tarix).format("DD.MM.YYYY") : "—"}</td>
                   <td className="px-4 py-3 text-xs">
-                    <span className={gechib ? "text-red-600 font-semibold" : ""}>
-                      {sonOdenis ? moment(sonOdenis).format("DD.MM.YYYY") : "—"}
-                    </span>
-                    {gechib && <span className="ml-1 text-[10px] bg-red-100 text-red-600 px-1 rounded">Keçib</span>}
+                    {isKassa ? <span className="text-muted-foreground">—</span> : (
+                      <>
+                        <span className={gechib ? "text-red-600 font-semibold" : ""}>
+                          {sonOdenis ? moment(sonOdenis).format("DD.MM.YYYY") : "—"}
+                        </span>
+                        {gechib && <span className="ml-1 text-[10px] bg-red-100 text-red-600 px-1 rounded">Keçib</span>}
+                      </>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right font-semibold">{(f.umumi_mebleg || 0).toFixed(2)} ₼</td>
                   <td className="px-4 py-3 text-right">
-                    <OdenisInput
-                      id={f.id}
-                      umumi={f.umumi_mebleg || 0}
-                      odenilmis={f.odenilmis_mebleg || 0}
-                      onSave={handleSave}
-                      entity="Faktura"
-                    />
+                    {isKassa ? (
+                      <span className="text-xs text-green-600 font-medium">{(f.odenilmis_mebleg || 0).toFixed(2)} ₼</span>
+                    ) : (
+                      <OdenisInput
+                        id={f.id}
+                        umumi={f.umumi_mebleg || 0}
+                        odenilmis={f.odenilmis_mebleg || 0}
+                        onSave={handleSave}
+                        entity="Faktura"
+                      />
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right font-bold">
                     <span className={qalig > 0 ? "text-red-600" : "text-green-600"}>{qalig.toFixed(2)} ₼</span>
@@ -276,11 +338,16 @@ function DebitorTable({ fakturalar, onRefresh }) {
                       {f.odenis_statusu || "Ödənilməyib"}
                     </span>
                   </td>
+                  <td className="px-4 py-3">
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${isKassa ? "bg-purple-100 text-purple-700" : "bg-orange-100 text-orange-700"}`}>
+                      {isKassa ? "Kassa" : "Faktura"}
+                    </span>
+                  </td>
                 </tr>
               );
             })}
             {filtered.length === 0 && (
-              <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">Debitor tapılmadı</td></tr>
+              <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">Kreditor tapılmadı</td></tr>
             )}
           </tbody>
         </table>
