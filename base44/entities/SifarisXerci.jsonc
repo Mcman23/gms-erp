@@ -26,6 +26,14 @@
       "title": "A\u00e7\u0131qlama",
       "type": "string"
     },
+    "isci_id": {
+      "title": "\u0130\u015f\u00e7i ID",
+      "type": "string"
+    },
+    "isci_adi": {
+      "title": "\u0130\u015f\u00e7i ad\u0131 (varsa)",
+      "type": "string"
+    },
     "edet_sayi": {
       "title": "\u018fd\u0259d say\u0131",
       "type": "number",
@@ -37,14 +45,18 @@
       "default": 1
     },
     "gun_qiymet": {
-      "title": "G\u00fcn/Qiym\u0259t (\u20bc)",
+      "title": "G\u00fcn/Qiym\u0259t (AZN)",
       "type": "number",
       "default": 0
     },
     "baxsis": {
-      "title": "Bax\u015fi\u015f (\u20bc)",
+      "title": "Bax\u015fi\u015f (AZN)",
       "type": "number",
       "default": 0
+    },
+    "mebleg": {
+      "title": "M\u0259bl\u0259\u011f (AZN)",
+      "type": "number"
     },
     "miqdar": {
       "title": "Miqdar",
@@ -53,18 +65,6 @@
     "vahid_qiymet": {
       "title": "Vahid qiym\u0259t",
       "type": "number"
-    },
-    "mebleg": {
-      "title": "M\u0259bl\u0259\u011f (AZN)",
-      "type": "number"
-    },
-    "isci_id": {
-      "title": "\u0130\u015f\u00e7i ID",
-      "type": "string"
-    },
-    "isci_adi": {
-      "title": "\u0130\u015f\u00e7i ad\u0131 (varsa)",
-      "type": "string"
     },
     "material_id": {
       "title": "Material ID (varsa)",
