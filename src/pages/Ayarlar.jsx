@@ -48,6 +48,7 @@ const BUTUN_MODULLER = [
   "Məzuniyyət",
   "Maaş Hesablaması",
   "Ad Günü Bildirişləri",
+  "Tapşırıqlar",
   "Sənədlər",
   "Hesabatlar",
   "Sistem Ayarları",

@@ -29,6 +29,7 @@ export const MODUL_ROUTE_MAP = {
   "Məzuniyyət": "/mezuniyyet",
   "Maaş Hesablaması": "/maas",
   "Ad Günü Bildirişləri": "/ad-gunleri",
+  "Tapşırıqlar": "/tapshiriqlar",
   "Sənədlər": "/senedler",
   "Hesabatlar": "/hesabatlar",
   "Sistem Ayarları": "/ayarlar",
