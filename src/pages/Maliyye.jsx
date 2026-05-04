@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Check, BookOpen, Layers, FileText, TrendingUp, Building2 } from "lucide-react";
 import moment from "moment";
 import SirketDovriiyyesi from "@/components/maliyye/SirketDovriiyyesi";
+import DebitorKreditorTab from "@/components/maliyye/DebitorKreditorTab";
 
 const SINIFLER = ["1 - Aktivlər", "2 - Öhdəliklər", "3 - Kapital", "4 - Gəlirlər", "5 - Xərclər"];
 const ISTINAD_TIPLERI = ["Faktura", "Sifariş", "Kassa", "Maaş", "Satınalma", "Manual"];
@@ -273,47 +274,9 @@ export default function Maliyye() {
           </div>
         </TabsContent>
 
-        {/* DEBITOR */}
+        {/* DEBITOR / KREDİTOR */}
         <TabsContent value="debitor" className="mt-4">
-          <div className="bg-card border border-border rounded-xl overflow-hidden">
-            <div className="px-5 py-3 border-b border-border flex items-center justify-between">
-              <h3 className="font-semibold text-sm">Ödənilməmiş Fakturalar (Debitor Borclar)</h3>
-              <span className="text-sm font-bold text-orange-600">{debitorBorc.toFixed(2)} ₼</span>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-muted/50">
-                  <tr>
-                    <th className="text-left px-4 py-3 font-medium">Faktura №</th>
-                    <th className="text-left px-4 py-3 font-medium">Müştəri</th>
-                    <th className="text-left px-4 py-3 font-medium">Tarix</th>
-                    <th className="text-left px-4 py-3 font-medium">Son Ödəniş</th>
-                    <th className="text-right px-4 py-3 font-medium">Ümumi</th>
-                    <th className="text-right px-4 py-3 font-medium">Ödənilib</th>
-                    <th className="text-right px-4 py-3 font-medium">Qalıq Borc</th>
-                    <th className="text-left px-4 py-3 font-medium">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {odenmemis.map(f => (
-                    <tr key={f.id} className="border-t border-border/50 hover:bg-muted/20">
-                      <td className="px-4 py-3 font-medium">{f.faktura_no}</td>
-                      <td className="px-4 py-3">{f.musteri_adi}</td>
-                      <td className="px-4 py-3">{f.tarix ? moment(f.tarix).format("DD.MM.YYYY") : "—"}</td>
-                      <td className="px-4 py-3">{f.son_odenis_tarixi ? moment(f.son_odenis_tarixi).format("DD.MM.YYYY") : "—"}</td>
-                      <td className="px-4 py-3 text-right">{(f.umumi_mebleg || 0).toFixed(2)} ₼</td>
-                      <td className="px-4 py-3 text-right text-green-600">{(f.odenilmis_mebleg || 0).toFixed(2)} ₼</td>
-                      <td className="px-4 py-3 text-right font-bold text-red-600">{((f.umumi_mebleg || 0) - (f.odenilmis_mebleg || 0)).toFixed(2)} ₼</td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${f.odenis_statusu === "Qismən" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{f.odenis_statusu}</span>
-                      </td>
-                    </tr>
-                  ))}
-                  {odenmemis.length === 0 && <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">Bütün fakturalar ödənilib</td></tr>}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <DebitorKreditorTab fakturalar={fakturalar} />
         </TabsContent>
 
         {/* MƏNFƏƏTvƏ ZƏRƏR */}

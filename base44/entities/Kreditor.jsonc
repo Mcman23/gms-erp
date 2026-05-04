@@ -1,0 +1,79 @@
+{
+  "name": "Kreditor",
+  "type": "object",
+  "properties": {
+    "faktura_id": {
+      "title": "Faktura ID",
+      "type": "string"
+    },
+    "faktura_no": {
+      "title": "Faktura n\u00f6mr\u0259si",
+      "type": "string"
+    },
+    "musteri_id": {
+      "title": "M\u00fc\u015ft\u0259ri ID",
+      "type": "string"
+    },
+    "musteri_adi": {
+      "title": "M\u00fc\u015ft\u0259ri ad\u0131",
+      "type": "string"
+    },
+    "tarix": {
+      "title": "Tarix",
+      "type": "string",
+      "format": "date"
+    },
+    "son_odenis_tarixi": {
+      "title": "Son \u00f6d\u0259ni\u015f tarixi",
+      "type": "string",
+      "format": "date"
+    },
+    "ara_cem": {
+      "title": "Ara c\u0259m (AZN)",
+      "type": "number",
+      "default": 0
+    },
+    "edv_faizi": {
+      "title": "\u018fDV faizi (%)",
+      "type": "number",
+      "default": 0
+    },
+    "edv_meblegi": {
+      "title": "\u018fDV m\u0259bl\u0259\u011fi (AZN)",
+      "type": "number",
+      "default": 0
+    },
+    "umumi_mebleg": {
+      "title": "\u00dcmumi m\u0259bl\u0259\u011f (AZN)",
+      "type": "number"
+    },
+    "odenilmis_mebleg": {
+      "title": "\u00d6d\u0259nilmi\u015f m\u0259bl\u0259\u011f (AZN)",
+      "type": "number",
+      "default": 0
+    },
+    "odenis_statusu": {
+      "title": "\u00d6d\u0259ni\u015f statusu",
+      "type": "string",
+      "enum": [
+        "\u00d6d\u0259nilm\u0259yib",
+        "Qism\u0259n \u00f6d\u0259nilib",
+        "\u00d6d\u0259nilib"
+      ],
+      "default": "\u00d6d\u0259nilm\u0259yib"
+    },
+    "xidmet_tipi": {
+      "title": "Xidm\u0259t / M\u0259hsul",
+      "type": "string"
+    },
+    "qeydler": {
+      "title": "Qeydl\u0259r",
+      "type": "string"
+    }
+  },
+  "required": [
+    "musteri_id",
+    "tarix",
+    "umumi_mebleg"
+  ]
+}
