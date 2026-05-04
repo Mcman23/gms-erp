@@ -26,7 +26,25 @@ export default function Layout() {
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
-    setSystemUser(getSystemUser());
+    const su = getSystemUser();
+    setSystemUser(su);
+
+    // Real-time: admin modul dəyişdirdikdə cari istifadəçi dərhal yenilənsin
+    if (su?.email) {
+      const unsubscribe = base44.entities.DavetEdilmisIstifadeci.subscribe((event) => {
+        if (event.data?.email === su.email && (event.type === "update" || event.type === "create")) {
+          const updated = {
+            ...su,
+            modul_erisimi: event.data.modul_erisimi || [],
+            rol: event.data.rol || su.rol,
+            status: event.data.status || su.status,
+          };
+          sessionStorage.setItem("gms_sys_user", JSON.stringify(updated));
+          setSystemUser(updated);
+        }
+      });
+      return () => unsubscribe();
+    }
   }, []);
 
   // Step 1: Sistem şifrəsi
