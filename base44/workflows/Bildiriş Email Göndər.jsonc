@@ -1,0 +1,39 @@
+{
+  "name": "Bildiri\u015f Email G\u00f6nd\u0259r",
+  "description": "H\u0259r yeni bildiri\u015f yarad\u0131ld\u0131qda EmailBildirisQaydalari-d\u0259ki aktiv qaydalara g\u00f6r\u0259 email g\u00f6nd\u0259rir",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create",
+        "update",
+        "delete"
+      ],
+      "entity_name": "Bildiris"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "bildiri_email_g_nd_r",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "onBildirisYaradildi",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "onBildirisYaradildi"
+  }
+}
